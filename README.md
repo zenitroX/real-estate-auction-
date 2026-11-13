@@ -161,7 +161,7 @@ pytest tests/ -v
 
 ## Deployment
 
-For a public deployment, use a Python-capable host such as Render and configure it to start `serve.py`. Before deploying, update the server to bind to `0.0.0.0` and read the port from the host-provided `PORT` environment variable. Configure Supabase credentials as host secrets; do not commit them.
+For a public deployment, use a Python-capable host such as Render and configure it to start `serve.py`. The server binds to `0.0.0.0` and reads the port from the host-provided `PORT` environment variable (defaulting to `3000` for local development). Configure Supabase credentials as host secrets; do not commit them.
 
 Because the dashboard includes personal and property information, inspect or remove the fallback snapshot before deploying publicly. A public deployment can expose both the local snapshot and any records returned by Supabase.
 

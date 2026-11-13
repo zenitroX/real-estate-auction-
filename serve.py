@@ -20,7 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent
 # Load .env directly from project root
 load_dotenv(BASE_DIR / ".env")
 
-PORT = 3000
+PORT = int(os.getenv("PORT", "3000"))
 WEB_DIR = BASE_DIR / "web"
 SUPABASE_URL = os.getenv("SUPABASE_URL", "https://pxviudwphxclnhzbglej.supabase.co").rstrip("/")
 SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY") or os.getenv("SUPABASE_KEY", "")
@@ -122,20 +122,22 @@ class FastAuctionRequestHandler(http.server.SimpleHTTPRequestHandler):
         super().do_GET()
 
 def main():
-    server_address = ("127.0.0.1", PORT)
+    server_address = ("0.0.0.0", PORT)
     with http.server.ThreadingHTTPServer(server_address, FastAuctionRequestHandler) as httpd:
         url = f"http://127.0.0.1:{PORT}"
         print("=" * 65)
         print("Bank Auction High-Speed Web Server is Ready!")
+        print(f"Listening on   : 0.0.0.0:{PORT}")
         print(f"Local URL      : {url}")
         print(f"Offline Direct : Open web/index.html in any browser")
         print(f"Database       : Supabase ({SUPABASE_URL})")
         print("=" * 65)
         print("Press Ctrl+C to stop the server.\n")
-        try:
-            webbrowser.open(url)
-        except Exception:
-            pass
+        if not os.getenv("RENDER"):
+            try:
+                webbrowser.open(url)
+            except Exception:
+                pass
         try:
             httpd.serve_forever()
         except KeyboardInterrupt:
