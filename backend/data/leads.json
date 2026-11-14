@@ -1,0 +1,28 @@
+[
+  {
+    "customerName": "Udhaya Kumar R",
+    "phone": "+91 98407 22110",
+    "email": "udhaya.kumar@skandx.demo",
+    "propertyId": "p4",
+    "propertyTitle": "Residential Plot",
+    "locality": "Tambaram, Chennai",
+    "inquiryType": "Site Visit Inspection",
+    "message": "eevierru",
+    "id": "lead-1794672874830",
+    "createdAt": 1794672874,
+    "status": "NEW"
+  },
+  {
+    "customerName": "Ramesh K",
+    "phone": "+91 98401 99999",
+    "email": "",
+    "propertyId": "",
+    "propertyTitle": "Villa",
+    "locality": "",
+    "inquiryType": "General Inquiry",
+    "message": "",
+    "id": "lead-1794672016346",
+    "createdAt": 1794672016,
+    "status": "NEW"
+  }
+]

@@ -1,7 +1,7 @@
 @echo off
-title Bank Auction Web Portal
+title SKANDX Backend API Server
 echo ========================================================
-echo Starting High-Speed Bank Auction Web Server...
+echo Starting SKANDX Backend REST API Server (Port 8000)...
 echo ========================================================
 
 if exist ".venv\Scripts\python.exe" (
