@@ -17,3 +17,11 @@ __pycache__/
 tmp_notices/
 **/tmp_notices/
 *.log
+
+# Node & Frontend Build
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+.vite/
+
