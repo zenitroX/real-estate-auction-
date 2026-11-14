@@ -305,9 +305,12 @@ def test_document_router_image_handling(tmp_path):
 def test_document_router_digital_pdf_handling(tmp_path):
     """Verify that a genuine digital text PDF with SARFAESI keywords routes to DIGITAL_TEXT."""
     try:
-        import fitz
+        import pymupdf as fitz
     except ImportError:
-        pytest.skip("PyMuPDF (fitz) not available")
+        try:
+            import fitz
+        except ImportError:
+            pytest.skip("PyMuPDF (fitz) not available")
 
     pdf_path = tmp_path / "digital_sale_notice.pdf"
     doc = fitz.open()

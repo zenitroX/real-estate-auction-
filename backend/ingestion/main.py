@@ -7,8 +7,15 @@ import argparse
 import asyncio
 import json
 import logging
+import sys
 from pathlib import Path
 from typing import List, Optional
+
+# Ensure ingestion directory is always on python sys.path
+_INGESTION_DIR = Path(__file__).resolve().parent
+if str(_INGESTION_DIR) not in sys.path:
+    sys.path.insert(0, str(_INGESTION_DIR))
+
 from rich.console import Console
 from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn
@@ -201,7 +208,7 @@ async def run_scrape_mode(
                 async for item in baanknet.scrape():
                     pdf_path = item.get("pdf_path")
                     if pdf_path and Path(pdf_path).exists():
-                        extracted = await process_file(
+                        extracted = process_file(
                             file_path=Path(pdf_path),
                             extractor=extractor,
                             db_client=db_client,
@@ -220,7 +227,7 @@ async def run_scrape_mode(
                 async for item in crawler.scrape():
                     pdf_path = item.get("pdf_path")
                     if pdf_path and Path(pdf_path).exists():
-                        extracted = await process_file(
+                        extracted = process_file(
                             file_path=Path(pdf_path),
                             extractor=extractor,
                             db_client=db_client,

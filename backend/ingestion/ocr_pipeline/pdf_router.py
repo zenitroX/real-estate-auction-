@@ -15,9 +15,12 @@ from pathlib import Path
 from typing import List, Optional, Union
 
 try:
-    import fitz  # PyMuPDF
+    import pymupdf as fitz
 except ImportError:
-    fitz = None
+    try:
+        import fitz
+    except ImportError:
+        fitz = None
 
 logger = logging.getLogger("auction_engine.router")
 
