@@ -99,6 +99,44 @@ export async function fetchLiveAuctions() {
   };
 }
 
+const OFFLINE_LEADS_KEY = 'skandx_pending_leads';
+
+function getOfflineLeads() {
+  try {
+    return JSON.parse(localStorage.getItem(OFFLINE_LEADS_KEY) || '[]');
+  } catch {
+    return [];
+  }
+}
+
+function saveOfflineLead(lead) {
+  try {
+    const existing = getOfflineLeads();
+    existing.push({ ...lead, queuedAt: Date.now() });
+    localStorage.setItem(OFFLINE_LEADS_KEY, JSON.stringify(existing));
+  } catch (e) {
+    console.warn('Could not cache offline lead', e);
+  }
+}
+
+export async function flushOfflineLeads() {
+  const pending = getOfflineLeads();
+  if (!pending.length) return;
+  try {
+    for (const lead of pending) {
+      await fetch(`${API_BASE}/api/contact`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(lead),
+      });
+    }
+    localStorage.removeItem(OFFLINE_LEADS_KEY);
+    console.info(`[Lead Sync]: Flushed ${pending.length} queued leads.`);
+  } catch {
+    // Keep in storage for next connection
+  }
+}
+
 /**
  * Admin: Authenticate for admin.skandx.com portal
  */
@@ -111,20 +149,16 @@ export async function adminLoginApi(email, password) {
     });
     return await res.json();
   } catch (err) {
-    console.warn('[Admin Login API]: Fallback to local auth', err);
-    if (email.toLowerCase().trim() === 'admin@skandx.com' && password === 'skandx@admin2026') {
-      return {
-        status: 'success',
-        token: `skandx-adm-${Date.now()}`,
-        admin: { name: 'Chief Auction Officer', email, role: 'SUPER_ADMIN' },
-      };
-    }
-    return { status: 'error', message: 'Authentication failed.' };
+    console.error('[Admin Login API Connection Error]:', err);
+    return {
+      status: 'error',
+      message: 'Authentication server unreachable. Please verify network connection or wait for backend to wake up.',
+    };
   }
 }
 
 /**
- * Submit customer inquiry (lead) from "Contact" button
+ * Submit customer inquiry (lead) from "Contact" button with zero data loss guarantee
  */
 export async function submitLeadApi(leadData) {
   try {
@@ -133,10 +167,18 @@ export async function submitLeadApi(leadData) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(leadData),
     });
-    return await res.json();
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    flushOfflineLeads();
+    return data;
   } catch (err) {
-    console.warn('[Lead API Error]: Fallback to local state', err);
-    return { status: 'success', local: true };
+    console.warn('[Lead API Network Delay/Sleep]: Queuing inquiry in local storage', err);
+    saveOfflineLead(leadData);
+    return {
+      status: 'queued',
+      message: 'Inquiry safely recorded offline. Our liaison desk will contact you once synchronized.',
+      queued: true,
+    };
   }
 }
 

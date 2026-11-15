@@ -22,6 +22,8 @@ import time
 import urllib.request
 import urllib.parse
 import subprocess
+import hmac
+import hashlib
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -34,6 +36,7 @@ PORT = int(os.getenv("PORT", "8000"))
 DATA_DIR = BASE_DIR / "data"
 SUPABASE_URL = os.getenv("SUPABASE_URL", "https://pxviudwphxclnhzbglej.supabase.co").rstrip("/")
 SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY") or os.getenv("SUPABASE_KEY", "")
+ADMIN_SECRET = os.getenv("ADMIN_JWT_SECRET") or os.getenv("SUPABASE_KEY") or "skandx-admin-secret-auth-key-2026"
 
 # In-memory auction cache
 _cache = {
@@ -43,14 +46,36 @@ _cache = {
 
 # Thread synchronization locks
 _leads_lock = threading.Lock()
+_auctions_lock = threading.Lock()
 _crawler_lock = threading.Lock()
 _crawler_running = False
 
-# Active authenticated admin session tokens
-_valid_admin_tokens = set()
+def generate_admin_token() -> str:
+    """Generate cryptographically signed, timestamped admin session token (valid 24h)."""
+    ts = str(int(time.time()))
+    sig = hmac.new(ADMIN_SECRET.encode("utf-8"), ts.encode("utf-8"), hashlib.sha256).hexdigest()[:32]
+    return f"skandx-adm-{ts}-{sig}"
+
+def verify_admin_token(token: str) -> bool:
+    """Validate HMAC signature and expiration window for admin token."""
+    if not token or not token.startswith("skandx-adm-"):
+        return False
+    parts = token.split("-")
+    if len(parts) != 4:  # ["skandx", "adm", ts, sig]
+        return False
+    ts_str, sig = parts[2], parts[3]
+    try:
+        ts = int(ts_str)
+        # Token valid for 24 hours (86,400s), reject future tokens with >60s clock skew
+        if time.time() - ts > 86400 or time.time() < ts - 60:
+            return False
+        expected = hmac.new(ADMIN_SECRET.encode("utf-8"), ts_str.encode("utf-8"), hashlib.sha256).hexdigest()[:32]
+        return hmac.compare_digest(sig, expected)
+    except Exception:
+        return False
 
 def load_leads(limit=None, offset=0):
-    """Thread-safe lead retrieval with pagination."""
+    """Thread-safe lead retrieval with pagination and Supabase rehydration."""
     with _leads_lock:
         leads_file = DATA_DIR / "leads.json"
         leads = []
@@ -60,6 +85,44 @@ def load_leads(limit=None, offset=0):
             except Exception:
                 leads = []
         
+        # If local leads are empty (e.g. freshly rebooted ephemeral container), attempt Supabase fetch
+        if not leads and SUPABASE_URL and SUPABASE_KEY:
+            try:
+                url = f"{SUPABASE_URL}/rest/v1/customer_leads?select=*&order=created_at.desc&limit=100"
+                req = urllib.request.Request(
+                    url,
+                    headers={
+                        "apikey": SUPABASE_KEY,
+                        "Authorization": f"Bearer {SUPABASE_KEY}",
+                        "Accept": "application/json"
+                    }
+                )
+                with urllib.request.urlopen(req, timeout=4) as response:
+                    sb_leads = json.loads(response.read().decode("utf-8"))
+                    if isinstance(sb_leads, list) and sb_leads:
+                        leads = [
+                            {
+                                "id": item.get("id"),
+                                "customerName": item.get("customer_name"),
+                                "phone": item.get("phone"),
+                                "email": item.get("email"),
+                                "propertyId": item.get("property_id"),
+                                "propertyTitle": item.get("property_title"),
+                                "inquiryType": item.get("inquiry_type"),
+                                "message": item.get("notes"),
+                                "createdAt": item.get("created_at"),
+                                "status": item.get("status", "NEW")
+                            }
+                            for item in sb_leads
+                        ]
+                        # Cache locally
+                        DATA_DIR.mkdir(parents=True, exist_ok=True)
+                        tmp = leads_file.with_suffix(".tmp")
+                        tmp.write_text(json.dumps(leads, indent=2), encoding="utf-8")
+                        tmp.replace(leads_file)
+            except Exception:
+                pass
+
         total = len(leads)
         if offset > 0:
             leads = leads[offset:]
@@ -68,7 +131,7 @@ def load_leads(limit=None, offset=0):
         return leads, total
 
 def save_lead(lead_data):
-    """Thread-safe save for new customer lead inquiries."""
+    """Thread-safe, atomic save for customer inquiries with Supabase replication."""
     with _leads_lock:
         DATA_DIR.mkdir(parents=True, exist_ok=True)
         leads_file = DATA_DIR / "leads.json"
@@ -83,7 +146,40 @@ def save_lead(lead_data):
         lead_data["createdAt"] = int(time.time())
         lead_data["status"] = lead_data.get("status", "NEW")
         leads.insert(0, lead_data)
-        leads_file.write_text(json.dumps(leads, indent=2), encoding="utf-8")
+        
+        # Atomic file write to avoid zero-byte truncation on unexpected shutdown
+        tmp_file = leads_file.with_suffix(".tmp")
+        tmp_file.write_text(json.dumps(leads, indent=2), encoding="utf-8")
+        tmp_file.replace(leads_file)
+
+        # Replicate to Supabase for durability across ephemeral container restarts
+        if SUPABASE_URL and SUPABASE_KEY:
+            try:
+                supabase_headers = {
+                    "apikey": SUPABASE_KEY,
+                    "Authorization": f"Bearer {SUPABASE_KEY}",
+                    "Content-Type": "application/json",
+                    "Prefer": "return=minimal"
+                }
+                lead_row = {
+                    "customer_name": lead_data.get("customerName", "Interested Bidder"),
+                    "phone": lead_data.get("phone", ""),
+                    "email": lead_data.get("email", ""),
+                    "property_id": str(lead_data.get("propertyId", "")),
+                    "property_title": lead_data.get("propertyTitle", ""),
+                    "inquiry_type": lead_data.get("inquiryType", "General Inquiry"),
+                    "notes": lead_data.get("message", ""),
+                }
+                req = urllib.request.Request(
+                    f"{SUPABASE_URL}/rest/v1/customer_leads",
+                    data=json.dumps(lead_row).encode("utf-8"),
+                    headers=supabase_headers,
+                    method="POST"
+                )
+                urllib.request.urlopen(req, timeout=4)
+            except Exception:
+                pass
+
         return lead_data
 
 def persist_property_update(prop_id, new_status, updated_fields=None):
@@ -91,39 +187,42 @@ def persist_property_update(prop_id, new_status, updated_fields=None):
     updated_fields = updated_fields or {}
     local_file = DATA_DIR / "auctions_data.json"
     
-    # 1. Update local snapshot file if present
-    if local_file.exists():
-        try:
-            items = json.loads(local_file.read_text(encoding="utf-8"))
-            matched = False
-            for item in items:
-                # Match by string ID or asset_id
-                item_id = str(item.get("id") or item.get("asset_id") or "")
-                if item_id == str(prop_id) or str(prop_id).endswith(item_id):
-                    item["review_status"] = new_status
-                    item["status"] = new_status
-                    item["verified"] = (new_status == "PUBLISHED")
-                    # Merge any updated fields (title, reserve, bank, address)
-                    for k, v in updated_fields.items():
-                        if k in ("title", "property_title"):
-                            item["property_title"] = v
-                            item["title"] = v
-                        elif k in ("reserve", "reserve_price"):
-                            item["reserve_price"] = v
-                            item["reserve"] = v
-                        elif k in ("bank", "bank_name"):
-                            item["bank_name"] = v
-                            item["bank"] = v
-                        elif k in ("address", "locality"):
-                            item["address"] = v
-                            item["locality"] = v
-                    matched = True
-                    break
-            
-            if matched:
-                local_file.write_text(json.dumps(items, indent=2), encoding="utf-8")
-        except Exception as e:
-            print(f"[Persistence Error local_file]: {e}")
+    # 1. Update local snapshot file if present (thread-safe and atomic)
+    with _auctions_lock:
+        if local_file.exists():
+            try:
+                items = json.loads(local_file.read_text(encoding="utf-8"))
+                matched = False
+                for item in items:
+                    # Match by string ID or asset_id
+                    item_id = str(item.get("id") or item.get("asset_id") or "")
+                    if item_id == str(prop_id) or str(prop_id).endswith(item_id):
+                        item["review_status"] = new_status
+                        item["status"] = new_status
+                        item["verified"] = (new_status == "PUBLISHED")
+                        # Merge any updated fields (title, reserve, bank, address)
+                        for k, v in updated_fields.items():
+                            if k in ("title", "property_title"):
+                                item["property_title"] = v
+                                item["title"] = v
+                            elif k in ("reserve", "reserve_price"):
+                                item["reserve_price"] = v
+                                item["reserve"] = v
+                            elif k in ("bank", "bank_name"):
+                                item["bank_name"] = v
+                                item["bank"] = v
+                            elif k in ("address", "locality"):
+                                item["address"] = v
+                                item["locality"] = v
+                        matched = True
+                        break
+                
+                if matched:
+                    tmp_prop = local_file.with_suffix(".tmp")
+                    tmp_prop.write_text(json.dumps(items, indent=2), encoding="utf-8")
+                    tmp_prop.replace(local_file)
+            except Exception as e:
+                print(f"[Persistence Error local_file]: {e}")
 
     # 2. Update Supabase table if credentials configured
     if SUPABASE_URL and SUPABASE_KEY and prop_id:
@@ -215,10 +314,7 @@ class ApiRequestHandler(http.server.BaseHTTPRequestHandler):
         elif "X-Admin-Token" in self.headers:
             token = self.headers["X-Admin-Token"].strip()
 
-        # Validated if in active session set or valid demo token prefix
-        if token and (token in _valid_admin_tokens or token.startswith("skandx-adm-")):
-            return True
-        return False
+        return verify_admin_token(token)
 
     def send_unauthorized(self):
         err = json.dumps({
@@ -383,8 +479,7 @@ class ApiRequestHandler(http.server.BaseHTTPRequestHandler):
             admin_password = os.getenv("ADMIN_PASSWORD", "skandx@admin2026")
 
             if email == admin_email and password == admin_password:
-                token = f"skandx-adm-{int(time.time())}"
-                _valid_admin_tokens.add(token)
+                token = generate_admin_token()
                 payload = json.dumps({
                     "status": "success",
                     "token": token,

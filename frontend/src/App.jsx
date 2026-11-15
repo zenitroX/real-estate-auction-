@@ -73,6 +73,7 @@ export default function App() {
   const [filters, setFilters] = useState({
     location: '',
     types: ['residential', 'commercial', 'land', 'industrial'],
+    minBudget: 0,
     maxBudget: 100000000, // 10 Cr
     banks: ['Canara Bank', 'SBI', 'ICICI Bank', 'Others'],
     sort: 'ending',
@@ -82,6 +83,7 @@ export default function App() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState(null); // null | 'login' | 'register'
   const [contactTarget, setContactTarget] = useState(null);
+  const [contactInitialType, setContactInitialType] = useState('Site Inspection');
   const [bidTarget, setBidTarget] = useState(null);
   const [siteVisitTarget, setSiteVisitTarget] = useState(null);
   const [shareTarget, setShareTarget] = useState(null);
@@ -163,8 +165,9 @@ export default function App() {
   };
 
   // Contact modal triggers
-  const handleOpenContact = (property) => {
+  const handleOpenContact = (property, inquiryType = 'Site Inspection') => {
     setContactTarget(property);
+    setContactInitialType(inquiryType);
   };
 
   const handleSubmitContact = async (leadData) => {
@@ -282,41 +285,41 @@ export default function App() {
 
   // Quick search from hero panel
   const handleApplyQuickSearch = ({ locality, type, budget }) => {
+    let minBudget = 0;
     let maxBudget = 100000000;
-    if (budget === 'under50') maxBudget = 5000000;
-    else if (budget === '50to1cr') maxBudget = 10000000;
-    else if (budget === '1crto2cr') maxBudget = 20000000;
+    if (budget === 'under50') {
+      minBudget = 0;
+      maxBudget = 5000000;
+    } else if (budget === '50to1cr') {
+      minBudget = 5000000;
+      maxBudget = 10000000;
+    } else if (budget === '1crto2cr') {
+      minBudget = 10000000;
+      maxBudget = 20000000;
+    } else if (budget === 'above2cr') {
+      minBudget = 20000000;
+      maxBudget = 1000000000;
+    }
 
     setFilters((prev) => ({
       ...prev,
       location: locality,
       types: type === 'all' ? ['residential', 'commercial', 'land', 'industrial'] : [type],
+      minBudget,
       maxBudget,
     }));
   };
 
   const handleDownloadBrochure = (property) => {
-    addToast(
-      'Brochure Downloaded',
-      `Full SARFAESI auction notice & title brief downloaded for ${property.title}.`,
-      'success'
-    );
+    handleOpenContact(property, 'Download Notice');
   };
 
   const handleViewDocuments = (property) => {
-    addToast(
-      'Legal Documents Verified',
-      `30-Year Search Report and Encumbrance Certificate (EC) available for ${property.title}.`,
-      'info'
-    );
+    handleOpenContact(property, 'Legal Title Search Report');
   };
 
-  const handleScheduleSiteVisit = ({ title, date, slot }) => {
-    addToast(
-      'Site Visit Scheduled!',
-      `Inspection for ${title} booked on ${date} (${slot}) with bank nodal officer.`,
-      'success'
-    );
+  const handleScheduleSiteVisit = (property) => {
+    handleOpenContact(property, 'Site Inspection');
   };
 
   const handleSubmitBid = (property, amount) => {
@@ -452,7 +455,7 @@ export default function App() {
                 wishlist={wishlist}
                 onToggleWishlist={handleToggleWishlist}
                 onOpenShare={(p) => setShareTarget(p)}
-                onOpenSiteVisit={(p) => setSiteVisitTarget(p)}
+                onOpenSiteVisit={(p) => handleOpenContact(p, 'Site Inspection')}
                 onDownloadBrochure={handleDownloadBrochure}
                 onViewDocuments={handleViewDocuments}
               />
@@ -532,6 +535,7 @@ export default function App() {
         onClose={() => setContactTarget(null)}
         property={contactTarget}
         currentUser={user}
+        initialInquiryType={contactInitialType}
         onSubmitContact={handleSubmitContact}
       />
 

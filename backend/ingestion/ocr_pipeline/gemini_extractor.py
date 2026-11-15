@@ -94,7 +94,7 @@ class GeminiAuctionExtractor:
         )
 
         models_to_try = [self.model_name]
-        for fallback in ("gemini-3.5-flash-lite", "gemini-3.8-flash", "gemini-2.5-flash"):
+        for fallback in ("gemini-2.0-flash", "gemini-1.5-flash", "gemini-1.5-pro"):
             if fallback not in models_to_try:
                 models_to_try.append(fallback)
 
@@ -120,39 +120,46 @@ class GeminiAuctionExtractor:
 
     def _offline_fallback_parse(self, text_content: Optional[str] = None) -> NoticeExtractionBatch:
         """
-        Regex heuristic fallback parser for local test documents and dry-runs
-        when an external Gemini API key is not yet provided.
+        Regex heuristic fallback parser for digital plain text documents when
+        Gemini API is unavailable. Enforces strict entity extraction; never fabricates dummy records.
         """
         text = text_content or ""
-        logger.info("Using offline heuristic extractor for notice parsing.")
+        if not text.strip():
+            logger.warning("Offline extractor received empty document text; returning empty batch.")
+            return NoticeExtractionBatch(properties=[])
 
         # 1. Bank name detection
-        bank_name = "State Bank of India"
-        for candidate in ("State Bank of India", "Canara Bank", "Indian Overseas Bank", "Bank of Baroda", "Punjab National Bank"):
+        bank_name = None
+        for candidate in (
+            "State Bank of India", "Canara Bank", "Indian Overseas Bank",
+            "Bank of Baroda", "Punjab National Bank", "Union Bank of India",
+            "HDFC Bank", "ICICI Bank", "Axis Bank", "Bank of India"
+        ):
             if candidate.lower() in text.lower():
                 bank_name = candidate
                 break
 
-        # 2. Branch name
-        branch_match = re.search(r"(?:Branch|SARB|ARMB)[:\s]+([^\n,]+)", text, re.IGNORECASE)
-        branch_name = branch_match.group(1).strip() if branch_match else "Main Branch"
+        if not bank_name:
+            logger.warning("No recognized bank entity found in document text; skipping offline extraction.")
+            return NoticeExtractionBatch(properties=[])
 
-        # 3. Borrower name
-        borrower_match = re.search(r"(?:Borrower|Borrowers|Thiru\.|Mr\.|M/s\.)\s*[:\-]?\s*([^\n,]+)", text, re.IGNORECASE)
-        borrower_name = borrower_match.group(1).strip() if borrower_match else "Borrower"
-
-        # 4. Reserve price & EMD
+        # 2. Reserve price & EMD (strictly requires matched reserve price)
         reserve_match = re.search(r"Reserve\s*Price\s*[:\-]?\s*(?:Rs\.?|INR)?\s*([\d,]+)", text, re.IGNORECASE)
-        if reserve_match:
-            reserve_price = int(re.sub(r"[^\d]", "", reserve_match.group(1)))
-        else:
-            reserve_price = 4500000
+        if not reserve_match:
+            logger.warning("No reserve price found in document text; skipping offline extraction.")
+            return NoticeExtractionBatch(properties=[])
+        reserve_price = int(re.sub(r"[^\d]", "", reserve_match.group(1)))
 
         emd_match = re.search(r"EMD\s*(?:Amount)?\s*[:\-]?\s*(?:Rs\.?|INR)?\s*([\d,]+)", text, re.IGNORECASE)
-        if emd_match:
-            emd_amount = int(re.sub(r"[^\d]", "", emd_match.group(1)))
-        else:
-            emd_amount = int(reserve_price * 0.10)
+        emd_amount = int(re.sub(r"[^\d]", "", emd_match.group(1))) if emd_match else int(reserve_price * 0.10)
+
+        # 3. Branch name
+        branch_match = re.search(r"(?:Branch|SARB|ARMB)[:\s]+([^\n,]+)", text, re.IGNORECASE)
+        branch_name = branch_match.group(1).strip() if branch_match else "Asset Recovery Branch"
+
+        # 4. Borrower name
+        borrower_match = re.search(r"(?:Borrower|Borrowers|Thiru\.|Mr\.|M/s\.)\s*[:\-]?\s*([^\n,]+)", text, re.IGNORECASE)
+        borrower_name = borrower_match.group(1).strip() if borrower_match else "Borrower"
 
         # 5. Survey numbers
         surveys = []
@@ -162,7 +169,7 @@ class GeminiAuctionExtractor:
                 if re.search(r"\d", part):
                     surveys.append(part.strip())
         if not surveys:
-            surveys = ["124/2A", "125"]
+            surveys = ["Unspecified"]
 
         # 6. Possession type
         if "physical" in text.lower() or "நேரடி" in text:
@@ -187,12 +194,12 @@ class GeminiAuctionExtractor:
 
         # 8. Locality / District
         dist_match = re.search(r"(Coimbatore|Chennai|Madurai|Tiruppur|Salem|Trichy|Erode|Dindigul)", text, re.IGNORECASE)
-        district = dist_match.group(1).title() if dist_match else "Coimbatore"
+        district = dist_match.group(1).title() if dist_match else "Tamil Nadu"
 
         village_match = re.search(r"(?:Village|Locality|Nagar)[:\s]+([^\n,]+)", text, re.IGNORECASE)
-        village = village_match.group(1).strip() if village_match else "Irugur"
+        village = village_match.group(1).strip() if village_match else district
 
-        area_desc = "5 Cents (2178 Sq.ft) with 1200 Sq.ft RCC building"
+        area_desc = "Extracted from statutory notice"
         area_match = re.search(r"(?:Extent|Area|Measuring)[:\s]+([^\n]+)", text, re.IGNORECASE)
         if area_match:
             cleaned_area = area_match.group(1).strip().rstrip(".")
@@ -200,7 +207,7 @@ class GeminiAuctionExtractor:
                 area_desc = cleaned_area
 
         # 9. Auction Date
-        auction_date = "2026-11-25T11:00:00"
+        auction_date = ""
         date_match = re.search(r"(\d{2})[-/](\d{2})[-/](\d{4})", text)
         if date_match:
             d, m, y = date_match.groups()
@@ -213,24 +220,24 @@ class GeminiAuctionExtractor:
             asset_category=AssetCategory.HOUSE_VILLA,
             possession_type=possession,
             survey_numbers=surveys,
-            patta_or_door_no="Patta No. 452",
+            patta_or_door_no="",
             village_or_locality=village,
-            taluk="Sulur",
+            taluk="",
             district=district,
             state="Tamil Nadu",
-            pincode="641103",
+            pincode="",
             area_description=area_desc,
             area_sqft=convert_area_description_to_sqft(area_desc),
             boundaries=boundaries,
             reserve_price_inr=reserve_price,
             emd_amount_inr=emd_amount,
             bid_increment_inr=50000,
-            emd_last_date="2026-11-23T17:00:00",
-            inspection_date_info="Prior appointment with Branch Manager",
+            emd_last_date="",
+            inspection_date_info="Contact authorized officer",
             auction_date=auction_date,
-            authorized_officer_name="Chief Manager",
-            contact_phone="+91-422-2245000",
-            bidding_portal_url="https://baanknet.com",
+            authorized_officer_name="Authorized Officer",
+            contact_phone="",
+            bidding_portal_url="https://ibapi.in",
         )
         return NoticeExtractionBatch(properties=[prop])
 
@@ -254,7 +261,8 @@ class GeminiAuctionExtractor:
     def extract_from_multimodal(self, file_bytes: bytes, mime_type: str) -> NoticeExtractionBatch:
         """Extract structured auction properties from scanned PDF or newspaper image bytes."""
         if not self.client:
-            return self._offline_fallback_parse()
+            logger.warning("Gemini client not initialized; cannot perform multimodal image extraction without API.")
+            return NoticeExtractionBatch(properties=[])
 
         from google.genai import types
 
@@ -267,8 +275,8 @@ class GeminiAuctionExtractor:
             batch = self._call_gemini_api(contents)
             return self._post_process_batch(batch)
         except Exception as e:
-            logger.warning("Gemini Vision call failed (%s); falling back to offline parser.", e)
-            return self._offline_fallback_parse()
+            logger.warning("Gemini Vision call failed (%s); returning empty extraction batch.", e)
+            return NoticeExtractionBatch(properties=[])
 
     def extract(self, routed_doc: RoutedDocument) -> NoticeExtractionBatch:
         """

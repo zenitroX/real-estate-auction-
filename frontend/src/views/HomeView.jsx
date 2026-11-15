@@ -13,6 +13,8 @@ import {
   Users,
   FileCheck2,
   Clock,
+  UserCheck,
+  KeyRound,
 } from 'lucide-react';
 import PropertyCard from '../components/PropertyCard';
 import { timeRemaining, pad2 } from '../data/propertiesData';
@@ -66,29 +68,29 @@ export default function HomeView({
             </span>
 
             <h1 className="hero-title">
-              Discover. Bid. <span className="gold">Own.</span>
+              India's Premier <span className="gold">Bank Auction Concierge</span>
             </h1>
 
             <p className="hero-sub">
-              Bank Auction & Distressed Properties with Complete Transparency. Verified titles, SARFAESI direct bank inventory, and end-to-end possession assistance.
+              Discover Verified Distressed Assets & Bid with Complete Legal Confidence. Comprehensive 30-year title checks, SARFAESI direct bank inventory, and assisted bidding on official government portals.
             </p>
 
             <ul className="hero-features">
               <li>
                 <span className="hf-icon"><Building2 size={16} /></span>
-                <span>Bank Auction Properties</span>
+                <span>Direct Bank Inventory</span>
               </li>
               <li>
                 <span className="hf-icon"><ShieldCheck size={16} /></span>
-                <span>Verified Listings</span>
+                <span>Verified Clean Titles</span>
               </li>
               <li>
                 <span className="hf-icon"><Scale size={16} /></span>
-                <span>Legal Assistance</span>
+                <span>Legal Due Diligence</span>
               </li>
               <li>
                 <span className="hf-icon"><Headset size={16} /></span>
-                <span>End-to-End Support</span>
+                <span>Assisted Bidding Concierge</span>
               </li>
             </ul>
 
@@ -307,10 +309,54 @@ export default function HomeView({
               <div className="trust-icon">
                 <Gavel size={24} />
               </div>
-              <h4>Transparent Bidding Engine</h4>
+              <h4>Assisted Bank Bidding</h4>
               <p>
-                Real-time electronic auction engine with published reserve prices, verified EMD custody, and clear timestamped bid records.
+                Expert guidance on EMD deposits and live bidding representation on official bank portals including e-Bikray, IBAPI, and MSTC.
               </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 4 STEP ASSISTED BIDDING PROCESS */}
+      <section className="section process-section">
+        <div className="container">
+          <div className="center">
+            <h2>
+              How Assisted Bank Bidding <span className="gold">Works</span>
+            </h2>
+            <p style={{ color: '#64748B', marginTop: 4 }}>
+              Four simple transparent steps from listing discovery to key handover.
+            </p>
+          </div>
+
+          <div className="process-grid">
+            <div className="process-step">
+              <span className="ps-num">01</span>
+              <UserCheck size={26} color="#071D35" />
+              <h4>Discover & Verify</h4>
+              <p>Explore verified bank notices with 30-year legal search reports and schedule physical site visits.</p>
+            </div>
+
+            <div className="process-step">
+              <span className="ps-num">02</span>
+              <IndianRupee size={26} color="#071D35" />
+              <h4>Deposit EMD (10%)</h4>
+              <p>Transfer the statutory Earnest Money Deposit into the bank escrow to obtain bidding authorization.</p>
+            </div>
+
+            <div className="process-step">
+              <span className="ps-num">03</span>
+              <Gavel size={26} color="#071D35" />
+              <h4>Assisted Bank Portal Bidding</h4>
+              <p>Assisted Bidding on Official Bank Portals: Expert guidance on EMD deposit and live bidding on e-Bikray/IBAPI.</p>
+            </div>
+
+            <div className="process-step">
+              <span className="ps-num">04</span>
+              <KeyRound size={26} color="#071D35" />
+              <h4>Win & Take Possession</h4>
+              <p>Receive your Sale Certificate, settle balance funds, and receive physical possession supported by our legal team.</p>
             </div>
           </div>
         </div>

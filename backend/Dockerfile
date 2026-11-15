@@ -6,8 +6,9 @@ ENV PYTHONUNBUFFERED=1 \
     PORT=8000 \
     PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
 
-# Install system dependencies for Playwright headless Chromium & PyMuPDF
+# Install system dependencies for Playwright headless Chromium, PyMuPDF, & tini init
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    tini \
     wget \
     gnupg \
     ca-certificates \
@@ -35,6 +36,13 @@ RUN playwright install chromium
 
 COPY . .
 
+# Non-root container security & ownership
+RUN useradd -m -u 1000 appuser && \
+    chown -R appuser:appuser /app /ms-playwright
+
+USER appuser
+
 EXPOSE 8000
 
+ENTRYPOINT ["/usr/bin/tini", "--"]
 CMD ["python", "app.py"]

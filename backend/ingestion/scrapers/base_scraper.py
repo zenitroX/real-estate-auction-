@@ -71,6 +71,11 @@ class BaseScraper(ABC):
                     "--disable-setuid-sandbox",
                     "--disable-blink-features=AutomationControlled",
                     "--disable-infobars",
+                    "--disable-dev-shm-usage",
+                    "--disable-gpu",
+                    "--no-zygote",
+                    "--single-process",
+                    "--disable-background-networking",
                 ],
             )
             logger.info("Playwright Chromium browser launched (headless=%s)", self.headless)

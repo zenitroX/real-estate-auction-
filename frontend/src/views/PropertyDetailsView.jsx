@@ -323,7 +323,7 @@ export default function PropertyDetailsView({
                 <CheckCircle2 size={16} /> Verified 30-Year Search Report & Encumbrance Certificate
               </li>
               <li>
-                <CheckCircle2 size={16} /> Physical vacant possession handover upon Sale Certificate
+                <CheckCircle2 size={16} /> {property.possessionType || 'Physical vacant'} possession handover upon Sale Certificate
               </li>
               <li>
                 <CheckCircle2 size={16} /> Clear CMDA / Municipal planning approval status
@@ -372,13 +372,22 @@ export default function PropertyDetailsView({
 
         {/* Action Buttons */}
         <div className="detail-actions">
-          <button className="btn btn-outline" onClick={() => onDownloadBrochure(property)}>
+          <button
+            className="btn btn-outline"
+            onClick={() => onContact ? onContact(property, 'Download Notice') : onDownloadBrochure(property)}
+          >
             <FileDown size={17} /> Download Official Notice
           </button>
-          <button className="btn btn-outline" onClick={() => onViewDocuments(property)}>
+          <button
+            className="btn btn-outline"
+            onClick={() => onContact ? onContact(property, 'Legal Title Search Report') : onViewDocuments(property)}
+          >
             <FolderOpen size={17} /> Request Title Search Pack
           </button>
-          <button className="btn btn-outline" onClick={() => onOpenSiteVisit(property)}>
+          <button
+            className="btn btn-outline"
+            onClick={() => onContact ? onContact(property, 'Site Inspection') : onOpenSiteVisit(property)}
+          >
             <Calendar size={17} /> Schedule Physical Site Inspection
           </button>
         </div>

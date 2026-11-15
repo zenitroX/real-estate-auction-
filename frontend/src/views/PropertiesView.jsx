@@ -59,6 +59,9 @@ export default function PropertiesView({
     }
 
     // Budget range
+    if (filters.minBudget) {
+      result = result.filter((p) => p.reserve >= filters.minBudget);
+    }
     if (filters.maxBudget) {
       result = result.filter((p) => p.reserve <= filters.maxBudget);
     }
@@ -113,6 +116,7 @@ export default function PropertiesView({
     setFilters({
       location: '',
       types: ['residential', 'commercial', 'land', 'industrial'],
+      minBudget: 0,
       maxBudget: 100000000, // 10 Cr
       banks: ['Canara Bank', 'SBI', 'ICICI Bank', 'Others'],
       sort: 'ending',
@@ -203,11 +207,15 @@ export default function PropertiesView({
                 max="100000000"
                 step="2500000"
                 value={filters.maxBudget}
-                onChange={(e) => setFilters({ ...filters, maxBudget: Number(e.target.value) })}
+                onChange={(e) => setFilters({ ...filters, minBudget: 0, maxBudget: Number(e.target.value) })}
               />
               <div className="range-vals">
                 <span>₹ 10 Lakh</span>
-                <strong>{filters.maxBudget >= 100000000 ? '₹ 10 Crore+' : `Up to ${formatPriceShort(filters.maxBudget)}`}</strong>
+                <strong>
+                  {filters.minBudget > 0
+                    ? `Above ${formatPriceShort(filters.minBudget)}`
+                    : (filters.maxBudget >= 100000000 ? '₹ 10 Crore+' : `Up to ${formatPriceShort(filters.maxBudget)}`)}
+                </strong>
               </div>
             </div>
           </div>

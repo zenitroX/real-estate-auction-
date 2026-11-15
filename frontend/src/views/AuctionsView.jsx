@@ -110,8 +110,8 @@ export default function AuctionsView({
             <div className="process-step">
               <span className="ps-num">03</span>
               <Gavel size={26} color="#071D35" />
-              <h4>Live Incremental Bids</h4>
-              <p>Place incremental bids electronically from your mobile or desktop before the auction countdown closes.</p>
+              <h4>Assisted Bank Portal Bidding</h4>
+              <p>Assisted Bidding on Official Bank Portals: Expert guidance on EMD deposit and live bidding on e-Bikray/IBAPI.</p>
             </div>
 
             <div className="process-step">
