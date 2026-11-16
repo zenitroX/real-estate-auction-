@@ -6,11 +6,10 @@ export default function PropertyCard({
   property,
   onView,
   onContact,
-  onBid,
   isWishlisted,
   onToggleWishlist,
 }) {
-  const handleContactAction = onContact || onBid || (() => {});
+  const handleContactAction = onContact || (() => {});
   const tr = timeRemaining(property.auctionEnd);
   const isEnded = tr.total === 0;
 

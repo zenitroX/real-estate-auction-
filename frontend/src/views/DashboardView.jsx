@@ -31,10 +31,10 @@ import { FAQS } from '../data/initialUserData';
 
 export default function DashboardView({
   user,
-  myBids,
-  wishlist,
-  notifications,
-  properties,
+  myBids = {},
+  wishlist = [],
+  notifications = [],
+  properties = [],
   onNavigate,
   onViewProperty,
   onContact,
@@ -60,23 +60,8 @@ export default function DashboardView({
     year: 'numeric',
   });
 
-  // Calculate active bids list
-  const activeBidRows = Object.keys(myBids)
-    .map((propId) => {
-      const p = properties.find((item) => item.id === propId);
-      if (!p) return null;
-      const tr = timeRemaining(p.auctionEnd);
-      return {
-        property: p,
-        myBid: myBids[propId].amount,
-        status: myBids[propId].status || (tr.total > 0 ? 'Leading' : 'Closed'),
-        timeRemainingText: tr.total === 0 ? 'Closed' : `${tr.d}d ${pad2(tr.h)}h ${pad2(tr.m)}m`,
-      };
-    })
-    .filter(Boolean);
-
   // Watchlisted properties
-  const savedProperties = properties.filter((p) => wishlist.includes(p.id));
+  const savedProperties = (properties || []).filter((p) => (wishlist || []).includes(p.id));
 
   const handleProfileSubmit = (e) => {
     e.preventDefault();
@@ -90,7 +75,6 @@ export default function DashboardView({
 
   const navItems = [
     { id: 'overview', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'bids', label: 'My Bids', icon: Gavel },
     { id: 'saved', label: 'Saved Properties', icon: Heart },
     { id: 'alerts', label: 'Alerts & Notifications', icon: Bell },
     { id: 'profile', label: 'My Profile', icon: User },
@@ -168,22 +152,22 @@ export default function DashboardView({
             {/* 4 Stat Cards */}
             <div className="stat-cards">
               <div className="s-card">
-                <div className="s-icon gavel">
-                  <Gavel size={22} />
-                </div>
-                <div>
-                  <small>Active Bids</small>
-                  <strong>{Math.max(activeBidRows.length, 3)}</strong>
-                </div>
-              </div>
-
-              <div className="s-card">
                 <div className="s-icon heart">
                   <Heart size={22} />
                 </div>
                 <div>
                   <small>Watched Properties</small>
-                  <strong>{Math.max(savedProperties.length, 5)}</strong>
+                  <strong>{savedProperties.length}</strong>
+                </div>
+              </div>
+
+              <div className="s-card">
+                <div className="s-icon gear">
+                  <Building2 size={22} />
+                </div>
+                <div>
+                  <small>Live Bank Auctions</small>
+                  <strong>{(properties || []).length}</strong>
                 </div>
               </div>
 
@@ -192,31 +176,31 @@ export default function DashboardView({
                   <Trophy size={22} />
                 </div>
                 <div>
-                  <small>Won Auctions</small>
+                  <small>Won / In Process</small>
                   <strong>2</strong>
                 </div>
               </div>
 
               <div className="s-card">
-                <div className="s-icon gear">
-                  <Cog size={22} />
+                <div className="s-icon gavel">
+                  <ShieldCheck size={22} />
                 </div>
                 <div>
-                  <small>In Process</small>
-                  <strong>1</strong>
+                  <small>KYC Status</small>
+                  <strong>Level 2 Verified</strong>
                 </div>
               </div>
             </div>
 
-            {/* My Active Bids Table Panel */}
+            {/* Saved & Tracked Properties Panel */}
             <div className="dash-panel">
               <div className="panel-head">
-                <h3>My Active Bids</h3>
+                <h3>Tracked Bank Auctions</h3>
                 <button
                   className="btn btn-outline btn-sm"
-                  onClick={() => setActiveTab('bids')}
+                  onClick={() => setActiveTab('saved')}
                 >
-                  View All <ArrowRight size={14} />
+                  View All Saved <ArrowRight size={14} />
                 </button>
               </div>
 
@@ -227,59 +211,53 @@ export default function DashboardView({
                       <th>Property</th>
                       <th>Location</th>
                       <th>Reserve Price</th>
-                      <th>My Bid</th>
-                      <th>Auction Ends</th>
+                      <th>EMD (10%)</th>
+                      <th>Auction Closes</th>
                       <th>Status</th>
                       <th>Action</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {activeBidRows.length > 0 ? (
-                      activeBidRows.map(({ property, myBid, status, timeRemainingText }) => (
-                        <tr key={property.id}>
-                          <td>
-                            <div className="t-prop">
-                              <img src={property.images[0]} alt="" />
-                              <div>
-                                <strong>{property.title}</strong>
-                                <small>{property.bank} &middot; {property.badge}</small>
+                    {savedProperties.length > 0 ? (
+                      savedProperties.slice(0, 5).map((property) => {
+                        const tr = timeRemaining(property.auctionEnd);
+                        const timeRemainingText = tr.total === 0 ? 'Closed' : `${tr.d}d ${pad2(tr.h)}h ${pad2(tr.m)}m`;
+                        return (
+                          <tr key={property.id}>
+                            <td>
+                              <div className="t-prop">
+                                <img src={(property.images && property.images[0]) || './placeholder.svg'} alt="" />
+                                <div>
+                                  <strong>{property.title}</strong>
+                                  <small>{property.bank} &middot; {property.badge || 'BANK AUCTION'}</small>
+                                </div>
                               </div>
-                            </div>
-                          </td>
-                          <td>{property.locality}</td>
-                          <td className="navy-val">{formatPrice(property.reserve)}</td>
-                          <td className="gold-val">{formatPrice(myBid)}</td>
-                          <td className="red-val">{timeRemainingText}</td>
-                          <td>
-                            <span
-                              className={`badge ${
-                                status === 'Leading'
-                                  ? 'badge-green'
-                                  : status === 'Outbid'
-                                  ? 'badge-red'
-                                  : 'badge-gold'
-                              }`}
-                            >
-                              {status}
-                            </span>
-                          </td>
-                          <td>
-                            <button
-                              className="btn btn-gold btn-sm"
-                              onClick={() => {
-                                if (onContact) onContact(property);
-                                else if (onBidProperty) onBidProperty(property);
-                              }}
-                            >
-                              Contact Desk
-                            </button>
-                          </td>
-                        </tr>
-                      ))
+                            </td>
+                            <td>{property.locality}</td>
+                            <td className="navy-val">{formatPrice(property.reserve)}</td>
+                            <td className="gold-val">{formatPrice(property.emd || Math.round(property.reserve * 0.1))}</td>
+                            <td className="red-val">{timeRemainingText}</td>
+                            <td>
+                              <span className="badge badge-green">Verified</span>
+                            </td>
+                            <td>
+                              <button
+                                className="btn btn-gold btn-sm"
+                                onClick={() => {
+                                  if (onContact) onContact(property);
+                                  else if (onViewProperty) onViewProperty(property.id);
+                                }}
+                              >
+                                Contact Desk
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })
                     ) : (
                       <tr>
                         <td colSpan={7} style={{ textAlign: 'center', padding: '30px' }}>
-                          No active bids. Browse properties to place your first bid!
+                          No saved properties yet. Click the heart icon on any auction listing to bookmark it here!
                         </td>
                       </tr>
                     )}
@@ -290,69 +268,7 @@ export default function DashboardView({
           </div>
         )}
 
-        {/* TAB 2: MY BIDS */}
-        {activeTab === 'bids' && (
-          <div className="dash-panel">
-            <div className="panel-head">
-              <h3>Bid History & Status</h3>
-              <span className="badge badge-gold">{activeBidRows.length} Active Auctions</span>
-            </div>
-
-            <div className="table-scroll">
-              <table className="bids-table">
-                <thead>
-                  <tr>
-                    <th>Property</th>
-                    <th>Location</th>
-                    <th>Reserve Price</th>
-                    <th>My Highest Bid</th>
-                    <th>Auction Ends</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {activeBidRows.map(({ property, myBid, status, timeRemainingText }) => (
-                    <tr key={property.id}>
-                      <td>
-                        <div className="t-prop">
-                          <img src={property.images[0]} alt="" />
-                          <div>
-                            <strong>{property.title}</strong>
-                            <small>{property.bank}</small>
-                          </div>
-                        </div>
-                      </td>
-                      <td>{property.locality}</td>
-                      <td className="navy-val">{formatPrice(property.reserve)}</td>
-                      <td className="gold-val">{formatPrice(myBid)}</td>
-                      <td className="red-val">{timeRemainingText}</td>
-                      <td>
-                        <span
-                          className={`badge ${
-                            status === 'Leading' ? 'badge-green' : 'badge-red'
-                          }`}
-                        >
-                          {status}
-                        </span>
-                      </td>
-                      <td>
-                        <button
-                          className="btn btn-outline btn-sm"
-                          onClick={() => onViewProperty(property.id)}
-                        >
-                          Details
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {/* TAB 3: SAVED PROPERTIES */}
+        {/* TAB 2: SAVED PROPERTIES */}
         {activeTab === 'saved' && (
           <div className="dash-panel">
             <div className="panel-head">
@@ -367,7 +283,7 @@ export default function DashboardView({
                     key={p.id}
                     property={p}
                     onView={onViewProperty}
-                    onContact={onContact || onBidProperty}
+                    onContact={onContact}
                     isWishlisted={true}
                     onToggleWishlist={onToggleWishlist}
                   />

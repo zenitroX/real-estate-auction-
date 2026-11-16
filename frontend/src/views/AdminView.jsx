@@ -20,8 +20,10 @@ import {
   FileText,
   BadgeCheck,
   LogOut,
+  Columns,
 } from 'lucide-react';
 import { formatPrice, formatRupees, formatPriceShort, typeLabel } from '../data/propertiesData';
+import { API_BASE, getAdminAuthHeader } from '../data/api';
 
 function toDatetimeLocalInput(ts) {
   if (!ts) return '';
@@ -55,12 +57,59 @@ export default function AdminView({
   const setActiveTab = controlledSetTab || setInternalTab;
 
   const [editingProperty, setEditingProperty] = useState(null);
+  const [showSplitPdf, setShowSplitPdf] = useState(false);
+  const [pdfModalData, setPdfModalData] = useState(null);
   const [rejectConfirmTarget, setRejectConfirmTarget] = useState(null);
   const [isScrapingRunning, setIsScrapingRunning] = useState(false);
   const [scrapeLogs, setScrapeLogs] = useState([
     'System ready. Last automated crawler run completed with 100% OCR pass rate.',
     'Scraped 3 new SARFAESI notices from Baanknet / IBAPI portal into Pending Queue.',
   ]);
+
+  const getPropertyPdfUrl = (prop) => {
+    return (
+      prop?.source_pdf_url ||
+      prop?.sourcePdfUrl ||
+      prop?.source_url ||
+      prop?.sourceUrl ||
+      'https://www.ibapi.in/assets/sample_notice.pdf'
+    );
+  };
+
+  const handleOpenPdfViewer = async (prop) => {
+    const rawUrl = getPropertyPdfUrl(prop);
+    const proxyUrl = `${API_BASE}/api/admin/pdf-proxy?url=${encodeURIComponent(rawUrl)}`;
+    setPdfModalData({
+      property: prop,
+      rawUrl,
+      proxyUrl,
+      blobUrl: null,
+      isLoading: true,
+      error: null,
+    });
+
+    try {
+      const res = await fetch(proxyUrl, {
+        headers: {
+          ...getAdminAuthHeader(),
+        },
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      setPdfModalData((prev) => (prev ? { ...prev, blobUrl, isLoading: false } : null));
+    } catch (err) {
+      console.warn('[Notice PDF Stream Notice]: Fallback to proxy URL', err);
+      setPdfModalData((prev) => (prev ? { ...prev, blobUrl: proxyUrl, isLoading: false } : null));
+    }
+  };
+
+  const handleClosePdfViewer = () => {
+    if (pdfModalData?.blobUrl && pdfModalData.blobUrl.startsWith('blob:')) {
+      URL.revokeObjectURL(pdfModalData.blobUrl);
+    }
+    setPdfModalData(null);
+  };
 
   // Separate properties into queues
   const pendingProperties = properties.filter((p) => p.status === 'PENDING_REVIEW' || !p.verified);
@@ -334,9 +383,20 @@ export default function AdminView({
 
                       <button
                         className="btn btn-outline btn-block btn-sm"
-                        onClick={() => setEditingProperty({ ...p })}
+                        onClick={() => {
+                          setEditingProperty({ ...p });
+                          setShowSplitPdf(false);
+                        }}
                       >
                         <Edit3 size={14} /> Edit Extracted Details
+                      </button>
+
+                      <button
+                        className="btn btn-outline btn-block btn-sm"
+                        onClick={() => handleOpenPdfViewer(p)}
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+                      >
+                        <FileText size={14} /> View Original Notice PDF
                       </button>
 
                       <button
@@ -582,125 +642,239 @@ export default function AdminView({
 
         {/* Edit Extracted Details Modal */}
         {editingProperty && (
-          <div className="modal-overlay" onClick={() => setEditingProperty(null)} role="dialog" aria-modal="true">
-            <div className="modal" style={{ width: 'min(620px, 100%)', maxHeight: '92vh', overflowY: 'auto' }} onClick={(e) => e.stopPropagation()}>
-              <button className="modal-close" onClick={() => setEditingProperty(null)}><XCircle size={20} /></button>
+          <div className="modal-overlay" onClick={() => { setEditingProperty(null); setShowSplitPdf(false); }} role="dialog" aria-modal="true">
+            <div
+              className="modal"
+              style={{
+                width: showSplitPdf ? 'min(1240px, 98vw)' : 'min(620px, 100%)',
+                maxHeight: '94vh',
+                overflowY: 'auto',
+                transition: 'width 0.2s ease-in-out',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button className="modal-close" onClick={() => { setEditingProperty(null); setShowSplitPdf(false); }}><XCircle size={20} /></button>
               <div className="modal-head">
                 <span className="brand-mark"><Edit3 size={20} /></span>
                 <h3>Verify & Edit Extracted Fields</h3>
                 <p>Adjust OCR fields, auction dates, and possession details before publishing.</p>
               </div>
 
-              <form onSubmit={handleSaveEdit} className="modal-form">
-                <div className="form-field">
-                  <label>Property Title</label>
-                  <input
-                    type="text"
-                    value={editingProperty.title}
-                    onChange={(e) => setEditingProperty({ ...editingProperty, title: e.target.value })}
-                    required
-                  />
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: 16,
+                  background: '#F8FAFC',
+                  padding: '10px 14px',
+                  borderRadius: 10,
+                  border: '1px solid #E2E8F0',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <FileText size={18} color="#D9A62E" />
+                  <span style={{ fontSize: '0.86rem', fontWeight: 600, color: '#071D35' }}>Original Bank Tender Notice</span>
                 </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <button
+                    type="button"
+                    className="btn btn-outline btn-sm"
+                    onClick={() => setShowSplitPdf(!showSplitPdf)}
+                    style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.78rem' }}
+                  >
+                    <Columns size={14} /> {showSplitPdf ? 'Hide Split-Pane' : 'View Original Notice PDF (Split-Pane)'}
+                  </button>
+                  <a
+                    href={`${API_BASE}/api/admin/pdf-proxy?url=${encodeURIComponent(getPropertyPdfUrl(editingProperty))}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-ghost btn-sm"
+                    style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.78rem', color: '#071D35' }}
+                  >
+                    <ExternalLink size={13} /> Open
+                  </a>
+                </div>
+              </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: showSplitPdf ? '1.1fr 1fr' : '1fr', gap: 20, alignItems: 'start' }}>
+                {showSplitPdf && (
+                  <div style={{ border: '1px solid #CBD5E1', borderRadius: 10, overflow: 'hidden', height: 600, display: 'flex', flexDirection: 'column', background: '#0F172A' }}>
+                    <div style={{ background: '#071D35', color: '#CBD5E1', padding: '8px 12px', fontSize: '0.78rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span>Notice PDF Stream: <code style={{ color: '#E8B849' }}>/api/admin/pdf-proxy</code></span>
+                      <span className="badge badge-green" style={{ fontSize: '0.65rem' }}>Authenticated</span>
+                    </div>
+                    <iframe
+                      src={`${API_BASE}/api/admin/pdf-proxy?url=${encodeURIComponent(getPropertyPdfUrl(editingProperty))}`}
+                      title="Original Tender Notice PDF"
+                      style={{ width: '100%', height: '100%', border: 'none', background: '#fff' }}
+                    />
+                  </div>
+                )}
+
+                <form onSubmit={handleSaveEdit} className="modal-form">
                   <div className="form-field">
-                    <label>Bank Name</label>
+                    <label>Property Title</label>
                     <input
                       type="text"
-                      value={editingProperty.bank}
-                      onChange={(e) => setEditingProperty({ ...editingProperty, bank: e.target.value })}
+                      value={editingProperty.title}
+                      onChange={(e) => setEditingProperty({ ...editingProperty, title: e.target.value })}
                       required
                     />
                   </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                    <div className="form-field">
+                      <label>Bank Name</label>
+                      <input
+                        type="text"
+                        value={editingProperty.bank}
+                        onChange={(e) => setEditingProperty({ ...editingProperty, bank: e.target.value })}
+                        required
+                      />
+                    </div>
+                    <div className="form-field">
+                      <label>Reserve Price (INR)</label>
+                      <input
+                        type="number"
+                        value={editingProperty.reserve}
+                        onChange={(e) => {
+                          const newReserve = Number(e.target.value);
+                          setEditingProperty({
+                            ...editingProperty,
+                            reserve: newReserve,
+                            emd: editingProperty.emd || Math.round(newReserve * 0.1),
+                          });
+                        }}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                    <div className="form-field">
+                      <label>Auction End Date & Time</label>
+                      <input
+                        type="datetime-local"
+                        value={toDatetimeLocalInput(editingProperty.auctionEnd)}
+                        onChange={(e) => {
+                          const ts = e.target.value ? new Date(e.target.value).getTime() : Date.now();
+                          setEditingProperty({ ...editingProperty, auctionEnd: ts });
+                        }}
+                        required
+                      />
+                    </div>
+                    <div className="form-field">
+                      <label>EMD Amount (INR)</label>
+                      <input
+                        type="number"
+                        placeholder="Statutory 10% EMD"
+                        value={editingProperty.emd !== undefined && editingProperty.emd !== null ? editingProperty.emd : Math.round((editingProperty.reserve || 0) * 0.1)}
+                        onChange={(e) => setEditingProperty({ ...editingProperty, emd: Number(e.target.value) })}
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                    <div className="form-field">
+                      <label>Built-up Area (sq.ft)</label>
+                      <input
+                        type="number"
+                        placeholder="e.g. 2100"
+                        value={editingProperty.area || ''}
+                        onChange={(e) => setEditingProperty({ ...editingProperty, area: Number(e.target.value) })}
+                      />
+                    </div>
+                    <div className="form-field">
+                      <label>Land Area (sq.ft)</label>
+                      <input
+                        type="number"
+                        placeholder="e.g. 1800"
+                        value={editingProperty.landArea || ''}
+                        onChange={(e) => setEditingProperty({ ...editingProperty, landArea: Number(e.target.value) })}
+                      />
+                    </div>
+                  </div>
+
                   <div className="form-field">
-                    <label>Reserve Price (INR)</label>
+                    <label>Possession Type</label>
+                    <select
+                      value={editingProperty.possessionType || 'Physical Vacant'}
+                      onChange={(e) => setEditingProperty({ ...editingProperty, possessionType: e.target.value })}
+                    >
+                      <option value="Physical Vacant">Physical Vacant Possession</option>
+                      <option value="Symbolic / Constructive">Symbolic / Constructive Possession</option>
+                    </select>
+                  </div>
+
+                  <div className="form-field">
+                    <label>Locality & Address</label>
                     <input
-                      type="number"
-                      value={editingProperty.reserve}
-                      onChange={(e) => {
-                        const newReserve = Number(e.target.value);
-                        setEditingProperty({
-                          ...editingProperty,
-                          reserve: newReserve,
-                          emd: editingProperty.emd || Math.round(newReserve * 0.1),
-                        });
-                      }}
+                      type="text"
+                      value={editingProperty.address || editingProperty.locality}
+                      onChange={(e) => setEditingProperty({ ...editingProperty, locality: e.target.value, address: e.target.value })}
                       required
                     />
+                  </div>
+
+                  <button className="btn btn-gold btn-block btn-lg" type="submit">
+                    <BadgeCheck size={18} /> Save & Approve Listing
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Notice PDF Viewer Modal */}
+        {pdfModalData && (
+          <div className="modal-overlay" onClick={handleClosePdfViewer} role="dialog" aria-modal="true">
+            <div
+              className="modal"
+              style={{ width: 'min(980px, 96vw)', height: '88vh', display: 'flex', flexDirection: 'column', padding: 20 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <span className="brand-mark" style={{ background: '#071D35', color: '#E8B849' }}>
+                    <FileText size={20} />
+                  </span>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: '1.2rem' }}>Original Bank Auction Notice PDF</h3>
+                    <small style={{ color: '#64748B' }}>
+                      {pdfModalData.property?.title} &middot; {pdfModalData.property?.bank}
+                    </small>
                   </div>
                 </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                  <div className="form-field">
-                    <label>Auction End Date & Time</label>
-                    <input
-                      type="datetime-local"
-                      value={toDatetimeLocalInput(editingProperty.auctionEnd)}
-                      onChange={(e) => {
-                        const ts = e.target.value ? new Date(e.target.value).getTime() : Date.now();
-                        setEditingProperty({ ...editingProperty, auctionEnd: ts });
-                      }}
-                      required
-                    />
-                  </div>
-                  <div className="form-field">
-                    <label>EMD Amount (INR)</label>
-                    <input
-                      type="number"
-                      placeholder="Statutory 10% EMD"
-                      value={editingProperty.emd !== undefined && editingProperty.emd !== null ? editingProperty.emd : Math.round((editingProperty.reserve || 0) * 0.1)}
-                      onChange={(e) => setEditingProperty({ ...editingProperty, emd: Number(e.target.value) })}
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                  <div className="form-field">
-                    <label>Built-up Area (sq.ft)</label>
-                    <input
-                      type="number"
-                      placeholder="e.g. 2100"
-                      value={editingProperty.area || ''}
-                      onChange={(e) => setEditingProperty({ ...editingProperty, area: Number(e.target.value) })}
-                    />
-                  </div>
-                  <div className="form-field">
-                    <label>Land Area (sq.ft)</label>
-                    <input
-                      type="number"
-                      placeholder="e.g. 1800"
-                      value={editingProperty.landArea || ''}
-                      onChange={(e) => setEditingProperty({ ...editingProperty, landArea: Number(e.target.value) })}
-                    />
-                  </div>
-                </div>
-
-                <div className="form-field">
-                  <label>Possession Type</label>
-                  <select
-                    value={editingProperty.possessionType || 'Physical Vacant'}
-                    onChange={(e) => setEditingProperty({ ...editingProperty, possessionType: e.target.value })}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <a
+                    href={pdfModalData.proxyUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-outline btn-sm"
+                    style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.78rem' }}
                   >
-                    <option value="Physical Vacant">Physical Vacant Possession</option>
-                    <option value="Symbolic / Constructive">Symbolic / Constructive Possession</option>
-                  </select>
+                    <ExternalLink size={13} /> Open in New Tab
+                  </a>
+                  <button className="modal-close" onClick={handleClosePdfViewer}>
+                    <XCircle size={20} />
+                  </button>
                 </div>
+              </div>
 
-                <div className="form-field">
-                  <label>Locality & Address</label>
-                  <input
-                    type="text"
-                    value={editingProperty.address || editingProperty.locality}
-                    onChange={(e) => setEditingProperty({ ...editingProperty, locality: e.target.value, address: e.target.value })}
-                    required
-                  />
+              {pdfModalData.isLoading ? (
+                <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748B', gap: 8 }}>
+                  <RotateCw size={22} className="animate-spin" />
+                  <span>Streaming authenticated PDF notice from proxy...</span>
                 </div>
-
-                <button className="btn btn-gold btn-block btn-lg" type="submit">
-                  <BadgeCheck size={18} /> Save & Approve Listing
-                </button>
-              </form>
+              ) : (
+                <iframe
+                  src={pdfModalData.blobUrl || pdfModalData.proxyUrl}
+                  title="Official Notice PDF"
+                  style={{ width: '100%', flex: 1, border: '1px solid #CBD5E1', borderRadius: 8, background: '#F8FAFC' }}
+                />
+              )}
             </div>
           </div>
         )}

@@ -10,36 +10,45 @@ import {
   FileCheck2,
   CheckCircle2,
 } from 'lucide-react';
+import { loginAdminApi } from '../data/api';
 
 export default function AdminLoginView({ onLoginSuccess, onReturnToCustomer }) {
-  const [email, setEmail] = useState('admin@skandx.com');
-  const [password, setPassword] = useState('skandx@admin2026');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
 
-    // Validate credentials (local fallback or API check)
-    setTimeout(() => {
-      if (email.toLowerCase().trim() === 'admin@skandx.com' && password === 'skandx@admin2026') {
-        const adminSession = {
-          email: 'admin@skandx.com',
+    try {
+      const data = await loginAdminApi(email.trim(), password);
+      if (data && data.status === 'success' && data.token) {
+        const user = data.admin || data.user || {
           name: 'Chief Auction Officer',
+          email: email.trim().toLowerCase(),
           role: 'SUPER_ADMIN',
-          token: `skandx-adm-${Date.now()}`,
+        };
+        const adminSession = {
+          token: data.token,
+          name: user.name || 'Chief Auction Officer',
+          email: user.email || email,
+          role: user.role || 'SUPER_ADMIN',
           loginTime: Date.now(),
         };
         sessionStorage.setItem('skandx_admin_session', JSON.stringify(adminSession));
         setIsLoading(false);
-        onLoginSuccess(adminSession);
+        onLoginSuccess(data.token, user);
       } else {
         setIsLoading(false);
-        setError('Invalid admin credentials. Use admin@skandx.com / skandx@admin2026');
+        setError(data?.message || 'Invalid administrative credentials.');
       }
-    }, 500);
+    } catch (err) {
+      setIsLoading(false);
+      setError(err.message || 'Authentication server unreachable. Please verify network connection or wait for backend to wake up.');
+    }
   };
 
   const handleUseDemoCreds = () => {

@@ -7,8 +7,9 @@ Features:
 - GET /api/auctions : Public endpoint (returns only PUBLISHED / verified properties)
 - GET /api/admin/properties : Protected admin verification queue
 - POST /api/admin/properties/verify : Approves, updates, & persists property status
-- POST /api/contact : Thread-safe public lead capture from "Contact" button
+- POST /api/contact : Thread-safe public lead capture from "Contact" button (Rate limited)
 - GET /api/admin/leads : Protected admin feed of customer inquiries with pagination
+- GET /api/admin/pdf-proxy : Protected streaming proxy for remote tender notice PDFs
 - POST /api/scrape/trigger : Concurrency-controlled scraper job runner
 - Full CORS support with OPTIONS preflight handling
 """
@@ -21,9 +22,11 @@ import threading
 import time
 import urllib.request
 import urllib.parse
+import urllib.error
 import subprocess
 import hmac
 import hashlib
+import socket
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -49,6 +52,42 @@ _leads_lock = threading.Lock()
 _auctions_lock = threading.Lock()
 _crawler_lock = threading.Lock()
 _crawler_running = False
+_rate_limit_lock = threading.Lock()
+_contact_rate_limits = {}  # ip -> list of timestamps
+
+def check_contact_rate_limit(client_ip: str, limit: int = 15, window_seconds: int = 60, prune_seconds: int = 120) -> bool:
+    """
+    Thread-safe sliding window rate limiter for POST /api/contact.
+    Allows up to `limit` requests within `window_seconds`.
+    Prunes timestamps older than `prune_seconds` to reclaim memory.
+    Returns True if request allowed, False if exceeded.
+    """
+    now = time.time()
+    cutoff = now - window_seconds
+    prune_cutoff = now - prune_seconds
+
+    with _rate_limit_lock:
+        timestamps = _contact_rate_limits.get(client_ip, [])
+        # Prune timestamps older than prune_seconds (120s)
+        timestamps = [ts for ts in timestamps if ts > prune_cutoff]
+
+        # Count active window timestamps (60s)
+        recent_count = sum(1 for ts in timestamps if ts > cutoff)
+
+        if recent_count >= limit:
+            _contact_rate_limits[client_ip] = timestamps
+            return False
+
+        timestamps.append(now)
+        _contact_rate_limits[client_ip] = timestamps
+
+        # Periodic dictionary cleanup of dormant IPs
+        if len(_contact_rate_limits) > 200:
+            stale_keys = [k for k, v in _contact_rate_limits.items() if not v or v[-1] <= prune_cutoff]
+            for k in stale_keys:
+                del _contact_rate_limits[k]
+
+        return True
 
 def generate_admin_token() -> str:
     """Generate cryptographically signed, timestamped admin session token (valid 24h)."""
@@ -296,6 +335,20 @@ class ApiRequestHandler(http.server.BaseHTTPRequestHandler):
         # Windows reverse-DNS freeze fix (instant 0ms localhost latency)
         return self.client_address[0]
 
+    def get_client_ip(self) -> str:
+        """
+        Extract client IP: inspect self.headers.get('X-Forwarded-For') taking
+        the first comma-separated IP. If missing, fall back to self.client_address[0].
+        """
+        forwarded_for = self.headers.get("X-Forwarded-For", "")
+        if forwarded_for:
+            first_ip = forwarded_for.split(",")[0].strip()
+            if first_ip:
+                return first_ip
+        if hasattr(self, "client_address") and self.client_address:
+            return self.client_address[0]
+        return "127.0.0.1"
+
     def log_message(self, format, *args):
         print(f"[{time.strftime('%H:%M:%S')}] {format % args}")
 
@@ -418,7 +471,94 @@ class ApiRequestHandler(http.server.BaseHTTPRequestHandler):
             self.wfile.write(payload)
             return
 
-        # Route 4: Health Check /api/health
+        # Route 4: Admin /api/admin/pdf-proxy (Protected: Streaming Notice PDF Proxy Endpoint)
+        elif path == "/api/admin/pdf-proxy":
+            if not self.check_admin_auth():
+                self.send_unauthorized()
+                return
+
+            target_url = query_params.get("url", [""])[0].strip()
+            if not target_url:
+                err = json.dumps({"error": "Missing 'url' query parameter."}).encode("utf-8")
+                self.send_response(400)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.send_header("Content-Length", str(len(err)))
+                self.send_cors_headers()
+                self.end_headers()
+                self.wfile.write(err)
+                return
+
+            parsed_target = urllib.parse.urlparse(target_url)
+            if parsed_target.scheme.lower() not in ("http", "https") or not parsed_target.netloc:
+                err = json.dumps({
+                    "error": "Invalid URL scheme or format. Only http and https URLs are permitted."
+                }).encode("utf-8")
+                self.send_response(400)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.send_header("Content-Length", str(len(err)))
+                self.send_cors_headers()
+                self.end_headers()
+                self.wfile.write(err)
+                return
+
+            req = urllib.request.Request(
+                target_url,
+                headers={
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                    "Accept": "application/pdf,application/octet-stream,*/*",
+                }
+            )
+
+            try:
+                with urllib.request.urlopen(req, timeout=10) as resp:
+                    pdf_bytes = resp.read()
+                    self.send_response(200)
+                    self.send_header("Content-Type", "application/pdf")
+                    self.send_header("Content-Disposition", "inline; filename=\"auction_notice.pdf\"")
+                    self.send_header("Content-Length", str(len(pdf_bytes)))
+                    self.send_cors_headers()
+                    self.end_headers()
+                    self.wfile.write(pdf_bytes)
+                    return
+            except urllib.error.HTTPError as e:
+                status_code = e.code if e.code in (400, 401, 403, 404, 410, 500, 502, 503) else 502
+                err = json.dumps({
+                    "error": f"Remote server returned HTTP {e.code}: {e.reason}",
+                    "status_code": e.code
+                }).encode("utf-8")
+                self.send_response(status_code)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.send_header("Content-Length", str(len(err)))
+                self.send_cors_headers()
+                self.end_headers()
+                self.wfile.write(err)
+                return
+            except (urllib.error.URLError, TimeoutError, socket.timeout) as e:
+                is_timeout = isinstance(e, (TimeoutError, socket.timeout)) or "timed out" in str(e).lower()
+                status_code = 504 if is_timeout else 502
+                err = json.dumps({
+                    "error": "Remote PDF fetch timed out after 10 seconds." if is_timeout else f"Failed to connect to remote PDF host: {e}"
+                }).encode("utf-8")
+                self.send_response(status_code)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.send_header("Content-Length", str(len(err)))
+                self.send_cors_headers()
+                self.end_headers()
+                self.wfile.write(err)
+                return
+            except Exception as e:
+                err = json.dumps({
+                    "error": f"Unexpected error streaming PDF: {str(e)}"
+                }).encode("utf-8")
+                self.send_response(500)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.send_header("Content-Length", str(len(err)))
+                self.send_cors_headers()
+                self.end_headers()
+                self.wfile.write(err)
+                return
+
+        # Route 5: Health Check /api/health
         elif path == "/api/health" or path == "/":
             with _crawler_lock:
                 crawling = _crawler_running
@@ -506,6 +646,20 @@ class ApiRequestHandler(http.server.BaseHTTPRequestHandler):
 
         # Route: POST /api/contact (Public customer inquiry from "Contact" button)
         elif self.path == "/api/contact":
+            client_ip = self.get_client_ip()
+            if not check_contact_rate_limit(client_ip, limit=15, window_seconds=60, prune_seconds=120):
+                err_payload = json.dumps({
+                    "error": "Rate limit exceeded. Please wait 60 seconds."
+                }).encode("utf-8")
+                self.send_response(429)
+                self.send_header("Content-Type", "application/json; charset=utf-8")
+                self.send_header("Content-Length", str(len(err_payload)))
+                self.send_header("Retry-After", "60")
+                self.send_cors_headers()
+                self.end_headers()
+                self.wfile.write(err_payload)
+                return
+
             try:
                 body = json.loads(post_data.decode("utf-8"))
             except Exception:
@@ -524,6 +678,7 @@ class ApiRequestHandler(http.server.BaseHTTPRequestHandler):
 
             payload = json.dumps({
                 "status": "success",
+                "leadId": saved.get("id"),
                 "message": "Inquiry recorded successfully. Assigned to auction desk.",
                 "lead": saved
             }).encode("utf-8")
@@ -638,6 +793,7 @@ def main():
         print(f"Public API     : http://127.0.0.1:{PORT}/api/auctions (Verified only)")
         print(f"Admin API      : http://127.0.0.1:{PORT}/api/admin/properties (Protected)")
         print(f"Leads API      : http://127.0.0.1:{PORT}/api/admin/leads (Protected)")
+        print(f"PDF Proxy      : http://127.0.0.1:{PORT}/api/admin/pdf-proxy (Protected)")
         print(f"CORS           : Enabled (Supports separate frontend hosting)")
         print("=" * 65)
         try:

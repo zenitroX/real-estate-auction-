@@ -4,7 +4,6 @@ import Footer from './components/Footer';
 import SearchOverlay from './components/SearchOverlay';
 import ToastContainer from './components/Toast';
 import ContactModal from './components/Modals/ContactModal';
-import BiddingModal from './components/Modals/BiddingModal';
 import AuthModal from './components/Modals/AuthModal';
 import SiteVisitModal from './components/Modals/SiteVisitModal';
 import ShareModal from './components/Modals/ShareModal';
@@ -16,8 +15,9 @@ import AuctionsView from './views/AuctionsView';
 import ServicesView from './views/ServicesView';
 import AboutView from './views/AboutView';
 import DashboardView from './views/DashboardView';
-import AdminView from './views/AdminView';
-import AdminLoginView from './views/AdminLoginView';
+
+const AdminView = React.lazy(() => import('./views/AdminView'));
+const AdminLoginView = React.lazy(() => import('./views/AdminLoginView'));
 
 import { INITIAL_PROPERTIES, formatPriceShort } from './data/propertiesData';
 import {
@@ -32,6 +32,7 @@ import {
   submitLeadApi,
   verifyPropertyApi,
   triggerScrapeApi,
+  flushOfflineLeads,
 } from './data/api';
 import { isSubdomainAdmin, isLocalDev } from './utils/domain';
 
@@ -84,7 +85,6 @@ export default function App() {
   const [authModalMode, setAuthModalMode] = useState(null); // null | 'login' | 'register'
   const [contactTarget, setContactTarget] = useState(null);
   const [contactInitialType, setContactInitialType] = useState('Site Inspection');
-  const [bidTarget, setBidTarget] = useState(null);
   const [siteVisitTarget, setSiteVisitTarget] = useState(null);
   const [shareTarget, setShareTarget] = useState(null);
 
@@ -115,6 +115,19 @@ export default function App() {
       }
     });
   }, [addToast]);
+
+  // Listen for network reconnect & tab focus to flush offline leads
+  useEffect(() => {
+    const handleSync = () => {
+      flushOfflineLeads();
+    };
+    window.addEventListener('online', handleSync);
+    window.addEventListener('focus', handleSync);
+    return () => {
+      window.removeEventListener('online', handleSync);
+      window.removeEventListener('focus', handleSync);
+    };
+  }, []);
 
   // Hash route & subdomain listener
   useEffect(() => {
@@ -190,6 +203,7 @@ export default function App() {
 
   // Admin Actions
   const handleVerifyProperty = async (id, updatedFields = {}) => {
+    const previousProperties = properties;
     setProperties((prev) =>
       prev.map((p) => {
         if (p.id === id) {
@@ -205,16 +219,30 @@ export default function App() {
       })
     );
 
-    await verifyPropertyApi(id, 'PUBLISHED', updatedFields);
-
-    addToast(
-      'Listing Verified & Published!',
-      'Asset is now visible to customers on the public marketplace with the green Verified badge.',
-      'success'
-    );
+    try {
+      await verifyPropertyApi(id, 'PUBLISHED', updatedFields);
+      addToast(
+        'Listing Verified & Published!',
+        'Asset is now visible to customers on the public marketplace with the green Verified badge.',
+        'success'
+      );
+    } catch (err) {
+      setProperties(previousProperties);
+      addToast(
+        'Verification Failed',
+        err.status === 401
+          ? 'Admin session expired or unauthorized. Please log in again.'
+          : (err.message || 'Failed to verify property on server.'),
+        'error'
+      );
+      if (err.status === 401) {
+        handleAdminLogout();
+      }
+    }
   };
 
   const handleRejectProperty = async (id) => {
+    const previousProperties = properties;
     setProperties((prev) =>
       prev.map((p) => {
         if (p.id === id) {
@@ -228,13 +256,26 @@ export default function App() {
       })
     );
 
-    await verifyPropertyApi(id, 'REJECTED');
-
-    addToast(
-      'Listing Rejected',
-      'The property notice has been removed from the public pipeline.',
-      'info'
-    );
+    try {
+      await verifyPropertyApi(id, 'REJECTED');
+      addToast(
+        'Listing Rejected',
+        'The property notice has been removed from the public pipeline.',
+        'info'
+      );
+    } catch (err) {
+      setProperties(previousProperties);
+      addToast(
+        'Rejection Failed',
+        err.status === 401
+          ? 'Admin session expired or unauthorized. Please log in again.'
+          : (err.message || 'Failed to reject property on server.'),
+        'error'
+      );
+      if (err.status === 401) {
+        handleAdminLogout();
+      }
+    }
   };
 
   const handleTriggerScrape = async () => {
@@ -322,22 +363,6 @@ export default function App() {
     handleOpenContact(property, 'Site Inspection');
   };
 
-  const handleSubmitBid = (property, amount) => {
-    setMyBids((prev) => ({
-      ...prev,
-      [property.id]: {
-        amount,
-        timestamp: Date.now(),
-        status: 'Leading',
-      },
-    }));
-    addToast(
-      'Bid Recorded!',
-      `Bid of ${formatPriceShort(amount)} submitted on ${property.title}.`,
-      'success'
-    );
-  };
-
   const currentProperty =
     properties.find((p) => p.id === selectedPropertyId) || properties[0];
 
@@ -349,17 +374,45 @@ export default function App() {
   if (isAdminPortal && !adminSession) {
     return (
       <div className="app-root">
-        <AdminLoginView
-          onLoginSuccess={(session) => {
-            setAdminSession(session);
-            addToast('Admin Authenticated', `Welcome back, ${session.name}.`, 'success');
-          }}
-          onReturnToCustomer={() => {
-            setViewMode('customer');
-            setIsSubdomainMode(false);
-            window.location.hash = '';
-          }}
-        />
+        <React.Suspense
+          fallback={
+            <div
+              className="view-loading"
+              style={{
+                minHeight: '60vh',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#94A3B8',
+              }}
+            >
+              Loading Admin Desk...
+            </div>
+          }
+        >
+          <AdminLoginView
+            onLoginSuccess={(tokenOrSession, maybeUser) => {
+              const session =
+                typeof tokenOrSession === 'string'
+                  ? {
+                      token: tokenOrSession,
+                      name: maybeUser?.name || 'Chief Auction Officer',
+                      email: maybeUser?.email || 'admin@skandx.com',
+                      role: maybeUser?.role || 'SUPER_ADMIN',
+                      loginTime: Date.now(),
+                    }
+                  : tokenOrSession;
+              sessionStorage.setItem('skandx_admin_session', JSON.stringify(session));
+              setAdminSession(session);
+              addToast('Admin Authenticated', `Welcome back, ${session.name || 'Admin'}.`, 'success');
+            }}
+            onReturnToCustomer={() => {
+              setViewMode('customer');
+              setIsSubdomainMode(false);
+              window.location.hash = '';
+            }}
+          />
+        </React.Suspense>
         <ToastContainer toasts={toasts} onDismiss={dismissToast} />
       </div>
     );
@@ -397,28 +450,45 @@ export default function App() {
       {/* Main View Router */}
       <main id="main">
         {isAdminPortal ? (
-          <AdminView
-            properties={properties}
-            leads={leads}
-            onVerifyProperty={handleVerifyProperty}
-            onRejectProperty={handleRejectProperty}
-            onTriggerScrape={handleTriggerScrape}
-            onViewProperty={(id) => {
-              setViewMode('customer');
-              setIsSubdomainMode(false);
-              handleViewProperty(id);
-            }}
-            onUpdateLeadStatus={handleUpdateLeadStatus}
-            adminSession={adminSession}
-            onAdminLogout={handleAdminLogout}
-            onSwitchToCustomer={() => {
-              setViewMode('customer');
-              setIsSubdomainMode(false);
-              window.location.hash = '';
-            }}
-            activeTab={adminActiveTab}
-            setActiveTab={setAdminActiveTab}
-          />
+          <React.Suspense
+            fallback={
+              <div
+                className="view-loading"
+                style={{
+                  minHeight: '60vh',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#94A3B8',
+                }}
+              >
+                Loading Admin Desk...
+              </div>
+            }
+          >
+            <AdminView
+              properties={properties}
+              leads={leads}
+              onVerifyProperty={handleVerifyProperty}
+              onRejectProperty={handleRejectProperty}
+              onTriggerScrape={handleTriggerScrape}
+              onViewProperty={(id) => {
+                setViewMode('customer');
+                setIsSubdomainMode(false);
+                handleViewProperty(id);
+              }}
+              onUpdateLeadStatus={handleUpdateLeadStatus}
+              adminSession={adminSession}
+              onAdminLogout={handleAdminLogout}
+              onSwitchToCustomer={() => {
+                setViewMode('customer');
+                setIsSubdomainMode(false);
+                window.location.hash = '';
+              }}
+              activeTab={adminActiveTab}
+              setActiveTab={setAdminActiveTab}
+            />
+          </React.Suspense>
         ) : (
           <>
             {activePage === 'home' && (
@@ -493,7 +563,6 @@ export default function App() {
                 onNavigate={(p) => navigateTo(p)}
                 onViewProperty={handleViewProperty}
                 onContact={handleOpenContact}
-                onBidProperty={handleOpenContact}
                 onToggleWishlist={handleToggleWishlist}
                 onMarkAllNotificationsRead={() => {
                   setNotifications((prev) => prev.map((n) => ({ ...n, unread: false })));
@@ -537,15 +606,6 @@ export default function App() {
         currentUser={user}
         initialInquiryType={contactInitialType}
         onSubmitContact={handleSubmitContact}
-      />
-
-      {/* Secondary Bidding Modal if ever accessed */}
-      <BiddingModal
-        isOpen={Boolean(bidTarget)}
-        onClose={() => setBidTarget(null)}
-        property={bidTarget}
-        currentHighestBid={bidTarget ? (myBids[bidTarget.id]?.amount || bidTarget.reserve) : 0}
-        onSubmitBid={handleSubmitBid}
       />
 
       <AuthModal

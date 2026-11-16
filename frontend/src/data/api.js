@@ -1,9 +1,9 @@
 import { INITIAL_PROPERTIES, GALLERY_POOL } from './propertiesData';
 
 // Support external backend URL when frontend is hosted separately (e.g. Vercel -> Render)
-const API_BASE = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
+export const API_BASE = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
 
-function getAdminAuthHeader() {
+export function getAdminAuthHeader() {
   try {
     const sess = sessionStorage.getItem('skandx_admin_session');
     if (sess) {
@@ -140,22 +140,23 @@ export async function flushOfflineLeads() {
 /**
  * Admin: Authenticate for admin.skandx.com portal
  */
-export async function adminLoginApi(email, password) {
-  try {
-    const res = await fetch(`${API_BASE}/api/admin/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    });
-    return await res.json();
-  } catch (err) {
-    console.error('[Admin Login API Connection Error]:', err);
-    return {
-      status: 'error',
-      message: 'Authentication server unreachable. Please verify network connection or wait for backend to wake up.',
-    };
+export async function loginAdminApi(email, password) {
+  const res = await fetch(`${API_BASE}/api/admin/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const error = new Error(data.message || data.error || `HTTP ${res.status}`);
+    error.status = res.status;
+    error.data = data;
+    throw error;
   }
+  return data;
 }
+
+export const adminLoginApi = loginAdminApi;
 
 /**
  * Submit customer inquiry (lead) from "Contact" button with zero data loss guarantee
@@ -186,20 +187,22 @@ export async function submitLeadApi(leadData) {
  * Admin: Verify and publish or reject a scraped property with updated fields
  */
 export async function verifyPropertyApi(id, status = 'PUBLISHED', updatedFields = {}) {
-  try {
-    const res = await fetch(`${API_BASE}/api/admin/properties/verify`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...getAdminAuthHeader(),
-      },
-      body: JSON.stringify({ id, status, ...updatedFields }),
-    });
-    return await res.json();
-  } catch (err) {
-    console.warn('[Verify API Error]: Fallback to local state', err);
-    return { status: 'success', local: true };
+  const res = await fetch(`${API_BASE}/api/admin/properties/verify`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...getAdminAuthHeader(),
+    },
+    body: JSON.stringify({ id, status, ...updatedFields }),
+  });
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    const error = new Error(errData.message || errData.error || `HTTP ${res.status}`);
+    error.status = res.status;
+    error.data = errData;
+    throw error;
   }
+  return await res.json();
 }
 
 /**
