@@ -115,30 +115,49 @@ Aligned with [backend/ingestion/database/supabase_client.py](file:///c:/Users/ra
 | `created_at` | `TIMESTAMPTZ` | DEFAULT `NOW()` | Ingestion timestamp. |
 
 ```sql
--- DDL Migration: 001_create_auction_properties.sql
+-- DDL Migration: 001_create_auction_properties.sql (Complete Production Schema)
 CREATE TABLE IF NOT EXISTS auction_properties (
     id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
-    property_title TEXT NOT NULL,
+    property_title TEXT DEFAULT 'Bank Foreclosure Asset',
     bank_name TEXT NOT NULL,
     branch_name TEXT,
-    reserve_price_inr NUMERIC(14,2) NOT NULL,
-    emd_amount_inr NUMERIC(14,2) NOT NULL,
-    auction_date TIMESTAMPTZ NOT NULL,
-    emd_last_date TIMESTAMPTZ,
+    borrower_name TEXT,
+    asset_category TEXT DEFAULT 'OTHER',
     possession_type TEXT NOT NULL DEFAULT 'PHYSICAL',
-    area_sqft NUMERIC(10,2),
+    survey_numbers JSONB DEFAULT '[]'::JSONB,
+    patta_or_door_no TEXT,
     village_or_locality TEXT NOT NULL,
-    state TEXT NOT NULL,
+    taluk TEXT,
+    district TEXT,
+    state TEXT NOT NULL DEFAULT 'Tamil Nadu',
+    pincode TEXT,
+    area_description TEXT,
+    area_sqft NUMERIC(10,2),
+    boundaries JSONB,
+    reserve_price_inr NUMERIC(14,2) NOT NULL,
+    previous_reserve_price_inr NUMERIC(14,2),
+    price_drop_percentage NUMERIC(5,2) DEFAULT 0.0,
+    emd_amount_inr NUMERIC(14,2) NOT NULL,
+    bid_increment_inr NUMERIC(14,2),
+    emd_last_date TIMESTAMPTZ,
+    inspection_date_info TEXT,
+    auction_date TIMESTAMPTZ NOT NULL,
+    authorized_officer_name TEXT,
+    contact_phone TEXT,
+    source_portal TEXT,
+    source_pdf_url TEXT,
+    bidding_portal_url TEXT,
     auction_event_hash TEXT UNIQUE,
     asset_fingerprint TEXT NOT NULL,
-    source_pdf_url TEXT,
-    price_drop_percentage NUMERIC(5,2) DEFAULT 0.0,
     review_status TEXT NOT NULL DEFAULT 'NEEDS_MANUAL_REVIEW',
+    review_notes TEXT,
+    raw_extracted_json JSONB,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE INDEX IF NOT EXISTS idx_auction_properties_status ON auction_properties (review_status);
 CREATE INDEX IF NOT EXISTS idx_auction_properties_fingerprint ON auction_properties (asset_fingerprint);
+CREATE INDEX IF NOT EXISTS idx_auction_properties_event_hash ON auction_properties (auction_event_hash);
 
 -- Enable RLS & Public Read Policy
 ALTER TABLE auction_properties ENABLE ROW LEVEL SECURITY;
