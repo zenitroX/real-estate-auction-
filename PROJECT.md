@@ -86,6 +86,18 @@ Scraping and OCR workloads run asynchronously from user-facing REST request loop
 4. **Ingestion Engine Status**:
    - Monitors background ingestion status and dispatches asynchronous crawler sync batches.
 
+### 2.3 User Roles & Permission Matrix (Proposal Section 7)
+
+| Role | Primary Responsibility | Permissions & Access Scope |
+| :--- | :--- | :--- |
+| **Super Admin** | Overall control, users, roles, system settings, global approvals | Full system access: add/remove users, change roles, override verifications, access raw audit logs. |
+| **Property / Acquisition Team** | Source tracking and data collection | Trigger scrapers, upload tender notices, record bank source URLs and auction reference metadata. |
+| **Verification Officer** | Document and property verification | Review pending OCR records against original circular PDF, edit extracted fields, approve (`PUBLISHED`) or reject (`REJECTED`). |
+| **Legal Reviewer** | Legal due diligence and risk assessment | Add legal encumbrance notes, Section 14 CMM orders, title risk levels, and legal observations. |
+| **Field Executive** | Site inspection and ground reality check | Upload physical site visit photos, neighborhood notes, and verify possession status (Physical vs Symbolic). |
+| **Relationship / Buyer Team** | Customer inquiries and buyer concierge | View buyer leads, follow up via phone/WhatsApp, schedule site visits, track lead lifecycle (`NEW` $\rightarrow$ `CLOSED`). |
+| **Customer / Buyer** | Property discovery and assisted bidding guidance | Browse verified listings on `skandx.com`, use filters, download notice summaries, submit inquiries via Contact Desk. |
+
 ---
 
 ## 3. Data Models & Schema
@@ -200,6 +212,99 @@ CREATE INDEX IF NOT EXISTS idx_customer_leads_created ON customer_leads (created
 ALTER TABLE customer_leads ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Public Insert Leads" ON customer_leads FOR INSERT WITH CHECK (true);
 CREATE POLICY "Service Role Leads Access" ON customer_leads FOR ALL USING (auth.role() = 'service_role');
+```
+
+### 3.3 Table: `admin_users` and `property_audit_logs`
+Aligned with [backend/migrations/003_create_admin_roles_and_audit.sql](file:///c:/Users/rajkr/Documents/code-base/real%20estate/backend/migrations/003_create_admin_roles_and_audit.sql):
+
+```sql
+-- DDL Migration: 003_create_admin_roles_and_audit.sql
+CREATE TYPE admin_role_type AS ENUM (
+    'SUPER_ADMIN', 'ACQUISITION_TEAM', 'VERIFICATION_OFFICER',
+    'LEGAL_REVIEWER', 'FIELD_EXECUTIVE', 'RELATIONSHIP_TEAM'
+);
+
+CREATE TABLE IF NOT EXISTS admin_users (
+    id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
+    email TEXT UNIQUE NOT NULL,
+    full_name TEXT NOT NULL,
+    role admin_role_type NOT NULL DEFAULT 'VERIFICATION_OFFICER',
+    phone TEXT,
+    is_active BOOLEAN NOT NULL DEFAULT true,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS property_audit_logs (
+    id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::TEXT,
+    property_id TEXT NOT NULL REFERENCES auction_properties(id) ON DELETE CASCADE,
+    admin_id TEXT REFERENCES admin_users(id) ON DELETE SET NULL,
+    admin_email TEXT NOT NULL,
+    action TEXT NOT NULL,
+    changes JSONB,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+### 3.4 Entity-Relationship (ER) Diagram (Phase 1 Database Architecture)
+
+```mermaid
+erDiagram
+    AUCTION_PROPERTIES {
+        text id PK
+        text property_title
+        text bank_name
+        text branch_name
+        text borrower_name
+        text possession_type "PHYSICAL | SYMBOLIC"
+        numeric reserve_price_inr
+        numeric emd_amount_inr
+        timestamptz auction_date
+        timestamptz emd_last_date
+        text village_or_locality
+        text state
+        text auction_event_hash UK
+        text asset_fingerprint
+        text review_status "NEEDS_MANUAL_REVIEW | PUBLISHED | REJECTED"
+        text source_pdf_url
+        jsonb raw_extracted_json
+        timestamptz created_at
+    }
+
+    CUSTOMER_LEADS {
+        text id PK "e.g. #SK-8492"
+        text customer_name
+        text phone
+        text email
+        text property_id FK
+        text property_title
+        text inquiry_type "Site Inspection | Legal Pack | Notice"
+        text notes
+        text status "NEW | IN_REVIEW | SCHEDULED | CLOSED"
+        timestamptz created_at
+    }
+
+    ADMIN_USERS {
+        text id PK
+        text email UK
+        text full_name
+        enum role "SUPER_ADMIN | VERIFICATION_OFFICER | LEGAL_REVIEWER | FIELD_EXECUTIVE | RELATIONSHIP_TEAM"
+        boolean is_active
+        timestamptz created_at
+    }
+
+    PROPERTY_AUDIT_LOGS {
+        text id PK
+        text property_id FK
+        text admin_id FK
+        text admin_email
+        text action "VERIFY_AND_PUBLISH | REJECT | UPDATE_FIELDS"
+        jsonb changes
+        timestamptz created_at
+    }
+
+    AUCTION_PROPERTIES ||--o{ CUSTOMER_LEADS : "generates inquiries"
+    AUCTION_PROPERTIES ||--o{ PROPERTY_AUDIT_LOGS : "tracks changes"
+    ADMIN_USERS ||--o{ PROPERTY_AUDIT_LOGS : "executes verification actions"
 ```
 
 ---

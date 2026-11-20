@@ -146,11 +146,16 @@ export default function AdminView({
         {/* Admin Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, flexWrap: 'wrap', gap: 16 }}>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
               <span className="badge badge-gold" style={{ fontSize: '0.75rem' }}>
                 <ShieldCheck size={14} /> Back-Office Verification Desk
               </span>
-              <span style={{ fontSize: '0.8rem', color: '#64748B' }}>Authenticated Admin Session</span>
+              <span className="badge badge-green" style={{ fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                Role: {adminSession?.role || 'SUPER_ADMIN'}
+              </span>
+              <span style={{ fontSize: '0.8rem', color: '#64748B' }}>
+                {adminSession?.name || 'Chief Auction Officer'} ({adminSession?.email || 'admin@skandx.com'})
+              </span>
             </div>
             <h1 style={{ fontSize: '1.9rem', marginTop: 4 }}>SKANDX Admin Control Console</h1>
           </div>
