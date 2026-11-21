@@ -26,7 +26,7 @@ export default function Footer({ setActivePage }) {
             </span>
             <span className="brand-text">
               <span>
-                SKAN<span className="gold">DX</span>
+                SKAN<span className="gold">D<span className="brand-x">X</span></span>
               </span>
               <small>The Future of Property Auctions</small>
             </span>

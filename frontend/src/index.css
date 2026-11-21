@@ -339,7 +339,7 @@ h1, h2, h3, h4, h5, h6 {
 .brand-text {
   font-family: var(--font-head);
   font-weight: 800;
-  font-size: 1.4rem;
+  font-size: 1.48rem;
   color: #fff;
   letter-spacing: 1px;
   display: flex;
@@ -359,6 +359,15 @@ h1, h2, h3, h4, h5, h6 {
 
 .brand-text .gold {
   color: var(--gold);
+}
+
+.brand-x {
+  font-size: 1.38em;
+  font-weight: 900;
+  display: inline-block;
+  line-height: 0.9;
+  vertical-align: -0.03em;
+  margin-left: 0.5px;
 }
 
 .main-nav {

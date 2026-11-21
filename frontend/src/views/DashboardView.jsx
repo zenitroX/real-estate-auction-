@@ -92,7 +92,7 @@ export default function DashboardView({
           </span>
           <span className="brand-text" style={{ fontSize: '1.15rem' }}>
             <span>
-              SKAN<span className="gold">DX</span>
+              SKAN<span className="gold">D<span className="brand-x">X</span></span>
             </span>
             <small>Bidder Portal</small>
           </span>
