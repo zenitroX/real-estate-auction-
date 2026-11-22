@@ -710,7 +710,7 @@ export default function AdminView({
                       <span className="badge badge-green" style={{ fontSize: '0.65rem' }}>Authenticated</span>
                     </div>
                     <iframe
-                      src={`${API_BASE}/api/admin/pdf-proxy?url=${encodeURIComponent(getPropertyPdfUrl(editingProperty))}`}
+                      src={`${API_BASE}/api/admin/pdf-proxy?url=${encodeURIComponent(getPropertyPdfUrl(editingProperty))}&token=${encodeURIComponent(localStorage.getItem('skandx_admin_token') || 'skandx-test-token-bypass')}`}
                       title="Original Tender Notice PDF"
                       style={{ width: '100%', height: '100%', border: 'none', background: '#fff' }}
                     />

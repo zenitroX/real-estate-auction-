@@ -1,0 +1,35 @@
+# ==============================================================================
+# SKANDX Frontend .dockerignore
+# Exclude node_modules, build outputs, version control, and secrets
+# ==============================================================================
+
+# Node dependencies and build artifacts
+node_modules/
+dist/
+build/
+.vite/
+
+# Version control
+.git/
+.gitignore
+
+# CRITICAL SECURITY: Exclude local environment files
+.env
+.env.*
+*.env
+!.env.example
+
+# Editor & IDE configurations
+.vscode/
+.idea/
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*

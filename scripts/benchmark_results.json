@@ -1,0 +1,124 @@
+{
+  "health_check_concurrency": {
+    "c1": {
+      "total_requests": 100,
+      "concurrency": 1,
+      "duration_sec": 1.142,
+      "throughput_rps": 87.53,
+      "latency_p50_ms": 10.77,
+      "latency_p95_ms": 25.26,
+      "latency_p99_ms": 39.3,
+      "error_rate_pct": 0.0,
+      "status_distribution": {
+        "200": 100
+      }
+    },
+    "c10": {
+      "total_requests": 100,
+      "concurrency": 10,
+      "duration_sec": 0.758,
+      "throughput_rps": 131.87,
+      "latency_p50_ms": 14.43,
+      "latency_p95_ms": 505.06,
+      "latency_p99_ms": 530.32,
+      "error_rate_pct": 0.0,
+      "status_distribution": {
+        "200": 100
+      }
+    },
+    "c25": {
+      "total_requests": 100,
+      "concurrency": 25,
+      "duration_sec": 1.573,
+      "throughput_rps": 63.56,
+      "latency_p50_ms": 8.25,
+      "latency_p95_ms": 1056.77,
+      "latency_p99_ms": 1527.31,
+      "error_rate_pct": 0.0,
+      "status_distribution": {
+        "200": 100
+      }
+    },
+    "c50": {
+      "total_requests": 100,
+      "concurrency": 50,
+      "duration_sec": 1.615,
+      "throughput_rps": 61.92,
+      "latency_p50_ms": 23.39,
+      "latency_p95_ms": 1039.26,
+      "latency_p99_ms": 1542.36,
+      "error_rate_pct": 0.0,
+      "status_distribution": {
+        "200": 100
+      }
+    }
+  },
+  "auctions_cached": {
+    "c1": {
+      "total_requests": 75,
+      "concurrency": 1,
+      "duration_sec": 0.998,
+      "throughput_rps": 75.12,
+      "latency_p50_ms": 15.23,
+      "latency_p95_ms": 26.1,
+      "latency_p99_ms": 28.06,
+      "error_rate_pct": 0.0,
+      "status_distribution": {
+        "200": 75
+      }
+    },
+    "c10": {
+      "total_requests": 75,
+      "concurrency": 10,
+      "duration_sec": 0.532,
+      "throughput_rps": 140.85,
+      "latency_p50_ms": 8.96,
+      "latency_p95_ms": 508.64,
+      "latency_p99_ms": 518.46,
+      "error_rate_pct": 0.0,
+      "status_distribution": {
+        "200": 75
+      }
+    },
+    "c25": {
+      "total_requests": 75,
+      "concurrency": 25,
+      "duration_sec": 1.068,
+      "throughput_rps": 70.23,
+      "latency_p50_ms": 15.66,
+      "latency_p95_ms": 1014.31,
+      "latency_p99_ms": 1018.86,
+      "error_rate_pct": 0.0,
+      "status_distribution": {
+        "200": 75
+      }
+    }
+  },
+  "circuit_breaker_tripped_fallback": {
+    "total_requests": 50,
+    "concurrency": 10,
+    "duration_sec": 0.569,
+    "throughput_rps": 87.91,
+    "latency_p50_ms": 19.05,
+    "latency_p95_ms": 509.23,
+    "latency_p99_ms": 535.06,
+    "error_rate_pct": 0.0,
+    "status_distribution": {
+      "200": 50
+    }
+  },
+  "admin_login_rate_limiting": {
+    "total_requests": 20,
+    "concurrency": 5,
+    "duration_sec": 0.041,
+    "throughput_rps": 484.45,
+    "latency_p50_ms": 8.82,
+    "latency_p95_ms": 11.28,
+    "latency_p99_ms": 11.28,
+    "error_rate_pct": 0.0,
+    "status_distribution": {
+      "401": 5,
+      "429": 15
+    }
+  }
+}

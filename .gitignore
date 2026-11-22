@@ -25,3 +25,8 @@ dist/
 **/dist/
 .vite/
 
+# Runtime Data & Lead Logs
+backend/data/*.jsonl
+**/data/*.jsonl
+
+

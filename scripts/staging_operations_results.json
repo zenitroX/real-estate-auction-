@@ -1,0 +1,195 @@
+{
+  "timestamp": "2026-11-22T14:40:34Z",
+  "base_url": "http://127.0.0.1:64996",
+  "phase4_functional": {
+    "auction_listing": {
+      "status": "VERIFIED",
+      "http_code": 200,
+      "latency_ms": 86.8,
+      "item_count": 5
+    },
+    "auction_filtering": {
+      "status": "VERIFIED",
+      "http_code": 200,
+      "latency_ms": 2.32
+    },
+    "buyer_enquiry_submission": {
+      "status": "VERIFIED",
+      "http_code": 201,
+      "leadId": "lead-1795358434338",
+      "latency_ms": 24.9
+    },
+    "admin_login": {
+      "status": "VERIFIED",
+      "http_code": 200,
+      "token_prefix": "skandx-adm-...",
+      "latency_ms": 2.32
+    },
+    "admin_lead_management": {
+      "status": "VERIFIED",
+      "http_code": 200,
+      "retrieved_lead_found": true,
+      "total_leads": 40,
+      "latency_ms": 21.47
+    },
+    "property_verification": {
+      "status": "VERIFIED",
+      "http_code": 200,
+      "persisted_status": "PUBLISHED",
+      "latency_ms": 18.53
+    },
+    "offline_fallback_durability": {
+      "status": "VERIFIED",
+      "circuit_breaker_state": "OPEN",
+      "http_code": 201,
+      "leadId": "lead-1795358434400",
+      "latency_ms": 14.97
+    }
+  },
+  "phase5_security": {
+    "bypass_token_lockout": {
+      "status": "VERIFIED",
+      "http_code": 401,
+      "bypass_rejected": true
+    },
+    "admin_credential_protection": {
+      "status": "VERIFIED",
+      "http_code": 401
+    },
+    "admin_login_rate_limiting": {
+      "status": "VERIFIED",
+      "http_code": 429,
+      "retry_after_header": "60"
+    },
+    "ssrf_protection": {
+      "status": "VERIFIED",
+      "http_code": 400,
+      "internal_ip_blocked": true
+    },
+    "sensitive_endpoint_cache_headers": {
+      "status": "VERIFIED",
+      "cache_control": "no-store, no-cache, must-revalidate, private",
+      "pragma": "no-cache"
+    },
+    "payload_size_limit": {
+      "status": "VERIFIED",
+      "http_code": 413,
+      "payload_rejected_above_10mb": true
+    }
+  },
+  "phase6_recovery": {
+    "backup_generation": {
+      "status": "VERIFIED",
+      "backup_path": "C:\\Users\\rajkr\\Documents\\code-base\\real estate\\backend\\data\\leads_backup_1795358434.jsonl",
+      "backed_up_records": 41,
+      "size_bytes": 9211
+    },
+    "restore_verification": {
+      "status": "VERIFIED",
+      "restored_records": 41,
+      "integrity_checksum_match": true
+    },
+    "concurrent_submission": {
+      "status": "VERIFIED",
+      "total_requests": 10,
+      "success_201": 10,
+      "rate_limited_429": 0,
+      "zero_server_errors": true
+    },
+    "restart_persistence": {
+      "status": "VERIFIED",
+      "recovered_lead_count": 20,
+      "durability_confirmed": true
+    }
+  },
+  "phase6_performance": {
+    "health_check": {
+      "c1": {
+        "concurrency": 1,
+        "total_requests": 100,
+        "duration_sec": 0.887,
+        "throughput_rps": 112.78,
+        "latency_p50_ms": 3.62,
+        "latency_p95_ms": 22.99,
+        "latency_p99_ms": 28.14,
+        "error_rate_pct": 0.0,
+        "cpu_percent": 49.2,
+        "memory_rss_mb": 31.15
+      },
+      "c10": {
+        "concurrency": 10,
+        "total_requests": 100,
+        "duration_sec": 0.557,
+        "throughput_rps": 179.43,
+        "latency_p50_ms": 7.32,
+        "latency_p95_ms": 518.68,
+        "latency_p99_ms": 527.0,
+        "error_rate_pct": 0.0,
+        "cpu_percent": 36.1,
+        "memory_rss_mb": 31.54
+      },
+      "c25": {
+        "concurrency": 25,
+        "total_requests": 100,
+        "duration_sec": 0.631,
+        "throughput_rps": 158.44,
+        "latency_p50_ms": 19.38,
+        "latency_p95_ms": 517.77,
+        "latency_p99_ms": 521.0,
+        "error_rate_pct": 0.0,
+        "cpu_percent": 85.7,
+        "memory_rss_mb": 31.73
+      },
+      "c50": {
+        "concurrency": 50,
+        "total_requests": 100,
+        "duration_sec": 1.138,
+        "throughput_rps": 87.87,
+        "latency_p50_ms": 42.17,
+        "latency_p95_ms": 534.0,
+        "latency_p99_ms": 1013.16,
+        "error_rate_pct": 0.0,
+        "cpu_percent": 45.8,
+        "memory_rss_mb": 31.98
+      }
+    },
+    "cached_auctions": {
+      "c1": {
+        "concurrency": 1,
+        "total_requests": 75,
+        "duration_sec": 0.686,
+        "throughput_rps": 109.36,
+        "latency_p50_ms": 6.43,
+        "latency_p95_ms": 24.2,
+        "latency_p99_ms": 27.9,
+        "error_rate_pct": 0.0,
+        "cpu_percent": 81.8,
+        "memory_rss_mb": 31.82
+      },
+      "c10": {
+        "concurrency": 10,
+        "total_requests": 75,
+        "duration_sec": 0.589,
+        "throughput_rps": 127.44,
+        "latency_p50_ms": 30.02,
+        "latency_p95_ms": 510.7,
+        "latency_p99_ms": 528.59,
+        "error_rate_pct": 0.0,
+        "cpu_percent": 137.0,
+        "memory_rss_mb": 32.1
+      },
+      "c25": {
+        "concurrency": 25,
+        "total_requests": 75,
+        "duration_sec": 0.665,
+        "throughput_rps": 112.85,
+        "latency_p50_ms": 41.59,
+        "latency_p95_ms": 544.77,
+        "latency_p99_ms": 552.72,
+        "error_rate_pct": 0.0,
+        "cpu_percent": 90.7,
+        "memory_rss_mb": 32.21
+      }
+    }
+  }
+}

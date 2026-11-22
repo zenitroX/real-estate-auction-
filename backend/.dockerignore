@@ -1,0 +1,47 @@
+# ==============================================================================
+# SKANDX Backend .dockerignore
+# Exclude secrets, build artifacts, test suites, and temporary files from image
+# ==============================================================================
+
+# Git & Version Control
+.git
+.gitignore
+
+# Virtual Environments & Python Bytecode
+.venv
+venv
+env
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Test Suites & Caches (Keep production image clean of tests)
+tests/
+test_*.py
+validate_*.py
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Editor & IDE configurations
+.vscode
+.idea
+
+# CRITICAL SECURITY: Exclude all local secrets and environment files
+.env
+.env.*
+*.env
+!.env.example
+
+# Temporary and local runtime files
+tmp_notices/
+*.log
+*.tmp
+*.temp
+
+# Local SQLite databases / dumps if created locally
+*.sqlite
+*.sqlite3
+*.db

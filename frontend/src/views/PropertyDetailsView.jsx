@@ -47,19 +47,23 @@ export default function PropertyDetailsView({
   const [activeImageIndex, setActiveImageIndex] = useState(0);
 
   // Live countdown timer state
-  const [countdown, setCountdown] = useState(() => timeRemaining(property.auctionEnd));
+  const [countdown, setCountdown] = useState(() =>
+    timeRemaining(property?.auctionEnd || Date.now() + 86400000)
+  );
 
   useEffect(() => {
+    if (!property?.id) return;
     setActiveImageIndex(0);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [property.id]);
+  }, [property?.id]);
 
   useEffect(() => {
+    if (!property?.auctionEnd) return;
     const timer = setInterval(() => {
       setCountdown(timeRemaining(property.auctionEnd));
     }, 1000);
     return () => clearInterval(timer);
-  }, [property.auctionEnd]);
+  }, [property?.auctionEnd]);
 
   const isWishlisted = wishlist.includes(property.id);
   const images = property.images && property.images.length > 0 ? property.images : ['./placeholder.svg'];

@@ -1,0 +1,92 @@
+name: CI / CD Pipeline
+
+'on':
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+# Cancel previous in-progress runs on the same branch or PR when a new commit is pushed
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  backend-tests:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    env:
+      ADMIN_JWT_SECRET: ci-test-secret-key-32chars-minimum!
+      TESTING_MODE: "false"
+      PYTHONPATH: ".:backend:backend/ingestion"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+
+      - name: Install Playwright Chromium headless dependencies
+        run: |
+          playwright install chromium --with-deps
+
+      - name: Run backend security tests
+        run: |
+          pytest backend/test_app_security.py -v
+
+      - name: Run ingestion pipeline tests
+        run: |
+          pytest backend/ingestion/tests/test_pipeline.py -v
+
+  frontend-build:
+    name: Frontend Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies and build frontend
+        run: |
+          cd frontend
+          npm ci
+          npm run build
+
+  docker-lint-build:
+    name: Docker Lint & Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        run: |
+          docker build -t skandx-backend:ci backend/

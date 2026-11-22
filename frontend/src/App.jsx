@@ -22,7 +22,6 @@ const AdminLoginView = React.lazy(() => import('./views/AdminLoginView'));
 import { INITIAL_PROPERTIES, formatPriceShort } from './data/propertiesData';
 import {
   INITIAL_USER,
-  INITIAL_BIDS,
   INITIAL_WISHLIST,
   INITIAL_NOTIFICATIONS,
   INITIAL_LEADS,
@@ -80,7 +79,6 @@ export default function App() {
 
   // User state
   const [user, setUser] = useState(INITIAL_USER);
-  const [myBids, setMyBids] = useState(INITIAL_BIDS);
   const [wishlist, setWishlist] = useState(INITIAL_WISHLIST);
   const [notifications, setNotifications] = useState(INITIAL_NOTIFICATIONS);
 
@@ -559,7 +557,6 @@ export default function App() {
             {activePage === 'dashboard' && (
               <DashboardView
                 user={user}
-                myBids={myBids}
                 wishlist={wishlist}
                 notifications={notifications}
                 properties={properties}

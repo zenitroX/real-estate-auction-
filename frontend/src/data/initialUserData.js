@@ -12,15 +12,6 @@ export const INITIAL_USER = {
 };
 
 // Seeded bids matching screenshot:
-// 1. Independent House (3 BHK) -> Reserve ₹ 78.00 Lakhs, My Bid ₹ 80.50 Lakhs
-// 2. Apartment (2 BHK) -> Reserve ₹ 52.00 Lakhs, My Bid ₹ 53.00 Lakhs
-// 3. Residential Plot -> Reserve ₹ 36.00 Lakhs, My Bid ₹ 36.50 Lakhs
-export const INITIAL_BIDS = {
-  p1: { amount: 8050000, timestamp: Date.now() - 1000 * 60 * 45, status: 'Leading' },
-  p3: { amount: 5300000, timestamp: Date.now() - 1000 * 60 * 180, status: 'Leading' },
-  p4: { amount: 3650000, timestamp: Date.now() - 1000 * 60 * 720, status: 'Outbid' },
-};
-
 export const INITIAL_WISHLIST = ['p1', 'p2', 'p3', 'p4', 'p5'];
 
 export const INITIAL_NOTIFICATIONS = [

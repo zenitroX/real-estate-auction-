@@ -17,24 +17,29 @@ export default function PropertiesView({
   // Available banks
   const availableBanks = ['Canara Bank', 'SBI', 'ICICI Bank', 'Others'];
 
-  // Calculate dynamic counts
+  // Calculate dynamic counts from real properties inventory
   const typeCounts = useMemo(() => {
-    return {
-      residential: 312,
-      commercial: 128,
-      land: 246,
-      industrial: 37,
-    };
-  }, []);
+    const counts = { residential: 0, commercial: 0, land: 0, industrial: 0 };
+    (properties || []).forEach((p) => {
+      const t = (p.type || '').toLowerCase();
+      if (counts[t] !== undefined) {
+        counts[t] += 1;
+      }
+    });
+    return counts;
+  }, [properties]);
 
   const bankCounts = useMemo(() => {
-    return {
-      'Canara Bank': 86,
-      SBI: 124,
-      'ICICI Bank': 92,
-      Others: 421,
-    };
-  }, []);
+    const counts = { 'Canara Bank': 0, SBI: 0, 'ICICI Bank': 0, Others: 0 };
+    (properties || []).forEach((p) => {
+      const b = p.bank || '';
+      if (b.includes('Canara')) counts['Canara Bank'] += 1;
+      else if (b.includes('State Bank') || b.includes('SBI')) counts['SBI'] += 1;
+      else if (b.includes('ICICI')) counts['ICICI Bank'] += 1;
+      else counts['Others'] += 1;
+    });
+    return counts;
+  }, [properties]);
 
   // Filter and sort verified published properties for public customers
   const filteredProperties = useMemo(() => {

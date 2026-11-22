@@ -34,7 +34,7 @@ export default function AuctionsView({
             Live <span className="gold">E-Auctions</span>
           </h1>
           <p>
-            Bid in real time on bank-owned assets under SARFAESI & DRT recovery. All reserve prices are statutory published, and bidding histories are recorded transparently.
+            Discover and review bank-owned assets under SARFAESI & DRT recovery. All reserve prices are statutory published, and our concierge desk provides assisted bidding on official bank portals.
           </p>
           <div className="auc-chips">
             <span className="chip">

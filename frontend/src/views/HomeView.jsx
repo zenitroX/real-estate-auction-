@@ -34,12 +34,15 @@ export default function HomeView({
   const [budgetInput, setBudgetInput] = useState('all');
 
   // Next E-Auction Ends Live Countdown for Hero Floating Card (Property p2)
-  const heroProperty = properties.find((p) => p.id === 'p2') || properties[0];
-  const [heroCountdown, setHeroCountdown] = useState(() => timeRemaining(heroProperty.auctionEnd));
+  const heroProperty = properties.find((p) => p.id === 'p2') || properties[0] || null;
+  const [heroCountdown, setHeroCountdown] = useState(() =>
+    timeRemaining(heroProperty?.auctionEnd || Date.now() + 86400000)
+  );
 
   useEffect(() => {
+    if (!heroProperty) return;
     const timer = setInterval(() => {
-      setHeroCountdown(timeRemaining(heroProperty.auctionEnd));
+      setHeroCountdown(timeRemaining(heroProperty?.auctionEnd || Date.now() + 86400000));
     }, 1000);
     return () => clearInterval(timer);
   }, [heroProperty]);
@@ -117,15 +120,17 @@ export default function HomeView({
                 alt="Luxury modern villa and auction asset"
                 loading="eager"
               />
-              <div className="hero-float-card">
-                <span className="hfc-label">Next E-Auction Ends In</span>
-                <strong className="hfc-count">
-                  {heroCountdown.d}d {pad2(heroCountdown.h)}h {pad2(heroCountdown.m)}m {pad2(heroCountdown.s)}s
-                </strong>
-                <span className="hfc-prop">
-                  {heroProperty.title} &middot; {heroProperty.locality}
-                </span>
-              </div>
+              {heroProperty && (
+                <div className="hero-float-card">
+                  <span className="hfc-label">Next E-Auction Ends In</span>
+                  <strong className="hfc-count">
+                    {heroCountdown.d}d {pad2(heroCountdown.h)}h {pad2(heroCountdown.m)}m {pad2(heroCountdown.s)}s
+                  </strong>
+                  <span className="hfc-prop">
+                    {heroProperty.title} &middot; {heroProperty.locality}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </div>

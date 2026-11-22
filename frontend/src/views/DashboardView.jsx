@@ -31,14 +31,12 @@ import { FAQS } from '../data/initialUserData';
 
 export default function DashboardView({
   user,
-  myBids = {},
   wishlist = [],
   notifications = [],
   properties = [],
   onNavigate,
   onViewProperty,
   onContact,
-  onBidProperty,
   onToggleWishlist,
   onMarkAllNotificationsRead,
   onUpdateProfile,

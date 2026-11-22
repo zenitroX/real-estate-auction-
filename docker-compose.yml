@@ -1,0 +1,51 @@
+# ==============================================================================
+# SKANDX Architecture - Production Docker Compose Orchestration
+# ==============================================================================
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: skandx-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - PYTHONUNBUFFERED=1
+      - PYTHONDONTWRITEBYTECODE=1
+      - SUPABASE_URL=${SUPABASE_URL:-}
+      - SUPABASE_KEY=${SUPABASE_KEY:-}
+      - SCRAPER_API_KEY=${SCRAPER_API_KEY:-}
+      - SCRAPER_PROXY_URL=${SCRAPER_PROXY_URL:-}
+      - ADMIN_API_KEY=${ADMIN_API_KEY:-}
+      - ENCRYPTION_SECRET=${ENCRYPTION_SECRET:-}
+      - AUDIT_SIGNING_KEY=${AUDIT_SIGNING_KEY:-}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=4)"]
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - skandx-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: skandx-frontend
+    ports:
+      # Host :3000 maps to unprivileged container Nginx :8080
+      - "3000:8080"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - skandx-network
+
+networks:
+  skandx-network:
+    driver: bridge
