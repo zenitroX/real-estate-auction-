@@ -1,7 +1,7 @@
 import { INITIAL_PROPERTIES, GALLERY_POOL } from './propertiesData';
 
 // Support external backend URL when frontend is hosted separately (e.g. Vercel -> Render)
-export const API_BASE = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
+export const API_BASE = (import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || '').replace(/\/+$/, '');
 
 export function getAdminAuthHeader() {
   try {
