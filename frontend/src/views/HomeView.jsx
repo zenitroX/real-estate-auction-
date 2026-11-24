@@ -15,9 +15,303 @@ import {
   Clock,
   UserCheck,
   KeyRound,
+  ChevronRight,
 } from 'lucide-react';
-import PropertyCard from '../components/PropertyCard';
-import { timeRemaining, pad2 } from '../data/propertiesData';
+import { timeRemaining, pad2, formatPriceShort, typeLabel } from '../data/propertiesData';
+
+const CITIES = [
+  {
+    name: 'Chennai',
+    img: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?w=400&q=80',
+    state: 'Tamil Nadu',
+    count: 42,
+  },
+  {
+    name: 'Kolkata',
+    img: 'https://images.unsplash.com/photo-1558431382-27e303142255?w=400&q=80',
+    state: 'West Bengal',
+    count: 28,
+  },
+  {
+    name: 'Bengaluru',
+    img: 'https://images.unsplash.com/photo-1529253355930-ddbe423a2ac7?w=400&q=80',
+    state: 'Karnataka',
+    count: 56,
+  },
+  {
+    name: 'Mumbai',
+    img: 'https://images.unsplash.com/photo-1529253355930-ddbe423a2ac7?w=400&q=80&sig=2',
+    state: 'Maharashtra',
+    count: 74,
+  },
+  {
+    name: 'Hyderabad',
+    img: 'https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=400&q=80',
+    state: 'Telangana',
+    count: 33,
+  },
+  {
+    name: 'Pune',
+    img: 'https://images.unsplash.com/photo-1587474260584-136574528ed5?w=400&q=80',
+    state: 'Maharashtra',
+    count: 21,
+  },
+  {
+    name: 'Delhi NCR',
+    img: 'https://images.unsplash.com/photo-1587474260584-136574528ed5?w=400&q=80&sig=2',
+    state: 'Delhi',
+    count: 61,
+  },
+  {
+    name: 'Ahmedabad',
+    img: 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=400&q=80',
+    state: 'Gujarat',
+    count: 19,
+  },
+];
+
+function ExploreByCitySection({ onNavigate }) {
+  const [activeTab, setActiveTab] = useState('property');
+
+  return (
+    <section className="section ebc-section">
+      <div className="container">
+        {/* Header */}
+        <div className="ebc-header">
+          <h2 className="ebc-heading">Explore by <span className="gold">City</span></h2>
+          <div className="ebc-toggle">
+            <button
+              className={`ebc-tab ${activeTab === 'property' ? 'active' : ''}`}
+              onClick={() => setActiveTab('property')}
+            >
+              Property
+            </button>
+            <button
+              className={`ebc-tab ${activeTab === 'movable' ? 'active' : ''}`}
+              onClick={() => setActiveTab('movable')}
+            >
+              Movable Asset
+            </button>
+          </div>
+        </div>
+
+        {/* City grid */}
+        <div className="ebc-grid">
+          {CITIES.map((city) => (
+            <button
+              key={city.name}
+              className="ebc-city-card"
+              onClick={() => onNavigate('properties')}
+              aria-label={`Browse ${activeTab === 'property' ? 'properties' : 'movable assets'} in ${city.name}`}
+            >
+              <div className="ebc-img-wrap">
+                <img
+                  src={city.img}
+                  alt={city.name}
+                  loading="lazy"
+                  onError={(e) => {
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = `https://source.unsplash.com/400x260/?${city.name},landmark`;
+                  }}
+                />
+                <span className="ebc-count">{city.count}+ listings</span>
+              </div>
+              <span className="ebc-city-name">{city.name}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* See All */}
+        <div className="ebc-footer">
+          <button className="ebc-see-all" onClick={() => onNavigate('properties')}>
+            See All <ArrowRight size={15} />
+          </button>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+const ASSET_CATEGORIES = [
+  {
+    count: '56152',
+    name: 'Residential',
+    typeKey: 'residential',
+    img: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=600&q=80',
+  },
+  {
+    count: '8257',
+    name: 'Commercial',
+    typeKey: 'commercial',
+    img: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=600&q=80',
+  },
+  {
+    count: '398',
+    name: 'Agricultural',
+    typeKey: 'land',
+    img: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=600&q=80',
+  },
+  {
+    count: '4122',
+    name: 'Industrial',
+    typeKey: 'industrial',
+    img: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=600&q=80',
+  },
+  {
+    count: '7481',
+    name: 'Others',
+    typeKey: 'all',
+    img: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=600&q=80',
+  },
+];
+
+function ExploreAssetsByCategorySection({ properties, onViewProperty, onNavigate }) {
+  const [activeTab, setActiveTab] = useState('property');
+  const [startIndex, setStartIndex] = useState(0);
+
+  const displayList = properties && properties.length > 0 ? properties : [];
+  const currentItems = displayList.slice(startIndex, startIndex + 4);
+
+  const handleNext = () => {
+    if (startIndex + 4 < displayList.length) {
+      setStartIndex((prev) => prev + 1);
+    } else {
+      setStartIndex(0);
+    }
+  };
+
+  return (
+    <section className="eac-section">
+      <div className="container">
+        <div className="eac-header">
+          <h2 className="eac-heading">Explore Assets by Category</h2>
+          <div className="ebc-toggle">
+            <button
+              className={`ebc-tab ${activeTab === 'property' ? 'active' : ''}`}
+              onClick={() => setActiveTab('property')}
+            >
+              Property
+            </button>
+            <button
+              className={`ebc-tab ${activeTab === 'movable' ? 'active' : ''}`}
+              onClick={() => setActiveTab('movable')}
+            >
+              Movable Asset
+            </button>
+          </div>
+        </div>
+
+        <div className="eac-card-container">
+          <div className="eac-grid">
+            {currentItems.map((p) => (
+              <div
+                key={p.id}
+                className="eac-item-card"
+                onClick={() => onViewProperty(p.id)}
+                role="button"
+                tabIndex={0}
+              >
+                <div className="eac-img-wrap">
+                  <img
+                    src={p.images?.[0] || './placeholder.svg'}
+                    alt={p.title}
+                    loading="lazy"
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = './placeholder.svg';
+                    }}
+                  />
+                </div>
+                <div className="eac-body">
+                  <h4 className="eac-item-title" title={p.title}>
+                    {p.title}
+                  </h4>
+                  <span className="eac-item-type">{typeLabel(p.type)}</span>
+                  <div className="eac-item-bank">
+                    <span className="eac-bank-name">{p.bank}</span>
+                    <span className="eac-asset-code">{p.assetCode || `ID: #${p.id}`}</span>
+                  </div>
+                  <div className="eac-item-foot">
+                    <span className="eac-locality">
+                      <MapPin size={12} /> {p.locality ? p.locality.split(',')[0] : 'India'}
+                    </span>
+                    <strong className="eac-price">{formatPriceShort(p.reserve)}</strong>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {displayList.length > 4 && (
+            <button className="eac-next-btn" onClick={handleNext} aria-label="Next properties">
+              <ChevronRight size={20} />
+            </button>
+          )}
+
+          <div className="eac-view-all-wrap">
+            <button className="eac-view-all-btn" onClick={() => onNavigate('properties')}>
+              View all &gt;
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function AssetsAvailableSection({ onNavigate }) {
+  const [activeTab, setActiveTab] = useState('property');
+
+  return (
+    <section className="aa-section">
+      <div className="container">
+        <div className="aa-header">
+          <h2 className="aa-heading">Assets Available</h2>
+          <div className="ebc-toggle">
+            <button
+              className={`ebc-tab ${activeTab === 'property' ? 'active' : ''}`}
+              onClick={() => setActiveTab('property')}
+            >
+              Property
+            </button>
+            <button
+              className={`ebc-tab ${activeTab === 'movable' ? 'active' : ''}`}
+              onClick={() => setActiveTab('movable')}
+            >
+              Movable Asset
+            </button>
+          </div>
+        </div>
+
+        <div className="aa-grid">
+          {ASSET_CATEGORIES.map((cat) => (
+            <div
+              key={cat.name}
+              className="aa-card"
+              onClick={() => onNavigate('properties')}
+              role="button"
+              tabIndex={0}
+            >
+              <img
+                src={cat.img}
+                alt={cat.name}
+                loading="lazy"
+                onError={(e) => {
+                  e.currentTarget.onerror = null;
+                  e.currentTarget.src = './placeholder.svg';
+                }}
+              />
+              <div className="aa-overlay">
+                <strong className="aa-count">{cat.count}</strong>
+                <span className="aa-name">{cat.name}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
 
 export default function HomeView({
   properties,
@@ -46,9 +340,6 @@ export default function HomeView({
     }, 1000);
     return () => clearInterval(timer);
   }, [heroProperty]);
-
-  // Only show verified published properties on public customer home
-  const featuredListings = properties.filter((p) => p.featured && p.verified).slice(0, 6);
 
   const handleQuickSearch = (e) => {
     e.preventDefault();
@@ -122,7 +413,9 @@ export default function HomeView({
               />
               {heroProperty && (
                 <div className="hero-float-card">
-                  <span className="hfc-label">Next E-Auction Ends In</span>
+                  <span className="hfc-label">
+                    <span className="live-pulse-dot" aria-hidden="true"></span> Next E-Auction Ends In
+                  </span>
                   <strong className="hfc-count">
                     {heroCountdown.d}d {pad2(heroCountdown.h)}h {pad2(heroCountdown.m)}m {pad2(heroCountdown.s)}s
                   </strong>
@@ -251,33 +544,18 @@ export default function HomeView({
         </div>
       </section>
 
-      {/* FEATURED AUCTION PROPERTIES */}
-      <section className="section">
-        <div className="container">
-          <div className="section-head">
-            <div>
-              <h2>Featured Auction <span className="gold">Properties</span></h2>
-              <p>Hand-picked bank-owned assets across India's prime metropolitan locations.</p>
-            </div>
-            <button className="btn btn-outline" onClick={() => onNavigate('properties')}>
-              View All Properties <ArrowRight size={16} />
-            </button>
-          </div>
+      {/* EXPLORE BY CITY */}
+      <ExploreByCitySection onNavigate={onNavigate} />
 
-          <div className="prop-grid">
-            {featuredListings.map((p) => (
-              <PropertyCard
-                key={p.id}
-                property={p}
-                onView={onViewProperty}
-                onContact={onContact}
-                isWishlisted={wishlist.includes(p.id)}
-                onToggleWishlist={onToggleWishlist}
-              />
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* EXPLORE ASSETS BY CATEGORY */}
+      <ExploreAssetsByCategorySection
+        properties={properties}
+        onViewProperty={onViewProperty}
+        onNavigate={onNavigate}
+      />
+
+      {/* ASSETS AVAILABLE */}
+      <AssetsAvailableSection onNavigate={onNavigate} />
 
       {/* TRUST STRIP */}
       <section className="section trust-section">

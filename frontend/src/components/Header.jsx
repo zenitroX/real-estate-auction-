@@ -179,6 +179,7 @@ export default function Header({
               {/* Dev Switcher: Only visible in local development, hidden in production customer site */}
               {showDevSwitcher && (
                 <div
+                  className="dev-switcher-wrap"
                   style={{
                     display: 'flex',
                     background: 'rgba(255, 255, 255, 0.08)',

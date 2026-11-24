@@ -105,10 +105,10 @@ export default function App() {
 
   const addToast = useCallback((title, message = '', type = 'info') => {
     const id = Date.now() + Math.random().toString(36).substring(2, 6);
-    setToasts((prev) => [...prev, { id, title, message, type }]);
+    setToasts((prev) => [...prev.slice(-1), { id, title, message, type }]);
     setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 4500);
+    }, 2500);
   }, []);
 
   const dismissToast = (id) => {
