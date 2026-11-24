@@ -4125,22 +4125,27 @@ h1, h2, h3, h4, h5, h6 {
    Layout: title row (full-width) → middle (image + grid) → footer → meta
    ============================================================ */
 
-/* Card: column layout so footer spans full width below image */
+/* Card: uniform standardized dimensions for all variables */
 .bnc-card {
   background: #ffffff;
   border: 1px solid #E2E8F0;
-  border-radius: 14px;
+  border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 2px 10px rgba(7, 29, 53, 0.04);
+  box-shadow: 0 2px 8px rgba(7, 29, 53, 0.04);
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
+  height: 292px;
+  min-height: 292px;
+  max-height: 292px;
+  box-sizing: border-box;
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
 }
 
 .bnc-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 28px rgba(7, 29, 53, 0.08);
-  border-color: rgba(232, 184, 73, 0.5);
+  box-shadow: 0 10px 24px rgba(7, 29, 53, 0.08);
+  border-color: rgba(232, 184, 73, 0.6);
 }
 
 /* ROW 1: Full-width title + icons */
@@ -4149,25 +4154,28 @@ h1, h2, h3, h4, h5, h6 {
   justify-content: space-between;
   align-items: center;
   gap: 12px;
-  padding: 14px 18px 10px;
+  padding: 10px 16px 6px;
+  height: 48px;
+  box-sizing: border-box;
+  flex-shrink: 0;
 }
 
 .bnc-title-left {
   flex: 1;
   min-width: 0;
+  overflow: hidden;
 }
 
 .bnc-title {
-  font-size: 1.05rem;
+  font-size: 0.98rem;
   font-weight: 800;
   color: var(--navy);
   cursor: pointer;
   margin: 0;
-  line-height: 1.35;
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
+  line-height: 1.25;
+  white-space: nowrap;
   overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .bnc-title:hover {
@@ -4178,9 +4186,12 @@ h1, h2, h3, h4, h5, h6 {
   font-size: 0.72rem;
   font-weight: 600;
   color: #64748B;
-  margin-top: 3px;
+  margin-top: 2px;
   display: block;
   letter-spacing: 0.3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .bnc-title-actions {
@@ -4191,8 +4202,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .bnc-icon-btn {
-  width: 34px;
-  height: 34px;
+  width: 32px;
+  height: 32px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -4210,24 +4221,29 @@ h1, h2, h3, h4, h5, h6 {
   transform: scale(1.05);
 }
 
-/* ROW 2: image (left, fixed width) + info grid (right, stretches) */
+/* ROW 2: image (left) + info grid (right) */
 .bnc-middle-row {
   display: flex;
   flex-direction: row;
-  gap: 14px;
-  padding: 0 18px 12px;
+  gap: 12px;
+  padding: 0 16px 8px;
+  height: 154px;
+  box-sizing: border-box;
+  flex-shrink: 0;
   align-items: stretch;
 }
 
 /* LEFT: image thumbnail */
 .bnc-media {
-  width: 210px;
-  min-width: 190px;
+  width: 195px;
+  min-width: 195px;
+  max-width: 195px;
+  height: 146px;
   flex-shrink: 0;
   position: relative;
   overflow: hidden;
   cursor: pointer;
-  border-radius: 10px;
+  border-radius: 8px;
   background: var(--navy);
   display: flex;
 }
@@ -4235,7 +4251,6 @@ h1, h2, h3, h4, h5, h6 {
 .bnc-media img {
   width: 100%;
   height: 100%;
-  min-height: 190px;
   object-fit: cover;
   display: block;
   transition: transform 0.35s ease;
@@ -4250,10 +4265,10 @@ h1, h2, h3, h4, h5, h6 {
   position: absolute;
   top: 8px;
   left: 0;
-  font-size: 0.65rem;
+  font-size: 0.62rem;
   font-weight: 800;
-  padding: 3px 10px 3px 8px;
-  border-radius: 0 20px 20px 0;
+  padding: 2.5px 8px 2.5px 6px;
+  border-radius: 0 16px 16px 0;
   text-transform: uppercase;
   letter-spacing: 0.4px;
   z-index: 2;
@@ -4278,17 +4293,17 @@ h1, h2, h3, h4, h5, h6 {
 /* Govt Verified badge — bottom-left of image */
 .bnc-verified-badge {
   position: absolute;
-  bottom: 8px;
-  left: 8px;
+  bottom: 6px;
+  left: 6px;
   display: inline-flex;
   align-items: center;
   gap: 3px;
   background: rgba(255, 255, 255, 0.95);
   color: #16A34A;
-  font-size: 0.64rem;
+  font-size: 0.62rem;
   font-weight: 750;
-  padding: 3px 8px;
-  border-radius: 20px;
+  padding: 2px 6px;
+  border-radius: 14px;
   border: 1px solid #BBF7D0;
   z-index: 2;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
@@ -4299,29 +4314,37 @@ h1, h2, h3, h4, h5, h6 {
   flex: 1;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 6px 14px;
-  align-content: center;
+  grid-template-rows: repeat(4, 1fr);
+  gap: 3px 10px;
+  align-content: space-between;
   border: 1px solid #E8ECF0;
-  border-radius: 10px;
-  padding: 10px 14px;
+  border-radius: 8px;
+  padding: 6px 12px;
   background: #FAFBFC;
+  height: 146px;
+  box-sizing: border-box;
 }
 
 .bnc-info-item {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  justify-content: center;
+  gap: 1px;
   min-width: 0;
+  overflow: hidden;
 }
 
 .bnc-info-label {
-  font-size: 0.68rem;
+  font-size: 0.64rem;
   color: #64748B;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
   font-weight: 500;
-  line-height: 1.3;
+  line-height: 1.15;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .bnc-info-label svg {
@@ -4330,10 +4353,10 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .bnc-info-item strong {
-  font-size: 0.8rem;
+  font-size: 0.76rem;
   color: var(--navy);
   font-weight: 700;
-  line-height: 1.3;
+  line-height: 1.2;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -4349,7 +4372,10 @@ h1, h2, h3, h4, h5, h6 {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 18px;
+  padding: 6px 16px;
+  height: 48px;
+  box-sizing: border-box;
+  flex-shrink: 0;
   border-top: 1px solid #E8ECF0;
   gap: 12px;
   background: #ffffff;
@@ -4359,21 +4385,24 @@ h1, h2, h3, h4, h5, h6 {
   display: flex;
   flex-direction: column;
   gap: 1px;
+  flex-shrink: 0;
 }
 
 .bnc-reserve-label {
-  font-size: 0.66rem;
+  font-size: 0.64rem;
   color: #64748B;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.4px;
+  line-height: 1.1;
 }
 
 .bnc-reserve-price {
-  font-size: 1.25rem;
+  font-size: 1.2rem;
   font-weight: 800;
   color: var(--navy);
-  line-height: 1.2;
+  line-height: 1.15;
+  white-space: nowrap;
 }
 
 /* Action buttons */
@@ -4381,17 +4410,18 @@ h1, h2, h3, h4, h5, h6 {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-shrink: 0;
 }
 
 .bnc-btn {
-  height: 38px;
+  height: 34px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  padding: 0 16px;
-  border-radius: 8px;
-  font-size: 0.82rem;
+  gap: 5px;
+  padding: 0 14px;
+  border-radius: 6px;
+  font-size: 0.78rem;
   font-weight: 700;
   cursor: pointer;
   border: 1.5px solid transparent;
@@ -4434,7 +4464,10 @@ h1, h2, h3, h4, h5, h6 {
   gap: 12px;
   background: #FFFDF5;
   border-top: 1px solid #FEF3C7;
-  padding: 8px 18px;
+  padding: 6px 16px;
+  height: 32px;
+  box-sizing: border-box;
+  flex-shrink: 0;
   align-items: center;
 }
 
@@ -4442,7 +4475,7 @@ h1, h2, h3, h4, h5, h6 {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 0.76rem;
+  font-size: 0.74rem;
   color: #475467;
   font-weight: 500;
   overflow: hidden;
@@ -4458,12 +4491,32 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Responsive PropertyCard */
 @media (max-width: 992px) {
+  .bnc-card {
+    height: auto;
+    min-height: unset;
+    max-height: unset;
+  }
+  .bnc-middle-row {
+    height: auto;
+  }
   .bnc-info-grid {
+    height: auto;
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (max-width: 640px) {
+  .bnc-card {
+    height: auto;
+    min-height: unset;
+    max-height: unset;
+  }
+  .bnc-title-row,
+  .bnc-footer-row,
+  .bnc-middle-row,
+  .bnc-meta-strip {
+    height: auto;
+  }
   .bnc-middle-row {
     flex-direction: column;
     padding: 0 12px 10px;
@@ -4472,6 +4525,7 @@ h1, h2, h3, h4, h5, h6 {
   .bnc-media {
     width: 100%;
     min-width: 100%;
+    max-width: 100%;
     height: 180px;
     border-radius: 10px;
     margin-bottom: 8px;

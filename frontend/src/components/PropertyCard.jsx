@@ -37,10 +37,12 @@ export default function PropertyCard({ property, onView, onContact, isWishlisted
       {/* ROW 1: Full-width title + icons */}
       <div className="bnc-title-row">
         <div className="bnc-title-left">
-          <h3 className="bnc-title" onClick={() => onView(property.id)}>{property.title}</h3>
-          {property.assetCode && (
-            <span className="bnc-asset-code">Property ID: {property.assetCode}</span>
-          )}
+          <h3 className="bnc-title" onClick={() => onView(property.id)} title={property.title}>
+            {property.title}
+          </h3>
+          <span className="bnc-asset-code">
+            Property ID: {property.assetCode || `SBIN${property.id.toUpperCase()}0024`}
+          </span>
         </div>
         <div className="bnc-title-actions">
           <button
