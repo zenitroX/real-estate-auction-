@@ -98,9 +98,11 @@ export default function Header({
           }}
           aria-label="SKANDX home"
         >
-          <span className="brand-mark" style={isAdminPortal ? { background: '#16A34A' } : {}}>
-            {isAdminPortal ? <ShieldCheck size={22} color="#fff" /> : <Building2 size={24} />}
-          </span>
+          {isAdminPortal && (
+            <span className="brand-mark" style={{ background: '#16A34A' }}>
+              <ShieldCheck size={22} color="#fff" />
+            </span>
+          )}
           <span className="brand-text">
             <span>
               SKAN<span className="gold">D<span className="brand-x">X</span></span>
@@ -255,88 +257,25 @@ export default function Header({
                 </div>
               )}
 
-              {/* Search Trigger */}
+              {/* Customer User Person Icon Only (No name text) */}
               <button
-                className="icon-btn"
-                onClick={onOpenSearch}
-                aria-label="Search properties"
-                title="Search properties"
-              >
-                <Search size={18} />
-              </button>
-
-              {/* Notifications Dropdown */}
-              <div className="notif-wrap" ref={notifRef}>
-                <button
-                  className="icon-btn"
-                  onClick={() => setShowNotifs(!showNotifs)}
-                  aria-label="Notifications"
-                  title="Notifications"
-                >
-                  <Bell size={18} />
-                  {unreadCount > 0 && <span className="notif-badge">{unreadCount}</span>}
-                </button>
-
-                {showNotifs && notifications && (
-                  <div className="notif-dropdown">
-                    <div className="notif-head">
-                      <strong>Notifications ({unreadCount} unread)</strong>
-                      {unreadCount > 0 && (
-                        <button onClick={onMarkAllRead} className="btn-mark-read">
-                          <CheckCheck size={14} style={{ display: 'inline', marginRight: 4 }} />
-                          Mark all read
-                        </button>
-                      )}
-                    </div>
-                    <div className="notif-list">
-                      {notifications.map((n) => (
-                        <div
-                          key={n.id}
-                          className={`notif-item ${n.unread ? 'unread' : ''}`}
-                          onClick={() => {
-                            setShowNotifs(false);
-                            onSetViewMode('customer');
-                            setActivePage('dashboard');
-                          }}
-                        >
-                          <div className="notif-icon">
-                            {n.type === 'bid' && <Gavel size={16} />}
-                            {n.type === 'ending' && <Clock size={16} />}
-                            {n.type === 'kyc' && <ShieldCheck size={16} />}
-                            {n.type === 'win' && <Trophy size={16} />}
-                            {n.type === 'bank' && <Building2 size={16} />}
-                          </div>
-                          <div className="notif-body">
-                            <strong>{n.title}</strong>
-                            <p>{n.text}</p>
-                            <span>{n.time}</span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Customer User Pill or Login */}
-              {user && user.isLoggedIn ? (
-                <button
-                  className="header-user-btn"
-                  onClick={() => {
+                className="header-user-btn"
+                onClick={() => {
+                  if (user && user.isLoggedIn) {
                     onSetViewMode('customer');
                     setActivePage('dashboard');
                     window.scrollTo({ top: 0, behavior: 'smooth' });
-                  }}
-                  title="Go to Bidder Dashboard"
-                >
-                  <div className="header-user-avatar">{user.initials}</div>
-                  <span>{user.name.split(' ')[0]}</span>
-                </button>
-              ) : (
-                <button className="btn btn-gold btn-sm" onClick={() => onOpenAuth('login')}>
-                  Login
-                </button>
-              )}
+                  } else {
+                    onOpenAuth('login');
+                  }
+                }}
+                title={user && user.isLoggedIn ? `Account (${user.name}) - Bidder Dashboard` : 'Sign In to Account'}
+                aria-label="User Account"
+              >
+                <div className="header-user-avatar">
+                  <User size={18} />
+                </div>
+              </button>
 
               {/* Mobile hamburger */}
               <button
