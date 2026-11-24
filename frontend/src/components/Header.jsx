@@ -38,9 +38,23 @@ export default function Header({
 }) {
   const [showNotifs, setShowNotifs] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const notifRef = useRef(null);
 
   const unreadCount = notifications ? notifications.filter((n) => n.unread).length : 0;
+
+  useEffect(() => {
+    function handleScroll() {
+      if (window.scrollY > 40) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+    }
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -68,7 +82,7 @@ export default function Header({
   ];
 
   return (
-    <header className="site-header">
+    <header className={`site-header ${isScrolled ? 'scrolled-island' : ''}`}>
       <div className="header-inner">
         {/* Brand */}
         <button
