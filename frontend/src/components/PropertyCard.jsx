@@ -46,14 +46,14 @@ export default function PropertyCard({ property, onView, onContact, isWishlisted
         </div>
         <div className="bnc-title-actions">
           <button
-            className="bnc-icon-btn"
+            className="bnc-bare-btn"
             onClick={(e) => { e.stopPropagation(); onToggleWishlist(property.id); }}
             aria-label={isWishlisted ? 'Remove from saved' : 'Save property'}
           >
-            <Heart size={18} fill={isWishlisted ? '#E8B849' : 'none'} color={isWishlisted ? '#E8B849' : '#94A3B8'} />
+            <Heart size={20} fill={isWishlisted ? '#E8B849' : 'none'} color={isWishlisted ? '#E8B849' : '#64748B'} />
           </button>
-          <button className="bnc-icon-btn" aria-label="Share property">
-            <Share2 size={16} color="#94A3B8" />
+          <button className="bnc-bare-btn" aria-label="Share property">
+            <Share2 size={19} color="#64748B" />
           </button>
         </div>
       </div>
@@ -68,58 +68,56 @@ export default function PropertyCard({ property, onView, onContact, isWishlisted
             loading="lazy"
             onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = './placeholder.svg'; }}
           />
-          <span className={`bnc-status-badge ${badgeClass}`}>{badgeLabel}</span>
-          {property.verified && (
-            <span className="bnc-verified-badge">
-              <ShieldCheck size={11} /> Govt Verified
-            </span>
-          )}
+          <span className={`bnc-ribbon ${badgeClass}`}>
+            <span className="bnc-ribbon-tail"></span>
+            {badgeLabel}
+          </span>
         </div>
 
         {/* Info grid */}
         <div className="bnc-info-grid">
           <div className="bnc-info-item">
-            <span className="bnc-info-label"><Grid2X2 size={12} /> Carpet Area</span>
+            <span className="bnc-info-label"><Grid2X2 size={13} /> Carpet Area</span>
             <strong>{areaLabel}</strong>
           </div>
           <div className="bnc-info-item">
-            <span className="bnc-info-label"><Grid2X2 size={12} /> Built Up Area</span>
+            <span className="bnc-info-label"><Grid2X2 size={13} /> Built Up Area</span>
             <strong>{property.builtUpArea ? `${property.builtUpArea} sq feet` : 'NA'}</strong>
           </div>
           <div className="bnc-info-item">
-            <span className="bnc-info-label"><Building2 size={12} /> Project Name</span>
+            <span className="bnc-info-label"><Building2 size={13} /> Project Name</span>
             <strong title={projectName}>{projectName}</strong>
           </div>
           <div className="bnc-info-item">
-            <span className="bnc-info-label"><Grid2X2 size={12} /> Furnished Status</span>
-            <strong>NA</strong>
+            <span className="bnc-info-label"><Grid2X2 size={13} /> Furnished Status</span>
+            <strong>{property.furnishing || 'NA'}</strong>
           </div>
           <div className="bnc-info-item">
-            <span className="bnc-info-label"><ShieldCheck size={12} /> Possession Type</span>
+            <span className="bnc-info-label"><ShieldCheck size={13} /> Possession Type</span>
             <strong className="bnc-highlight-val">{possessionType}</strong>
           </div>
           <div className="bnc-info-item">
-            <span className="bnc-info-label"><ShieldCheck size={12} /> Type of Action</span>
+            <span className="bnc-info-label"><ShieldCheck size={13} /> Type of Action</span>
             <strong className="bnc-highlight-val">{legalAction}</strong>
           </div>
           <div className="bnc-info-item">
-            <span className="bnc-info-label"><CalendarClock size={12} /> Auction Start Date &amp; Time</span>
+            <span className="bnc-info-label"><CalendarClock size={13} /> Auction Start Date &amp; Time</span>
             <strong>{property.auctionEnd ? fmtAuctionDate(property.auctionEnd - 4 * 60 * 60 * 1000) : 'NA'}</strong>
           </div>
           <div className="bnc-info-item">
-            <span className="bnc-info-label"><CalendarCheck size={12} /> Auction End Date &amp; Time</span>
+            <span className="bnc-info-label"><CalendarCheck size={13} /> Auction End Date &amp; Time</span>
             <strong>{fmtAuctionDate(property.auctionEnd)}</strong>
           </div>
           <div className="bnc-info-item">
-            <span className="bnc-info-label"><CalendarCheck size={12} /> EMD End Date &amp; Time</span>
+            <span className="bnc-info-label"><CalendarCheck size={13} /> EMD End Date &amp; Time</span>
             <strong>{emdEnd ? fmtAuctionDate(emdEnd) : 'NA'}</strong>
           </div>
           <div className="bnc-info-item">
-            <span className="bnc-info-label"><CalendarClock size={12} /> Inspection Start Date &amp; Time</span>
+            <span className="bnc-info-label"><CalendarClock size={13} /> Inspection Start Date &amp; Time</span>
             <strong>{inspectionStart ? fmtAuctionDate(inspectionStart) : 'NA'}</strong>
           </div>
           <div className="bnc-info-item">
-            <span className="bnc-info-label"><CalendarCheck size={12} /> Inspection End Date &amp; Time</span>
+            <span className="bnc-info-label"><CalendarCheck size={13} /> Inspection End Date &amp; Time</span>
             <strong>{inspectionEnd ? fmtAuctionDate(inspectionEnd) : 'NA'}</strong>
           </div>
         </div>
@@ -136,19 +134,19 @@ export default function PropertyCard({ property, onView, onContact, isWishlisted
             className="bnc-btn bnc-btn-contact"
             onClick={(e) => { e.stopPropagation(); handleContactAction(property); }}
           >
-            <PhoneCall size={13} /> Contact Us
+            Contact Us
           </button>
           <button
             className="bnc-btn bnc-btn-details"
             onClick={(e) => { e.stopPropagation(); onView(property.id); }}
           >
-            <Eye size={13} /> View Details
+            View Details
           </button>
           <button
             className="bnc-btn bnc-btn-auction"
             onClick={(e) => { e.stopPropagation(); onView(property.id); }}
           >
-            <ExternalLink size={13} /> View Auction
+            View Auction
           </button>
         </div>
       </div>
@@ -156,13 +154,13 @@ export default function PropertyCard({ property, onView, onContact, isWishlisted
       {/* ROW 4: Meta strip — Type | Bank | Location */}
       <div className="bnc-meta-strip">
         <span className="bnc-meta-cell">
-          <Grid2X2 size={12} /> {typeLabel(property.type)}{property.beds ? `, ${property.beds} BHK` : ''}
+          <Grid2X2 size={13} /> {typeLabel(property.type)}{property.beds ? `, ${property.beds} BHK` : ''}
         </span>
         <span className="bnc-meta-cell">
-          <Building2 size={12} /> {property.bank}
+          <Building2 size={13} /> {property.bank}
         </span>
         <span className="bnc-meta-cell">
-          <MapPin size={12} /> {property.locality}
+          <MapPin size={13} /> {property.locality}
         </span>
       </div>
     </article>

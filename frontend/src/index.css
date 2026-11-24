@@ -4125,54 +4125,52 @@ h1, h2, h3, h4, h5, h6 {
    Layout: title row (full-width) → middle (image + grid) → footer → meta
    ============================================================ */
 
-/* Card: uniform standardized dimensions for all variables */
+/* ============================================================
+   BAANKNET PROPERTY CARD — EXACT 1:1 REPLICATION
+   ============================================================ */
 .bnc-card {
   background: #ffffff;
-  border: 1px solid #E2E8F0;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(7, 29, 53, 0.04);
+  border: 1px solid #E5E7EB;
+  border-radius: 10px;
+  padding: 18px 22px 14px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  height: 292px;
-  min-height: 292px;
-  max-height: 292px;
+  height: 345px;
+  min-height: 345px;
+  max-height: 345px;
   box-sizing: border-box;
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 .bnc-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 24px rgba(7, 29, 53, 0.08);
-  border-color: rgba(232, 184, 73, 0.6);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  border-color: #CBD5E1;
 }
 
-/* ROW 1: Full-width title + icons */
+/* ROW 1: Title + Action Icons */
 .bnc-title-row {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 16px 6px;
-  height: 48px;
-  box-sizing: border-box;
+  align-items: flex-start;
+  gap: 16px;
+  height: 42px;
   flex-shrink: 0;
 }
 
 .bnc-title-left {
   flex: 1;
   min-width: 0;
-  overflow: hidden;
 }
 
 .bnc-title {
-  font-size: 0.98rem;
-  font-weight: 800;
-  color: var(--navy);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #111827;
   cursor: pointer;
   margin: 0;
-  line-height: 1.25;
+  line-height: 1.3;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -4183,12 +4181,12 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .bnc-asset-code {
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: #64748B;
-  margin-top: 2px;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: #6B7280;
+  margin-top: 3px;
   display: block;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.2px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -4198,131 +4196,109 @@ h1, h2, h3, h4, h5, h6 {
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 10px;
+  padding-top: 2px;
 }
 
-.bnc-icon-btn {
-  width: 32px;
-  height: 32px;
+.bnc-bare-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
-  background: #F8FAFC;
-  border: 1px solid #E2E8F0;
-  cursor: pointer;
-  padding: 0;
-  transition: all 0.18s ease;
+  color: #6B7280;
+  transition: transform 0.15s ease, color 0.15s ease;
 }
 
-.bnc-icon-btn:hover {
-  background: #F1F5F9;
-  border-color: #CBD5E1;
-  transform: scale(1.05);
+.bnc-bare-btn:hover {
+  transform: scale(1.15);
+  color: var(--gold-2);
 }
 
 /* ROW 2: image (left) + info grid (right) */
 .bnc-middle-row {
   display: flex;
   flex-direction: row;
-  gap: 12px;
-  padding: 0 16px 8px;
-  height: 154px;
-  box-sizing: border-box;
+  gap: 18px;
+  margin-top: 10px;
+  height: 165px;
   flex-shrink: 0;
   align-items: stretch;
 }
 
 /* LEFT: image thumbnail */
 .bnc-media {
-  width: 195px;
-  min-width: 195px;
-  max-width: 195px;
-  height: 146px;
+  width: 205px;
+  min-width: 205px;
+  max-width: 205px;
+  height: 165px;
   flex-shrink: 0;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   cursor: pointer;
   border-radius: 8px;
-  background: var(--navy);
-  display: flex;
+  background: #F3F4F6;
 }
 
 .bnc-media img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-radius: 8px;
   display: block;
-  transition: transform 0.35s ease;
 }
 
-.bnc-card:hover .bnc-media img {
-  transform: scale(1.04);
-}
-
-/* Auction status badge — top-left of image */
-.bnc-status-badge {
+/* Purple Ribbon Badge — top-left */
+.bnc-ribbon {
   position: absolute;
-  top: 8px;
-  left: 0;
-  font-size: 0.62rem;
-  font-weight: 800;
-  padding: 2.5px 8px 2.5px 6px;
-  border-radius: 0 16px 16px 0;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-  z-index: 2;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-}
-
-.bnc-status-badge.upcoming {
-  background: #4A2574;
+  top: 12px;
+  left: -5px;
+  background: #7C3AED;
   color: #ffffff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 3.5px 10px 3.5px 8px;
+  border-radius: 0 4px 4px 0;
+  z-index: 2;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+  letter-spacing: 0.2px;
 }
 
-.bnc-status-badge.live {
+.bnc-ribbon.live {
   background: var(--gold);
   color: var(--navy);
 }
 
-.bnc-status-badge.ended {
+.bnc-ribbon.ended {
   background: #94A3B8;
   color: #ffffff;
 }
 
-/* Govt Verified badge — bottom-left of image */
-.bnc-verified-badge {
+.bnc-ribbon-tail {
   position: absolute;
-  bottom: 6px;
-  left: 6px;
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  background: rgba(255, 255, 255, 0.95);
-  color: #16A34A;
-  font-size: 0.62rem;
-  font-weight: 750;
-  padding: 2px 6px;
-  border-radius: 14px;
-  border: 1px solid #BBF7D0;
-  z-index: 2;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  bottom: -4px;
+  left: 0;
+  width: 0;
+  height: 0;
+  border-top: 4px solid #4C1D95;
+  border-left: 4px solid transparent;
 }
 
-/* Info grid — right of image */
+/* Info grid — right of image (transparent background, spacious 3 columns) */
 .bnc-info-grid {
   flex: 1;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(4, 1fr);
-  gap: 3px 10px;
-  align-content: space-between;
-  border: 1px solid #E8ECF0;
-  border-radius: 8px;
-  padding: 6px 12px;
-  background: #FAFBFC;
-  height: 146px;
+  row-gap: 8px;
+  column-gap: 18px;
+  height: 165px;
   box-sizing: border-box;
+  padding: 0;
+  background: transparent;
+  border: none;
 }
 
 .bnc-info-item {
@@ -4335,28 +4311,29 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .bnc-info-label {
-  font-size: 0.64rem;
-  color: #64748B;
+  font-size: 0.72rem;
+  color: #6B7280;
   display: inline-flex;
   align-items: center;
-  gap: 3px;
+  gap: 5px;
   font-weight: 500;
-  line-height: 1.15;
+  line-height: 1.2;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .bnc-info-label svg {
-  color: #94A3B8;
+  color: #6B7280;
   flex-shrink: 0;
 }
 
 .bnc-info-item strong {
-  font-size: 0.76rem;
-  color: var(--navy);
-  font-weight: 700;
-  line-height: 1.2;
+  font-size: 0.82rem;
+  color: #1F2937;
+  font-weight: 600;
+  line-height: 1.25;
+  margin-top: 1px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -4364,43 +4341,40 @@ h1, h2, h3, h4, h5, h6 {
 
 .bnc-highlight-val {
   color: #16A34A !important;
-  font-weight: 750 !important;
+  font-weight: 700 !important;
 }
 
-/* ROW 3: Reserve Price + Action Buttons — full width, below image */
+/* ROW 3: Reserve Price + Action Buttons */
 .bnc-footer-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 6px 16px;
-  height: 48px;
-  box-sizing: border-box;
+  margin-top: 12px;
+  height: 42px;
   flex-shrink: 0;
-  border-top: 1px solid #E8ECF0;
-  gap: 12px;
-  background: #ffffff;
+  border-top: none;
+  background: transparent;
+  padding: 0;
 }
 
 .bnc-reserve-block {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 0;
   flex-shrink: 0;
 }
 
 .bnc-reserve-label {
-  font-size: 0.64rem;
-  color: #64748B;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
+  font-size: 0.72rem;
+  color: #6B7280;
+  font-weight: 500;
   line-height: 1.1;
 }
 
 .bnc-reserve-price {
-  font-size: 1.2rem;
+  font-size: 1.35rem;
   font-weight: 800;
-  color: var(--navy);
+  color: #111827;
   line-height: 1.15;
   white-space: nowrap;
 }
@@ -4409,20 +4383,19 @@ h1, h2, h3, h4, h5, h6 {
 .bnc-action-btns {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   flex-shrink: 0;
 }
 
 .bnc-btn {
-  height: 34px;
+  height: 36px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
-  padding: 0 14px;
+  padding: 0 18px;
   border-radius: 6px;
-  font-size: 0.78rem;
-  font-weight: 700;
+  font-size: 0.82rem;
+  font-weight: 600;
   cursor: pointer;
   border: 1.5px solid transparent;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
@@ -4430,52 +4403,63 @@ h1, h2, h3, h4, h5, h6 {
   text-decoration: none;
 }
 
-.bnc-btn-contact,
-.bnc-btn-details {
-  border-color: #CBD5E1;
-  color: var(--navy);
+.bnc-btn-contact {
+  border-color: #E5E7EB;
+  color: #374151;
   background: #ffffff;
 }
 
-.bnc-btn-contact:hover,
-.bnc-btn-details:hover {
+.bnc-btn-contact:hover {
   border-color: var(--navy);
-  background: #F8FAFC;
-  box-shadow: 0 2px 6px rgba(7, 29, 53, 0.06);
+  color: var(--navy);
+  background: #F9FAFB;
+}
+
+.bnc-btn-details {
+  border-color: var(--gold-2);
+  color: var(--gold-2);
+  background: #ffffff;
+}
+
+.bnc-btn-details:hover {
+  background: rgba(232, 184, 73, 0.08);
 }
 
 .bnc-btn-auction {
-  border-color: var(--gold-2);
+  border-color: var(--gold);
   background: var(--gold);
   color: var(--navy);
-  box-shadow: 0 2px 8px rgba(232, 184, 73, 0.3);
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgba(232, 184, 73, 0.3);
 }
 
 .bnc-btn-auction:hover {
   background: var(--gold-2);
-  box-shadow: 0 4px 14px rgba(232, 184, 73, 0.45);
+  border-color: var(--gold-2);
   transform: translateY(-1px);
 }
 
-/* ROW 4: Meta strip — Type | Bank | Location */
+/* ROW 4: Meta Strip — Soft Cream Pill Box */
 .bnc-meta-strip {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  background: #FFFDF5;
-  border-top: 1px solid #FEF3C7;
-  padding: 6px 16px;
-  height: 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  background: #FFFDF0;
+  border: 1px solid #FEF3C7;
+  border-radius: 6px;
+  padding: 8px 16px;
+  margin-top: 10px;
+  height: 34px;
   box-sizing: border-box;
   flex-shrink: 0;
-  align-items: center;
 }
 
 .bnc-meta-cell {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-size: 0.74rem;
+  gap: 7px;
+  font-size: 0.78rem;
   color: #475467;
   font-weight: 500;
   overflow: hidden;
@@ -4510,6 +4494,7 @@ h1, h2, h3, h4, h5, h6 {
     height: auto;
     min-height: unset;
     max-height: unset;
+    padding: 14px;
   }
   .bnc-title-row,
   .bnc-footer-row,
@@ -4519,7 +4504,7 @@ h1, h2, h3, h4, h5, h6 {
   }
   .bnc-middle-row {
     flex-direction: column;
-    padding: 0 12px 10px;
+    margin-top: 8px;
   }
 
   .bnc-media {
@@ -4527,25 +4512,20 @@ h1, h2, h3, h4, h5, h6 {
     min-width: 100%;
     max-width: 100%;
     height: 180px;
-    border-radius: 10px;
+    border-radius: 8px;
     margin-bottom: 8px;
   }
 
   .bnc-info-grid {
-    margin-left: 0;
     grid-template-columns: repeat(2, 1fr);
-    padding: 10px;
-  }
-
-  .bnc-title-row,
-  .bnc-footer-row {
-    padding: 10px 12px;
+    gap: 8px;
   }
 
   .bnc-footer-row {
     flex-direction: column;
     align-items: stretch;
     gap: 12px;
+    margin-top: 12px;
   }
 
   .bnc-action-btns {
@@ -4566,8 +4546,10 @@ h1, h2, h3, h4, h5, h6 {
 
   .bnc-meta-strip {
     padding: 8px 12px;
-    grid-template-columns: 1fr;
+    flex-direction: column;
+    align-items: flex-start;
     gap: 6px;
+    height: auto;
   }
 }
 
