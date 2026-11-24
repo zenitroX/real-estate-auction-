@@ -466,17 +466,7 @@ h1, h2, h3, h4, h5, h6 {
 .nav-link.active {
   color: var(--gold);
   font-weight: 600;
-}
-
-.nav-link.active::after {
-  content: '';
-  position: absolute;
-  bottom: -6px;
-  left: 16px;
-  right: 16px;
-  height: 2px;
-  background: var(--gold);
-  border-radius: 2px;
+  background: rgba(232, 184, 73, 0.08);
 }
 
 .header-actions {
