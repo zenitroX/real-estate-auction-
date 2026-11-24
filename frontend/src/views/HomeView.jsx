@@ -396,7 +396,7 @@ export default function HomeView({
                 Explore Auctions <ArrowRight size={18} />
               </button>
               <button
-                className="btn btn-outline-light btn-lg"
+                className="btn btn-outline-navy btn-lg"
                 onClick={() => onNavigate('about')}
               >
                 How It Works
