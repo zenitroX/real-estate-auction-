@@ -17,7 +17,7 @@
   --ink: #16283E;
   --muted: #64748B;
   --muted-2: #94A3B8;
-  --bg: #F6F8FB;
+  --bg: #ffffff;
   --card: #FFFFFF;
   --line: #E2E8F0;
   --line-dark: rgba(255, 255, 255, 0.12);
@@ -75,11 +75,25 @@ html {
 body {
   font-family: var(--font-body);
   color: var(--ink);
-  background-color: var(--bg);
+  background-color: #ffffff;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+}
+
+#root,
+.app,
+main,
+.home-view,
+.properties-view,
+.auctions-view,
+.services-view,
+.about-view,
+.property-details-view,
+.dash-layout,
+.dash-main {
+  background-color: #ffffff !important;
 }
 
 img {
@@ -989,16 +1003,17 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .stats-band.navy {
-  background: var(--navy);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: #ffffff;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
 }
 
 .stats-band.navy .stat strong {
-  color: var(--gold);
+  color: #B4831B;
 }
 
 .stats-band.navy .stat span {
-  color: #94A3B8;
+  color: #64748B;
 }
 
 .stats-grid {
@@ -1334,19 +1349,23 @@ h1, h2, h3, h4, h5, h6 {
    LISTINGS PAGE (PROPERTIES VIEW)
    ============================================================ */
 .page-head {
-  background: var(--navy);
-  color: #fff;
-  padding: 44px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: #ffffff;
+  color: var(--navy);
+  padding: 44px 0 32px;
+  border-bottom: 1px solid var(--line);
 }
 
 .page-head h1 {
-  color: #fff;
+  color: var(--navy);
   font-size: 2.2rem;
 }
 
+.page-head h1 .gold {
+  color: #B4831B;
+}
+
 .page-head p {
-  color: #B9C7D8;
+  color: #475467;
   margin-top: 4px;
   font-size: 1.05rem;
 }
@@ -2352,19 +2371,23 @@ h1, h2, h3, h4, h5, h6 {
    LIVE AUCTIONS HUB & SERVICES & ABOUT
    ============================================================ */
 .auctions-hero {
-  background: var(--navy);
-  color: #fff;
-  padding: 50px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: #ffffff;
+  color: var(--navy);
+  padding: 50px 0 32px;
+  border-bottom: 1px solid var(--line);
 }
 
 .auctions-hero h1 {
-  color: #fff;
+  color: var(--navy);
   font-size: 2.3rem;
 }
 
+.auctions-hero h1 .gold {
+  color: #B4831B;
+}
+
 .auctions-hero p {
-  color: #B9C7D8;
+  color: #475467;
   max-width: 650px;
   margin: 8px 0 20px;
 }
@@ -2379,13 +2402,13 @@ h1, h2, h3, h4, h5, h6 {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: #F8FAFC;
+  border: 1px solid var(--line);
   padding: 6px 14px;
   border-radius: 20px;
   font-size: 0.82rem;
   font-weight: 600;
-  color: #fff;
+  color: var(--navy);
 }
 
 .dot-live {
@@ -2477,9 +2500,10 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .cta-band {
-  background: var(--navy);
-  color: #fff;
+  background: #ffffff;
+  color: var(--navy);
   padding: 50px 0;
+  border-top: 1px solid var(--line);
 }
 
 .cta-inner {
@@ -2491,12 +2515,12 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .cta-inner h2 {
-  color: #fff;
+  color: var(--navy);
   font-size: 2rem;
 }
 
 .cta-inner p {
-  color: #B9C7D8;
+  color: #475467;
   margin-top: 4px;
 }
 
@@ -3009,10 +3033,10 @@ h1, h2, h3, h4, h5, h6 {
 
 /* 1. Page Header */
 .bn-page-head {
-  background: linear-gradient(135deg, #071D35 0%, #0A2342 50%, #0E2C50 100%);
-  color: #ffffff;
+  background: #ffffff;
+  color: var(--navy);
   padding: 44px 0 36px;
-  border-bottom: 3px solid var(--gold);
+  border-bottom: 1px solid var(--line);
   position: relative;
   overflow: hidden;
 }
@@ -3032,7 +3056,7 @@ h1, h2, h3, h4, h5, h6 {
   font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 1.2px;
-  color: var(--gold);
+  color: #92640A;
   font-weight: 700;
   margin-bottom: 8px;
 }
@@ -3040,17 +3064,17 @@ h1, h2, h3, h4, h5, h6 {
 .bn-page-head h1 {
   font-size: 2.2rem;
   font-weight: 800;
-  color: #ffffff;
+  color: var(--navy);
   line-height: 1.2;
   margin-bottom: 8px;
 }
 
 .bn-page-head h1 .gold {
-  color: var(--gold);
+  color: #B4831B;
 }
 
 .bn-page-head p {
-  color: #94A3B8;
+  color: #475467;
   font-size: 0.95rem;
   max-width: 650px;
   line-height: 1.5;
@@ -3062,25 +3086,24 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .bn-head-stat {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(232, 184, 73, 0.25);
+  background: #F8FAFC;
+  border: 1px solid var(--line);
   border-radius: 12px;
   padding: 12px 20px;
   text-align: center;
   min-width: 100px;
-  backdrop-filter: blur(8px);
 }
 
 .bn-head-stat strong {
   display: block;
   font-size: 1.5rem;
   font-weight: 800;
-  color: var(--gold);
+  color: #B4831B;
 }
 
 .bn-head-stat span {
   font-size: 0.75rem;
-  color: #E2E8F0;
+  color: #64748B;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
