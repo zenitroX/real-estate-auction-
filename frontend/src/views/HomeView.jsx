@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import { timeRemaining, pad2, formatPriceShort, typeLabel } from '../data/propertiesData';
 
-const CITIES = [
+const DISTRICTS = [
   {
     name: 'Chennai',
     img: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?w=400&q=80',
@@ -27,46 +27,46 @@ const CITIES = [
     count: 42,
   },
   {
-    name: 'Kolkata',
-    img: 'https://images.unsplash.com/photo-1558431382-27e303142255?w=400&q=80',
-    state: 'West Bengal',
-    count: 28,
+    name: 'Coimbatore',
+    img: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=400&q=80',
+    state: 'Tamil Nadu',
+    count: 35,
   },
   {
-    name: 'Bengaluru',
-    img: 'https://images.unsplash.com/photo-1529253355930-ddbe423a2ac7?w=400&q=80',
-    state: 'Karnataka',
-    count: 56,
+    name: 'Madurai',
+    img: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=400&q=80',
+    state: 'Tamil Nadu',
+    count: 24,
   },
   {
-    name: 'Mumbai',
-    img: 'https://images.unsplash.com/photo-1529253355930-ddbe423a2ac7?w=400&q=80&sig=2',
-    state: 'Maharashtra',
-    count: 74,
-  },
-  {
-    name: 'Hyderabad',
-    img: 'https://images.unsplash.com/photo-1570168007204-dfb528c6958f?w=400&q=80',
-    state: 'Telangana',
-    count: 33,
-  },
-  {
-    name: 'Pune',
-    img: 'https://images.unsplash.com/photo-1587474260584-136574528ed5?w=400&q=80',
-    state: 'Maharashtra',
-    count: 21,
-  },
-  {
-    name: 'Delhi NCR',
-    img: 'https://images.unsplash.com/photo-1587474260584-136574528ed5?w=400&q=80&sig=2',
-    state: 'Delhi',
-    count: 61,
-  },
-  {
-    name: 'Ahmedabad',
-    img: 'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=400&q=80',
-    state: 'Gujarat',
+    name: 'Tiruchirappalli',
+    img: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=400&q=80',
+    state: 'Tamil Nadu',
     count: 19,
+  },
+  {
+    name: 'Salem',
+    img: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400&q=80',
+    state: 'Tamil Nadu',
+    count: 16,
+  },
+  {
+    name: 'Tirunelveli',
+    img: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=400&q=80',
+    state: 'Tamil Nadu',
+    count: 14,
+  },
+  {
+    name: 'Vellore',
+    img: 'https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=400&q=80',
+    state: 'Tamil Nadu',
+    count: 15,
+  },
+  {
+    name: 'Erode',
+    img: 'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=400&q=80',
+    state: 'Tamil Nadu',
+    count: 12,
   },
 ];
 
@@ -78,7 +78,7 @@ function ExploreByCitySection({ onNavigate }) {
       <div className="container">
         {/* Header */}
         <div className="ebc-header">
-          <h2 className="ebc-heading">Explore by <span className="gold">City</span></h2>
+          <h2 className="ebc-heading">Explore by <span className="gold">District</span></h2>
           <div className="ebc-toggle">
             <button
               className={`ebc-tab ${activeTab === 'property' ? 'active' : ''}`}
@@ -95,28 +95,28 @@ function ExploreByCitySection({ onNavigate }) {
           </div>
         </div>
 
-        {/* City grid */}
+        {/* District grid */}
         <div className="ebc-grid">
-          {CITIES.map((city) => (
+          {DISTRICTS.map((dist) => (
             <button
-              key={city.name}
+              key={dist.name}
               className="ebc-city-card"
               onClick={() => onNavigate('properties')}
-              aria-label={`Browse ${activeTab === 'property' ? 'properties' : 'movable assets'} in ${city.name}`}
+              aria-label={`Browse ${activeTab === 'property' ? 'properties' : 'movable assets'} in ${dist.name} district`}
             >
               <div className="ebc-img-wrap">
                 <img
-                  src={city.img}
-                  alt={city.name}
+                  src={dist.img}
+                  alt={`${dist.name} District`}
                   loading="lazy"
                   onError={(e) => {
                     e.currentTarget.onerror = null;
-                    e.currentTarget.src = `https://source.unsplash.com/400x260/?${city.name},landmark`;
+                    e.currentTarget.src = `https://source.unsplash.com/400x260/?${dist.name},landmark`;
                   }}
                 />
-                <span className="ebc-count">{city.count}+ listings</span>
+                <span className="ebc-count">{dist.count}+ listings</span>
               </div>
-              <span className="ebc-city-name">{city.name}</span>
+              <span className="ebc-city-name">{dist.name}</span>
             </button>
           ))}
         </div>
@@ -124,7 +124,7 @@ function ExploreByCitySection({ onNavigate }) {
         {/* See All */}
         <div className="ebc-footer">
           <button className="ebc-see-all" onClick={() => onNavigate('properties')}>
-            See All <ArrowRight size={15} />
+            See All Districts <ArrowRight size={15} />
           </button>
         </div>
       </div>
@@ -358,15 +358,15 @@ export default function HomeView({
         <div className="hero-inner">
           <div className="hero-copy">
             <span className="hero-eyebrow">
-              <ShieldCheck size={16} /> India's Trusted Bank Auction Marketplace
+              <ShieldCheck size={16} /> Tamil Nadu's Premier Bank Auction Marketplace
             </span>
 
             <h1 className="hero-title">
-              India's Premier <span className="gold">Bank Auction Concierge</span>
+              Tamil Nadu's Trusted <span className="gold">Bank Auction Concierge</span>
             </h1>
 
             <p className="hero-sub">
-              Discover Verified Distressed Assets & Bid with Complete Legal Confidence. Comprehensive 30-year title checks, SARFAESI direct bank inventory, and assisted bidding on official government portals.
+              Centralized discovery of verified SARFAESI bank auctions, NPA properties, and DRT recovery listings across all 38 districts of Tamil Nadu. 30-year title verification, direct bank inventory, and assisted bidding on official portals.
             </p>
 
             <ul className="hero-features">
@@ -456,11 +456,11 @@ export default function HomeView({
           <form className="sp-fields" onSubmit={handleQuickSearch}>
             <div className="sp-field">
               <label>
-                <MapPin size={15} /> Enter Location (e.g. Chennai)
+                <MapPin size={15} /> Select District / Locality (e.g. Chennai, Coimbatore)
               </label>
               <input
                 type="text"
-                placeholder="City, locality or pincode..."
+                placeholder="District, locality or pincode in Tamil Nadu..."
                 value={locationInput}
                 onChange={(e) => setLocationInput(e.target.value)}
               />
@@ -507,8 +507,8 @@ export default function HomeView({
               <Building2 size={26} />
             </div>
             <div className="stat-info">
-              <strong>5,000+</strong>
-              <span>Properties Listed</span>
+              <strong>1,500+</strong>
+              <span>TN Properties Listed</span>
             </div>
           </div>
 
@@ -517,8 +517,8 @@ export default function HomeView({
               <Gavel size={26} />
             </div>
             <div className="stat-info">
-              <strong>1,200+</strong>
-              <span>Auctions Completed</span>
+              <strong>38</strong>
+              <span>Districts Covered</span>
             </div>
           </div>
 
@@ -561,9 +561,9 @@ export default function HomeView({
       <section className="section trust-section">
         <div className="container">
           <div className="center">
-            <h2>Why Institutional Bidders Choose <span className="gold">SKANDX</span></h2>
+            <h2>Why Bidders Across Tamil Nadu Choose <span className="gold">SKANDX</span></h2>
             <p style={{ color: '#64748B', marginTop: 4 }}>
-              Direct integration with India's top public & private sector banking recovery wings.
+              Direct recovery integration with leading public &amp; private sector banks operating throughout Tamil Nadu.
             </p>
           </div>
 
@@ -574,7 +574,7 @@ export default function HomeView({
               </div>
               <h4>Complete Legal Check</h4>
               <p>
-                Every listing passes 30-year title search, encumbrance verification (EC), and court-case scrutiny by empanelled High Court advocates.
+                Every listing passes 30-year title search, encumbrance verification (EC via TNREGINET), and court-case scrutiny by empanelled Madras High Court advocates.
               </p>
             </div>
 
@@ -584,7 +584,7 @@ export default function HomeView({
               </div>
               <h4>Direct From Partner Banks</h4>
               <p>
-                Official listings from 20+ partner banks including SBI, Canara Bank, ICICI Bank, Indian Bank, and Axis Bank with zero intermediary markup.
+                Official listings from 20+ partner banks across Tamil Nadu including SBI, Canara Bank, Indian Bank, and ICICI Bank with zero intermediary markup.
               </p>
             </div>
 
@@ -617,8 +617,8 @@ export default function HomeView({
             <div className="process-step">
               <span className="ps-num">01</span>
               <UserCheck size={26} color="#071D35" />
-              <h4>Discover & Verify</h4>
-              <p>Explore verified bank notices with 30-year legal search reports and schedule physical site visits.</p>
+              <h4>Discover &amp; Verify</h4>
+              <p>Explore verified bank notices across Tamil Nadu districts with 30-year legal search reports and schedule physical site visits.</p>
             </div>
 
             <div className="process-step">

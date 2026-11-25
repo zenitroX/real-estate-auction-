@@ -30,14 +30,16 @@ export default function PropertiesView({
   // Available banks
   const availableBanks = ['Canara Bank', 'SBI', 'ICICI Bank', 'Indian Bank', 'Others'];
 
-  // States list for quick Baanknet filtering
-  const indianStates = [
-    { id: 'all', label: 'All States' },
-    { id: 'tn', label: 'Tamil Nadu (Chennai)' },
-    { id: 'ka', label: 'Karnataka (Bengaluru)' },
-    { id: 'ts', label: 'Telangana (Hyderabad)' },
-    { id: 'dl', label: 'Delhi NCR' },
-    { id: 'mh', label: 'Maharashtra (Mumbai)' },
+  // Tamil Nadu Districts list for quick Baanknet filtering
+  const tamilNaduDistricts = [
+    { id: 'all', label: 'All Districts' },
+    { id: 'chennai', label: 'Chennai' },
+    { id: 'coimbatore', label: 'Coimbatore' },
+    { id: 'madurai', label: 'Madurai' },
+    { id: 'trichy', label: 'Tiruchirappalli' },
+    { id: 'salem', label: 'Salem' },
+    { id: 'kanchipuram', label: 'Kanchipuram' },
+    { id: 'vellore', label: 'Vellore' },
   ];
 
   // Dynamic counts from current verified inventory
@@ -188,32 +190,32 @@ export default function PropertiesView({
         </div>
       </div>
 
-      {/* 2. State & Location */}
+      {/* 2. District & Location */}
       <div className="bn-filter-section">
-        <label className="bn-section-label">Location / State</label>
+        <label className="bn-section-label">District / Location</label>
         <div className="bn-input-wrap">
           <MapPin size={16} className="bn-field-icon" />
           <input
             type="text"
-            placeholder="Enter City, Locality..."
+            placeholder="Enter District, Locality..."
             value={filters.location}
             onChange={(e) => setFilters({ ...filters, location: e.target.value })}
           />
         </div>
 
         <div className="bn-chip-group">
-          {indianStates.map((st) => (
+          {tamilNaduDistricts.map((dist) => (
             <button
-              key={st.id}
-              className={`bn-chip ${filters.location.toLowerCase().includes(st.label.split(' ')[0].toLowerCase()) ? 'active' : ''}`}
+              key={dist.id}
+              className={`bn-chip ${filters.location.toLowerCase().includes(dist.label.toLowerCase()) ? 'active' : ''}`}
               onClick={() =>
                 setFilters({
                   ...filters,
-                  location: st.id === 'all' ? '' : st.label.split(' ')[0],
+                  location: dist.id === 'all' ? '' : dist.label,
                 })
               }
             >
-              {st.label}
+              {dist.label}
             </button>
           ))}
         </div>
@@ -358,7 +360,7 @@ export default function PropertiesView({
                 Bank Auction <span className="gold">Properties</span>
               </h1>
               <p>
-                Centralized discovery of SARFAESI bank auctions, NPA properties, and DRT recovery listings across 20+ public & private sector banks.
+                Centralized discovery of SARFAESI bank auctions, NPA properties, and DRT recovery listings across 20+ public &amp; private sector banks in Tamil Nadu.
               </p>
             </div>
 
