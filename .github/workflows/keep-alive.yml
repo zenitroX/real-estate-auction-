@@ -1,0 +1,15 @@
+name: Render Keep-Alive Ping
+
+on:
+  schedule:
+    # Ping every 14 minutes to stay under Render's 15-minute idle spin-down
+    - cron: "*/14 * * * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    if: ${{ secrets.RENDER_HEALTH_URL != '' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping backend /api/health
+        run: curl -fsS --max-time 15 "${{ secrets.RENDER_HEALTH_URL }}"
