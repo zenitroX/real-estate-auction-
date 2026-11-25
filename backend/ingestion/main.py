@@ -24,7 +24,7 @@ from rich.table import Table
 from config.settings import get_settings
 from database.supabase_client import AuctionDatabaseClient, prepare_auction_record
 from models.auction_schema import ExtractedAuctionProperty, NoticeExtractionBatch
-from ocr_pipeline.gemini_extractor import GeminiAuctionExtractor
+from ocr_pipeline.opensource_extractor import OpenSourceAuctionExtractor
 from ocr_pipeline.pdf_router import RoutePath, route_document
 
 console = Console()
@@ -87,12 +87,12 @@ def render_properties_table(properties: List[ExtractedAuctionProperty], dry_run:
 
 def process_file(
     file_path: Path,
-    extractor: GeminiAuctionExtractor,
+    extractor: OpenSourceAuctionExtractor,
     db_client: AuctionDatabaseClient,
     source_portal: str = "Folder Ingestion",
     dry_run: bool = False,
 ) -> List[ExtractedAuctionProperty]:
-    """Process a single notice file: route document -> Gemini extraction -> Supabase upsert."""
+    """Process a single notice file: route document -> open-source extraction -> Supabase upsert."""
     console.print(f"\n[bold blue]Processing file:[/bold blue] {file_path.name}")
 
     # 1. Route document (digital vs vision)
@@ -103,7 +103,7 @@ def process_file(
     console.print(f"  Reason: [dim]{routed.reason}[/dim]")
 
     # 2. Extract structured properties
-    console.print("  [cyan]Extracting SARFAESI properties via Gemini 2.5 Flash...[/cyan]")
+    console.print("  [cyan]Extracting SARFAESI properties via OpenSourceAuctionExtractor...[/cyan]")
     batch: NoticeExtractionBatch = extractor.extract(routed)
 
     console.print(f"  Extracted [bold green]{len(batch.properties)}[/bold green] distinct property record(s).")
@@ -127,7 +127,7 @@ def process_file(
 
 def run_folder_mode(
     input_dir: Path,
-    extractor: GeminiAuctionExtractor,
+    extractor: OpenSourceAuctionExtractor,
     db_client: AuctionDatabaseClient,
     dry_run: bool = False,
 ):
@@ -180,7 +180,7 @@ def run_folder_mode(
 
 
 async def run_scrape_mode(
-    extractor: GeminiAuctionExtractor,
+    extractor: OpenSourceAuctionExtractor,
     db_client: AuctionDatabaseClient,
     portal: str = "all",
     dry_run: bool = False,
@@ -290,7 +290,7 @@ def main():
     elif not mode:
         mode = "folder"  # Default if no arguments
 
-    extractor = GeminiAuctionExtractor()
+    extractor = OpenSourceAuctionExtractor()
     db_client = AuctionDatabaseClient(dry_run=args.dry_run)
 
     if mode == "folder":

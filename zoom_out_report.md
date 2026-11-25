@@ -1,122 +1,70 @@
-# Initial Zoom Out Review Report (Stage 5)
+# Stage 5: Initial Zoom Out Review Report
 
-**Target Document**: [PROJECT.md](file:///c:/Users/rajkr/Documents/code-base/real%20estate/PROJECT.md)  
-**Evaluators**: Skeptical Architect (`egm-zoom-out`) & TRIZ Inventive Catalyst (`egm-inventive-catalyst`)  
-**Context Documents**:
-- [docs/Baanknet_Bank_Auction_Business_Blueprint.md](file:///c:/Users/rajkr/Documents/code-base/real%20estate/docs/Baanknet_Bank_Auction_Business_Blueprint.md)
-- [frontend/src/utils/domain.js](file:///c:/Users/rajkr/Documents/code-base/real%20estate/frontend/src/utils/domain.js)
-- [frontend/src/views/AdminLoginView.jsx](file:///c:/Users/rajkr/Documents/code-base/real%20estate/frontend/src/views/AdminLoginView.jsx)
+* **Target Document:** `docs/designs/customer-platform-mvp.md` (lines 1–217)
+* **Reviewers:** `egm-zoom-out`, `egm-inventive-catalyst`
+* **Goldfish Context:** `concepts_brief.md`
+* **Date:** 2026-11-25
 
 ---
 
-## 1. Executive Architectural Summary
+## Prioritized Findings
 
-The system specification in `PROJECT.md` displays an **enterprise veneer paradox**: it establishes complex, high-ceremony structures (subdomain separation, multi-tier dual caching, hand-rolled HTTP daemons, live crawler subprocess streaming) around a system whose core business function is an assisted discovery catalog with an inquiry lead form.
+### 1. Dual Status Column (`review_status` vs. `publication_status`) Creates Split-Brain Risk — **Blocker**
+* **Lenses:** `egm-zoom-out`, `egm-inventive-catalyst`
+* **Affected Scope:** Lines 103–105, 144–145, 161–162 (`Section 5.2`, `Section 6`)
+* **Issue:** Adding `publication_status` while keeping `review_status` and dual-syncing in `backend/app.py` and `supabase_client.py` risks split-brain between `001`'s RLS policy (`review_status = 'PUBLISHED'`) and the API (`publication_status = 'PUBLISHED'`).
+* **Recommendation:** Use a single status column (`review_status` extended with the needed states, or a one-time rename after dropping `001`'s RLS policy) instead of maintaining two synchronized status columns.
 
-Simultaneously, critical systemic flaws were uncovered:
-1. **Subdomain security is client-side cosmetic theater**: Both `skandx.com` and `admin.skandx.com` serve identical JavaScript bundles. Public users can enter the admin interface simply by appending `#admin` or `?portal=admin`.
-2. **Severed authentication contracts**: The backend expects HMAC-SHA256 signed 4-segment tokens, whereas the frontend hardcodes credential evaluation and mints 3-segment unsigned tokens.
-3. **Heavy crawler co-location**: Heavy Playwright headless Chromium instances and Gemini multimodal OCR jobs are co-located with user-facing low-latency REST endpoints inside a single container process.
+### 2. Unresolved Public Read Path & PostgREST Join Contradiction — **Blocker**
+* **Lenses:** `egm-zoom-out`, `egm-inventive-catalyst`
+* **Affected Scope:** Lines 44, 96–98, 147, 149–151 (`Section 5.1`, `Section 6`)
+* **Issue:** The doc leaves open revoking `anon` `SELECT` on `auction_properties` vs. adding a `public_auction_listings` view. If `SELECT` is revoked without a view, direct PostgREST joins from `saved_properties` fail; if a view is added alongside `backend/app.py`, two public read paths must be maintained. Also, line 44 vs. line 211 is unclear on whether `EXPIRED` rows are filtered out or shown with an expired label.
+* **Recommendation:** Pick one public read path (revoke `anon`/`authenticated` `SELECT` on `auction_properties` and hydrate saved/recent IDs via `backend/app.py` or `GET /api/v1/auctions?ids=...`) and explicitly define `EXPIRED` filtering/labeling.
 
----
+### 3. `verification_dimensions` Public Projection Leaks Internal Reviewer Notes — **Major**
+* **Lenses:** `egm-zoom-out`
+* **Affected Scope:** Lines 96–97, 104 (`Section 5.1`, `Section 5.2`)
+* **Issue:** `PUBLIC_AUCTION_COLUMNS` includes `verification_dimensions` in full, and each dimension object contains `reviewer`, `evidence_ref`, and `notes`, which risks leaking internal staff identifiers or unredacted legal notes.
+* **Recommendation:** Project only `status`, `reviewed_at`, and `review_period` in the `backend/app.py` public serializer.
 
-## 2. Skeptical Architect Findings (`egm-zoom-out`)
+### 4. Unvalidated 5% Service Agreement Enforced as Mandatory Clickwrap Gate — **Major**
+* **Lenses:** `egm-inventive-catalyst`
+* **Affected Scope:** Lines 124–135, 157, 185 (`Section 5.4`, `Section 6`, `Section 9`)
+* **Issue:** The design flags the 5% terms (calculation basis, GST, Tamil Nadu brokerage/RERA, clickwrap enforceability) as unresolved for legal review, yet makes clickwrap acceptance of those terms mandatory before requesting inspection or document review.
+* **Recommendation:** Use a plain-English fee disclosure acknowledgment on `customer_leads` for MVP (confirming the customer was informed of the proposed 5% model and that a separate signed mandate applies before engagement), or obtain legal sign-off before shipping `service_agreements`.
 
-### 🔴 Blocker Findings
+### 5. Over-Engineered MVP Schema (`compared_properties`, Post-MVP Billing Columns) — **Major**
+* **Lenses:** `egm-zoom-out`
+* **Affected Scope:** Lines 35, 149–151, 157 (`Section 2`, `Section 6`)
+* **Issue:** `compared_properties` in Postgres duplicates URL/client comparison state (`/compare?ids=...`), and `acquisition_outcome` / `payment_status` / `legal_review_status` in `service_agreements` belong to deferred post-MVP commission tracking.
+* **Recommendation:** Drop `compared_properties` from `005` and defer billing columns from `006`.
 
-#### Finding 2.1: Subdomain Isolation is Client-Side Cosmetic Theater Masquerading as "Bank-Grade Security"
-- **Affected Scope**: [PROJECT.md#L7-L50](file:///c:/Users/rajkr/Documents/code-base/real%20estate/PROJECT.md#L7-L50), [PROJECT.md#L149-L161](file:///c:/Users/rajkr/Documents/code-base/real%20estate/PROJECT.md#L149-L161), [domain.js](file:///c:/Users/rajkr/Documents/code-base/real%20estate/frontend/src/utils/domain.js)
-- **Technical Mechanism**:
-  `PROJECT.md` claims "bank-grade security and access control" via subdomain isolation (`admin.skandx.com` vs `skandx.com`). However, both point to the same Vercel deployment. In `domain.js`, the check relies on `window.location.hostname.startsWith('admin.')`, which is bypassed with `#admin` or `?portal=admin`.
-- **Concrete Risk**:
-  Public users download full admin review desk logic and mock credentials in the public client bundle. It incurs multi-subdomain DNS overhead with zero security benefit.
-- **Simplification / Anti-YAGNI Rationale**:
-  Consolidate onto a single domain (`skandx.com`), enforce server-side authentication (e.g. Supabase Auth) on `/admin`, and dynamic code-split administrative routes.
+### 6. Lead Status, Auth Requirement, and Foreign Key Inconsistencies — **Major**
+* **Lenses:** `egm-zoom-out`
+* **Affected Scope:** Lines 56, 118, 126–127, 153–157 (`Section 3`, `Section 5.3`, `Section 5.4`, `Section 6`)
+* **Issue:** `customer_leads.status` mixes `'NEW'`, `'Request received'`, and `'CLOSED'` without an explicit state list; `POST /api/v1/leads` requires a JWT while `user_id` is nullable; `service_agreements` lacks `REFERENCES auth.users(id) ON DELETE CASCADE` and could orphan rows if lead creation returns `409`.
+* **Recommendation:** Standardize `customer_leads.status` values, make `user_id` consistent with JWT auth, add `ON DELETE CASCADE` on `service_agreements.user_id`, and run duplicate checks before inserting any agreement row.
 
-#### Finding 2.2: Severed Authentication Contract Between Frontend and Backend
-- **Affected Scope**: [PROJECT.md#L65-L68](file:///c:/Users/rajkr/Documents/code-base/real%20estate/PROJECT.md#L65-L68), [AdminLoginView.jsx#L26-L43](file:///c:/Users/rajkr/Documents/code-base/real%20estate/frontend/src/views/AdminLoginView.jsx#L26-L43), [backend/app.py#L59-L75](file:///c:/Users/rajkr/Documents/code-base/real%20estate/backend/app.py#L59-L75)
-- **Technical Mechanism**:
-  `backend/app.py` enforces cryptographic HMAC tokens (`skandx-adm-{ts}-{sig}`). `AdminLoginView.jsx` matches credentials in local React state and issues `skandx-adm-${Date.now()}`. Backend API calls fail with 401, while `api.js` masks the failure by returning `{ status: 'success', local: true }`.
-- **Concrete Risk**:
-  Property approvals and lead updates do not persist to the database in production.
-- **Simplification / Anti-YAGNI Rationale**:
-  Direct authentication against `/api/admin/login` or Supabase Auth. Remove silent try-catch masks in `api.js`.
+### 7. Deployment Ordering Contradiction & Missing `slug` Backfill — **Major**
+* **Lenses:** `egm-zoom-out`
+* **Affected Scope:** Lines 144, 161 (`Section 6`)
+* **Issue:** Line 161 deploys `backend/app.py` before `005` and `006` are applied, and `004` adds `slug TEXT` without backfill or index while `/properties/:slugId` and `/sitemap.xml` rely on it.
+* **Recommendation:** Apply each migration before deploying code that queries its columns/tables, and backfill `slug` (or parse `<slug>-<id>` using `id`) in `004`.
 
----
+### 8. `PYTEST_CURRENT_TEST` Auth Bypass & Unspecified Admin Advisor Identity — **Major**
+* **Lenses:** `egm-zoom-out`
+* **Affected Scope:** Lines 116, 120, 192 (`Section 5.3`, `Section 10`)
+* **Issue:** Line 192 implies branching auth on `PYTEST_CURRENT_TEST`, and `PATCH /api/admin/leads` sets `assigned_advisor_id` without specifying how `skandx-adm-...` HMAC tokens resolve `admin_users.id` or enforce TTL.
+* **Recommendation:** Inject a test `ADMIN_JWT_SECRET` in `pytest` fixtures instead of branching auth code, and document HMAC payload (`admin_id`, `exp`) and TTL checks.
 
-### 🟡 Major Findings
+### 9. Unwired `frameworkFilter` & Route Parameter Naming Drift — **Nit**
+* **Lenses:** `egm-zoom-out`
+* **Affected Scope:** Lines 64, 169, 210 (`Section 4`, `Section 7`, `Section 12`)
+* **Issue:** `frameworkFilter` has no DB column or Phase 1 requirement, and routes alternate between `/properties/:slugId` and `/properties/:id`.
+* **Recommendation:** Remove `frameworkFilter` as dead UI and standardize on one route parameter convention.
 
-#### Finding 2.3: Reinventing the Web Framework with a 650-Line Hand-Rolled `http.server`
-- **Affected Scope**: [PROJECT.md#L32-L36](file:///c:/Users/rajkr/Documents/code-base/real%20estate/PROJECT.md#L32-L36), [backend/app.py](file:///c:/Users/rajkr/Documents/code-base/real%20estate/backend/app.py)
-- **Technical Mechanism**:
-  `backend/app.py` hand-rolls route parsing, manual thread locks, CORS headers, and byte counting on top of Python's standard `http.server`.
-- **Concrete Risk**:
-  Fragile concurrency, risk of deadlock, and unhandled keep-alive connections. Supabase already provides a managed REST API (PostgREST) with Row Level Security.
-- **Simplification Rationale**:
-  Adopt FastAPI (<100 lines) for custom endpoints, or query Supabase directly from the frontend using Row-Level Security for public verified listings.
-
-#### Finding 2.4: Fragile Dual State Duplication (Local JSON Files vs. Supabase)
-- **Affected Scope**: [PROJECT.md#L40-L42](file:///c:/Users/rajkr/Documents/code-base/real%20estate/PROJECT.md#L40-L42), [PROJECT.md#L96](file:///c:/Users/rajkr/Documents/code-base/real%20estate/PROJECT.md#L96), [backend/app.py](file:///c:/Users/rajkr/Documents/code-base/real%20estate/backend/app.py)
-- **Technical Mechanism**:
-  Dual-writing to ephemeral container disks (`leads.json`, `auctions_data.json`) and Supabase.
-- **Concrete Risk**:
-  Container restarts wipe ephemeral disks; multi-instance containers suffer split-brain writes.
-- **Simplification Rationale**:
-  Designate Supabase PostgreSQL as the single source of truth. Delete local JSON dual-writes.
-
-#### Finding 2.5: Heavy Browser Automation Subprocesses Inside Web REST Daemon
-- **Affected Scope**: [PROJECT.md#L77-L79](file:///c:/Users/rajkr/Documents/code-base/real%20estate/PROJECT.md#L77-L79), [backend/app.py](file:///c:/Users/rajkr/Documents/code-base/real%20estate/backend/app.py)
-- **Technical Mechanism**:
-  `POST /api/scrape/trigger` spawns headless Chromium inside the web API container, consuming 500MB–1.5GB RAM and threatening memory limits.
-- **Simplification Rationale**:
-  Decouple batch scraping into a scheduled GitHub Actions workflow or standalone background worker.
-
-#### Finding 2.6: Missing Primary Domain Filter: Physical vs. Symbolic Possession
-- **Affected Scope**: [PROJECT.md#L53-L64](file:///c:/Users/rajkr/Documents/code-base/real%20estate/PROJECT.md#L53-L64), [Baanknet Blueprint#L55-L80](file:///c:/Users/rajkr/Documents/code-base/real%20estate/docs/Baanknet_Bank_Auction_Business_Blueprint.md#L55-L80)
-- **Technical Mechanism**:
-  Symbolic possession carries 6–18 month DRT court stay risks, whereas Physical possession allows immediate occupancy. This distinction is treated as secondary metadata rather than a primary filter.
-- **Simplification Rationale**:
-  Make Possession Type and Court Stay Status top-level badge and filter dimensions.
-
----
-
-### 🟢 Nit Findings
-
-#### Finding 2.7: Zombie Bidding Artifacts
-- **Affected Scope**: `BiddingModal.jsx`, `INITIAL_BIDS`, mock hotline references.
-- **Simplification Rationale**:
-  Remove vestigial bidding components to maintain codebase honesty regarding concierge lead generation.
-
----
-
-## 3. TRIZ Inventive Contradiction Eliminations (`egm-inventive-catalyst`)
-
-| Contradiction | Accepted Compromise in Spec | TRIZ Inventive Resolution |
-| :--- | :--- | :--- |
-| **Operational Simplicity vs Admin Boundary Security** | Single SPA bundle delivers admin code to public visitors. | **Extraction & Segmentation**: Split Vite targets into `marketplace` and `admin-desk`. Block unauthorized access at edge CDN before bundle download. |
-| **Low-Latency REST API vs Heavy Crawling/OCR** | Running Playwright Chromium in the REST API container, risking OOM crashes. | **Intermediary & Cheap Dispensables**: Decouple crawlers into ephemeral worker containers triggered asynchronously via message queue. |
-| **Buyer Conversion Speed vs Officer Spam Prevention** | Manual toll-free desk bottlenecking every customer lead. | **Inversion & Intermediary**: Automated programmable telephony proxy (masked calling session) connects verified buyers directly to bank recovery officers. |
-| **Catalog Verification Accuracy vs Statutory Auction Window** | Properties sit idle in `PENDING_REVIEW` while 15-day auction windows expire. | **Dynamics & Cushioning**: Two-tier publishing (deterministic auto-publishing for schema-validated notices with confidence >0.95, manual gating for edge cases). |
-
----
-
-## 4. Strategic High-Leverage Inventions
-
-1. **Algorithmic Pre-Auction Bridge Loan Qualifier (Level 4 Monetization)**:
-   Pre-computes loan-to-value ratios and pre-cleared bridge liquidity terms with partner NBFCs, solving the statutory 15-day 75% balance payment requirement for H1 winners.
-2. **Deterministic Price-Drop Inverted Alert Radar (Level 1 & Level 3 Deal Sourcing)**:
-   Hashes `SHA256(bank_id + district + survey_number)` to detect re-auction price reductions (10–20% drops) and automatically pushes WhatsApp alerts to subscribed investor syndicates.
-3. **Section 14 Eviction & Possession Risk Indexing**:
-   Extracts Section 14 CMM orders, physical/symbolic possession status, and queries public e-Courts listings to assign a transparent "Possession Risk Score" directly on listing cards.
-
----
-
-## 5. Architectural Verdict & Action Matrix
-
-| Architectural Item | Current State | Required Target State |
-| :--- | :--- | :--- |
-| **Portal Boundary** | Single SPA with `#admin` URL hash bypass | Standalone admin build or server-gated edge route |
-| **Authentication** | Client-side credential comparison | Server-side cryptographic JWT / Supabase Auth |
-| **Data Persistence** | Ephemeral `.tmp` JSON file dual-write | Supabase PostgreSQL as sole source of truth |
-| **Crawler Workload** | Heavy subprocess spawned in web API process | Asynchronous background worker / scheduled cron |
-| **Domain Modeling** | Generic e-commerce BHK / price filters | SARFAESI legal risk index (Physical vs Symbolic possession) |
+### 10. Outbound Auth Verification Hop on Every Authenticated Backend Request — **Nit**
+* **Lenses:** `egm-zoom-out`
+* **Affected Scope:** Line 118 (`Section 5.3`)
+* **Issue:** Calling `{SUPABASE_URL}/auth/v1/user` on every `POST /api/v1/leads` and `GET /api/v1/me/leads` adds latency.
+* **Recommendation:** Acceptable for MVP; note local JWT verification (`SUPABASE_JWT_SECRET`) as a future optimization.

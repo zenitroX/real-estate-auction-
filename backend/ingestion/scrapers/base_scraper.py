@@ -97,6 +97,10 @@ class BaseScraper(ABC):
         page = await context.new_page()
         # Set extra HTTP headers
         await page.set_extra_http_headers(DEFAULT_HEADERS)
+        stealth_path = Path(__file__).resolve().parent / "stealth.js"
+        if stealth_path.exists():
+            stealth_js = stealth_path.read_text(encoding="utf-8").replace("__LANGUAGES__", '["en-US", "en", "ta"]')
+            await page.add_init_script(stealth_js)
         return page
 
     async def polite_sleep(self, min_seconds: float = 1.5, max_seconds: float = 3.5):

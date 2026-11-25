@@ -41,7 +41,258 @@ DATA_DIR = BASE_DIR / "data"
 ENVIRONMENT = os.getenv("ENVIRONMENT", "development").lower()
 SUPABASE_URL = os.getenv("SUPABASE_URL", "").rstrip("/")
 SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY") or os.getenv("SUPABASE_KEY", "")
-ADMIN_SECRET = os.getenv("ADMIN_JWT_SECRET") or os.getenv("SUPABASE_KEY", "") or "skandx-admin-secret-auth-key-2026"
+ADMIN_SECRET = os.getenv("ADMIN_JWT_SECRET", "")
+ADMIN_TOKEN_TTL_SECONDS = 28800  # 8 hours
+
+PUBLIC_AUCTION_COLUMNS = (
+    "id",
+    "property_title",
+    "bank_name",
+    "branch_name",
+    "asset_category",
+    "possession_type",
+    "survey_numbers",
+    "patta_or_door_no",
+    "village_or_locality",
+    "taluk",
+    "district",
+    "state",
+    "pincode",
+    "area_description",
+    "area_sqft",
+    "boundaries",
+    "reserve_price_inr",
+    "previous_reserve_price_inr",
+    "price_drop_percentage",
+    "emd_amount_inr",
+    "bid_increment_inr",
+    "emd_last_date",
+    "inspection_date_info",
+    "auction_date",
+    "source_portal",
+    "source_pdf_url",
+    "bidding_portal_url",
+    "review_status",
+    "publication_status",
+    "verification_dimensions",
+    "risk_disclosures",
+    "slug",
+    "last_source_confirmed_at",
+    "created_at",
+)
+
+ADMIN_EDITABLE_PROPERTY_FIELDS = {
+    "title": "property_title",
+    "property_title": "property_title",
+    "bank": "bank_name",
+    "bank_name": "bank_name",
+    "branch": "branch_name",
+    "branch_name": "branch_name",
+    "category": "asset_category",
+    "asset_category": "asset_category",
+    "possession": "possession_type",
+    "possession_type": "possession_type",
+    "survey_numbers": "survey_numbers",
+    "patta_or_door_no": "patta_or_door_no",
+    "locality": "village_or_locality",
+    "village_or_locality": "village_or_locality",
+    "taluk": "taluk",
+    "district": "district",
+    "state": "state",
+    "pincode": "pincode",
+    "area_description": "area_description",
+    "area": "area_sqft",
+    "areaSqft": "area_sqft",
+    "area_sqft": "area_sqft",
+    "boundaries": "boundaries",
+    "reserve": "reserve_price_inr",
+    "reserve_price": "reserve_price_inr",
+    "reserve_price_inr": "reserve_price_inr",
+    "previous_reserve_price_inr": "previous_reserve_price_inr",
+    "price_drop_percentage": "price_drop_percentage",
+    "emd": "emd_amount_inr",
+    "emd_amount_inr": "emd_amount_inr",
+    "bidIncrement": "bid_increment_inr",
+    "bid_increment_inr": "bid_increment_inr",
+    "emdLastDate": "emd_last_date",
+    "emd_last_date": "emd_last_date",
+    "inspection_date_info": "inspection_date_info",
+    "auctionDate": "auction_date",
+    "auction_date": "auction_date",
+    "source_portal": "source_portal",
+    "sourcePdfUrl": "source_pdf_url",
+    "source_pdf_url": "source_pdf_url",
+    "biddingPortalUrl": "bidding_portal_url",
+    "bidding_portal_url": "bidding_portal_url",
+    "reviewNotes": "review_notes",
+    "review_notes": "review_notes",
+    "publicationStatus": "publication_status",
+    "publication_status": "publication_status",
+    "verificationDimensions": "verification_dimensions",
+    "verification_dimensions": "verification_dimensions",
+    "riskDisclosures": "risk_disclosures",
+    "risk_disclosures": "risk_disclosures",
+}
+
+PUBLIC_VERIFICATION_KEYS = ("status", "reviewed_at", "review_period")
+
+VALID_LEAD_STATUSES = {
+    "NEW",
+    "IN_REVIEW",
+    "SCHEDULED",
+    "REQUEST_RECEIVED",
+    "CONTACTED",
+    "IN_PROGRESS",
+    "CLOSED",
+}
+
+INQUIRY_TYPE_MAP = {
+    "General Auction Guidance": "GENERAL_GUIDANCE",
+    "GENERAL_GUIDANCE": "GENERAL_GUIDANCE",
+    "Site Inspection": "PHYSICAL_INSPECTION",
+    "Physical Property Inspection": "PHYSICAL_INSPECTION",
+    "PHYSICAL_INSPECTION": "PHYSICAL_INSPECTION",
+    "Document Review": "DOCUMENT_REVIEW",
+    "Legal Title Search Report": "DOCUMENT_REVIEW",
+    "Download Notice": "GENERAL_GUIDANCE",
+    "DOCUMENT_REVIEW": "DOCUMENT_REVIEW",
+    "Legal Coordination": "LEGAL_COORDINATION",
+    "LEGAL_COORDINATION": "LEGAL_COORDINATION",
+    "Auction Guidance": "AUCTION_GUIDANCE",
+    "AUCTION_GUIDANCE": "AUCTION_GUIDANCE",
+    "Complete Buyer Assistance": "COMPLETE_ASSISTANCE",
+    "COMPLETE_ASSISTANCE": "COMPLETE_ASSISTANCE",
+}
+AGREEMENT_REQUIRED_TYPES = {
+    "PHYSICAL_INSPECTION",
+    "DOCUMENT_REVIEW",
+    "LEGAL_COORDINATION",
+    "AUCTION_GUIDANCE",
+    "COMPLETE_ASSISTANCE",
+}
+AGREEMENT_VERSION = "v1.0-proposed"
+AGREEMENT_CALCULATION_BASIS = "5% of final successful auction hammer price (proposed; subject to formal written mandate)"
+AGREEMENT_COMMISSION_RATE = 5.00
+
+_in_memory_leads = []
+_in_memory_agreements = []
+
+def _get_admin_secret() -> str:
+    """Return configured ADMIN_JWT_SECRET or fail closed."""
+    secret = ADMIN_SECRET or os.getenv("ADMIN_JWT_SECRET", "")
+    if not secret:
+        raise RuntimeError("ADMIN_JWT_SECRET is not configured.")
+    return secret
+
+def serialize_public_auction(row: dict) -> dict:
+    """Return only approved public auction fields, stripping borrower/officer PII and internal verification notes."""
+    out = {col: row[col] for col in PUBLIC_AUCTION_COLUMNS if col in row}
+    dims = out.get("verification_dimensions")
+    if isinstance(dims, dict):
+        out["verification_dimensions"] = {
+            k: {pk: v[pk] for pk in PUBLIC_VERIFICATION_KEYS if pk in v}
+            for k, v in dims.items()
+            if isinstance(v, dict)
+        }
+    return out
+
+def _is_published_auction(row: dict) -> bool:
+    status = row.get("publication_status") or row.get("review_status") or row.get("status") or "PUBLISHED"
+    return status == "PUBLISHED"
+
+def _filter_and_paginate_auctions(data: list, query_params: dict):
+    """Apply Phase 1 discovery filters, sorting, and pagination."""
+    from datetime import datetime, timezone
+    now_ts = time.time()
+    include_expired = query_params.get("include_expired", ["false"])[0].lower() in ("true", "1")
+    ids_raw = query_params.get("ids", [""])[0].strip()
+    ids_filter = {i.strip() for i in ids_raw.split(",") if i.strip()} if ids_raw else None
+
+    q = query_params.get("q", [""])[0].strip().lower()
+    district = query_params.get("district", [""])[0].strip().lower()
+    prop_type = query_params.get("type", [""])[0].strip().lower()
+    bank = query_params.get("bank", [""])[0].strip().lower()
+    possession = query_params.get("possession", [""])[0].strip().lower()
+    min_price = query_params.get("min_price", [""])[0].strip()
+    max_price = query_params.get("max_price", [""])[0].strip()
+    deadline = query_params.get("deadline", [""])[0].strip().lower()
+    sort_by = query_params.get("sort", ["deadline_asc"])[0].strip().lower()
+
+    def parse_ts(val):
+        if not val:
+            return None
+        try:
+            return datetime.fromisoformat(str(val).replace("Z", "+00:00")).timestamp()
+        except Exception:
+            return None
+
+    filtered = []
+    for row in data:
+        if not _is_published_auction(row):
+            continue
+        if ids_filter is not None and str(row.get("id")) not in ids_filter:
+            continue
+        auc_ts = parse_ts(row.get("auction_date"))
+        if not include_expired and auc_ts is not None and auc_ts < now_ts and ids_filter is None:
+            continue
+        if q:
+            hay = " ".join(str(row.get(k) or "") for k in ("property_title", "district", "village_or_locality", "bank_name", "patta_or_door_no")).lower()
+            if q not in hay:
+                continue
+        if district and district != "all" and district not in str(row.get("district") or "").lower():
+            continue
+        if prop_type and prop_type != "all" and prop_type not in str(row.get("asset_category") or "").lower():
+            continue
+        if bank and bank != "all" and bank not in str(row.get("bank_name") or "").lower():
+            continue
+        if possession and possession != "all" and possession not in str(row.get("possession_type") or "").lower():
+            continue
+        price = float(row.get("reserve_price_inr") or 0)
+        if min_price:
+            try:
+                if price < float(min_price):
+                    continue
+            except ValueError:
+                pass
+        if max_price:
+            try:
+                if price > float(max_price):
+                    continue
+            except ValueError:
+                pass
+        if deadline in ("7d", "14d", "30d") and auc_ts is not None:
+            days = int(deadline[:-1])
+            if auc_ts > now_ts + days * 86400:
+                continue
+        filtered.append(serialize_public_auction(row))
+
+    if sort_by == "price_asc":
+        filtered.sort(key=lambda r: float(r.get("reserve_price_inr") or 0))
+    elif sort_by == "price_desc":
+        filtered.sort(key=lambda r: float(r.get("reserve_price_inr") or 0), reverse=True)
+    elif sort_by == "newest":
+        filtered.sort(key=lambda r: str(r.get("created_at") or ""), reverse=True)
+    else:
+        filtered.sort(key=lambda r: str(r.get("auction_date") or "9999"))
+
+    try:
+        page = max(1, int(query_params.get("page", ["1"])[0]))
+    except ValueError:
+        page = 1
+    try:
+        limit = min(50, max(1, int(query_params.get("limit", ["20"])[0])))
+    except ValueError:
+        limit = 20
+
+    total = len(filtered)
+    total_pages = max(1, (total + limit - 1) // limit)
+    start = (page - 1) * limit
+    return filtered[start:start + limit], {
+        "page": page,
+        "limit": limit,
+        "total": total,
+        "total_pages": total_pages,
+    }
 
 # In-memory auction cache
 _cache = {
@@ -220,9 +471,10 @@ def check_contact_rate_limit(client_ip: str, limit: int = 15, window_seconds: in
         return True
 
 def generate_admin_token() -> str:
-    """Generate cryptographically signed, timestamped admin session token (valid 24h)."""
+    """Generate cryptographically signed, timestamped admin session token (valid 8h)."""
+    secret = _get_admin_secret()
     ts = str(int(time.time()))
-    sig = hmac.new(ADMIN_SECRET.encode("utf-8"), ts.encode("utf-8"), hashlib.sha256).hexdigest()[:32]
+    sig = hmac.new(secret.encode("utf-8"), ts.encode("utf-8"), hashlib.sha256).hexdigest()[:32]
     return f"skandx-adm-{ts}-{sig}"
 
 def is_safe_url(url_str: str) -> bool:
@@ -264,36 +516,26 @@ class SafeRedirectHandler(urllib.request.HTTPRedirectHandler):
 
 def verify_admin_token(token: str) -> bool:
     """Validate HMAC signature and expiration window for admin token."""
-    if not token:
-        return False
-
-    # Explicitly allowed test token ONLY when explicitly enabled or during tests
-    if token == "skandx-test-token-bypass":
-        if os.getenv("ALLOW_TEST_TOKEN", "false").lower() in ("true", "1") or bool(os.getenv("PYTEST_CURRENT_TEST")):
-            return True
-        return False
-
-    if not token.startswith("skandx-adm-"):
+    if not token or not token.startswith("skandx-adm-"):
         return False
     parts = token.split("-")
     if len(parts) != 4:  # ["skandx", "adm", ts, sig]
         return False
     ts_str, sig = parts[2], parts[3]
     try:
+        secret = _get_admin_secret()
         ts = int(ts_str)
-        # Token valid for 24 hours (86,400s), reject future tokens with >60s clock skew
-        if time.time() - ts > 86400 or time.time() < ts - 60:
+        # Token valid for 8 hours (28,800s), reject future tokens with >60s clock skew
+        if time.time() - ts > ADMIN_TOKEN_TTL_SECONDS or time.time() < ts - 60:
             return False
-        expected = hmac.new(ADMIN_SECRET.encode("utf-8"), ts_str.encode("utf-8"), hashlib.sha256).hexdigest()[:32]
+        expected = hmac.new(secret.encode("utf-8"), ts_str.encode("utf-8"), hashlib.sha256).hexdigest()[:32]
         return hmac.compare_digest(sig, expected)
     except Exception:
         return False
 
 def load_leads(limit=None, offset=0):
-    """Thread-safe lead retrieval with Supabase authoritative fetch and local fallback."""
+    """Thread-safe lead retrieval from Supabase (with in-memory fallback when offline/unconfigured)."""
     with _leads_lock:
-        leads_file = DATA_DIR / "leads.jsonl"
-        legacy_file = DATA_DIR / "leads.json"
         leads = []
 
         # 1. Authoritative fetch from Supabase if configured and breaker allows
@@ -311,7 +553,7 @@ def load_leads(limit=None, offset=0):
                 with urllib.request.urlopen(req, timeout=4) as response:
                     sb_leads = json.loads(response.read().decode("utf-8"))
                     circuit_breaker.record_success()
-                    if isinstance(sb_leads, list) and sb_leads:
+                    if isinstance(sb_leads, list):
                         leads = [
                             {
                                 "id": item.get("id"),
@@ -330,23 +572,9 @@ def load_leads(limit=None, offset=0):
             except Exception:
                 circuit_breaker.record_failure()
 
-        # 2. Local fallback if Supabase not configured or offline
-        if not leads:
-            if leads_file.exists():
-                try:
-                    with open(leads_file, "r", encoding="utf-8") as f:
-                        for line in f:
-                            line = line.strip()
-                            if line:
-                                leads.append(json.loads(line))
-                    leads.reverse()  # Newest first
-                except Exception:
-                    leads = []
-            elif legacy_file.exists():
-                try:
-                    leads = json.loads(legacy_file.read_text(encoding="utf-8"))
-                except Exception:
-                    leads = []
+        # 2. In-memory fallback only when Supabase is unconfigured or offline
+        if not leads and _in_memory_leads:
+            leads = list(reversed(_in_memory_leads))
 
         total = len(leads)
         if offset > 0:
@@ -356,31 +584,23 @@ def load_leads(limit=None, offset=0):
         return leads, total
 
 def save_lead(lead_data):
-    """Thread-safe, append-only save for customer inquiries with Supabase replication."""
+    """Thread-safe save for customer inquiries to Supabase (or in-memory when unconfigured)."""
     with _leads_lock:
-        DATA_DIR.mkdir(parents=True, exist_ok=True)
-        leads_file = DATA_DIR / "leads.jsonl"
-
         lead_data["id"] = f"lead-{int(time.time() * 1000)}"
         lead_data["createdAt"] = int(time.time())
         lead_data["status"] = lead_data.get("status", "NEW")
+        _in_memory_leads.append(dict(lead_data))
 
-        # O(1) append-only disk write
-        with open(leads_file, "a", encoding="utf-8") as f:
-            f.write(json.dumps(lead_data) + "\n")
-
-        # Circuit breaker fast bypass: if OPEN, bypass blocking network request to Supabase
         if circuit_breaker.state == CircuitBreaker.OPEN:
             return lead_data
 
-        # Replicate to Supabase for durability across ephemeral container restarts
         if SUPABASE_URL and SUPABASE_KEY and circuit_breaker.allow_request():
             try:
                 supabase_headers = {
                     "apikey": SUPABASE_KEY,
                     "Authorization": f"Bearer {SUPABASE_KEY}",
                     "Content-Type": "application/json",
-                    "Prefer": "return=minimal"
+                    "Prefer": "return=representation"
                 }
                 lead_row = {
                     "customer_name": lead_data.get("customerName", "Interested Bidder"),
@@ -390,6 +610,7 @@ def save_lead(lead_data):
                     "property_title": lead_data.get("propertyTitle", ""),
                     "inquiry_type": lead_data.get("inquiryType", "General Inquiry"),
                     "notes": lead_data.get("message", ""),
+                    "status": lead_data["status"],
                 }
                 req = urllib.request.Request(
                     f"{SUPABASE_URL}/rest/v1/customer_leads",
@@ -397,13 +618,179 @@ def save_lead(lead_data):
                     headers=supabase_headers,
                     method="POST"
                 )
-                with urllib.request.urlopen(req, timeout=4):
-                    pass
+                with urllib.request.urlopen(req, timeout=4) as resp:
+                    inserted = json.loads(resp.read().decode("utf-8"))
+                    if isinstance(inserted, list) and inserted:
+                        lead_data["id"] = inserted[0].get("id", lead_data["id"])
                 circuit_breaker.record_success()
             except Exception:
                 circuit_breaker.record_failure()
 
         return lead_data
+
+def verify_customer_jwt(auth_header: str):
+    """Verify Supabase customer JWT against {SUPABASE_URL}/auth/v1/user and return user_id or None."""
+    if not auth_header or not auth_header.startswith("Bearer "):
+        return None
+    token = auth_header.split(" ", 1)[1].strip()
+    if not token or not SUPABASE_URL:
+        return None
+    try:
+        req = urllib.request.Request(
+            f"{SUPABASE_URL}/auth/v1/user",
+            headers={
+                "apikey": SUPABASE_KEY,
+                "Authorization": f"Bearer {token}",
+            },
+        )
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            user_obj = json.loads(resp.read().decode("utf-8"))
+            return user_obj.get("id")
+    except Exception:
+        return None
+
+def create_lead_and_agreement(user_id: str, body: dict, client_ip: str, user_agent: str):
+    """Create lead (and service agreement when required) atomically, enforcing active-lead dedup."""
+    prop_id = str(body.get("propertyId") or "").strip()
+    raw_type = str(body.get("inquiryType") or "General Auction Guidance").strip()
+    canonical_type = INQUIRY_TYPE_MAP.get(raw_type)
+    if not canonical_type:
+        return {"error": "Validation failed", "message": "Unsupported inquiryType."}, 400
+
+    require_agreement = canonical_type in AGREEMENT_REQUIRED_TYPES
+    accepted_name = str(body.get("acceptedName") or body.get("customerName") or "").strip()
+    if require_agreement and (not body.get("agreementAccepted") or not accepted_name):
+        return {
+            "error": "Agreement required",
+            "message": "Explicit acceptance of the proposed 5% service agreement is required for substantive assistance.",
+        }, 400
+
+    with _leads_lock:
+        for existing in _in_memory_leads:
+            if (
+                existing.get("userId") == user_id
+                and str(existing.get("propertyId")) == prop_id
+                and existing.get("status") != "CLOSED"
+            ):
+                return {"error": "Duplicate lead", "message": "An active request already exists for this property."}, 409
+
+        if SUPABASE_URL and SUPABASE_KEY and circuit_breaker.allow_request():
+            try:
+                rpc_payload = {
+                    "p_user_id": user_id,
+                    "p_property_id": prop_id,
+                    "p_property_title": body.get("propertyTitle", "Property Auction"),
+                    "p_customer_name": body.get("customerName", "SKANDX Buyer"),
+                    "p_phone": body.get("phone", ""),
+                    "p_email": body.get("email", ""),
+                    "p_preferred_contact": body.get("preferredContact", "PHONE"),
+                    "p_inquiry_type": canonical_type,
+                    "p_notes": body.get("message", ""),
+                    "p_require_agreement": require_agreement,
+                    "p_commission_rate": AGREEMENT_COMMISSION_RATE,
+                    "p_calculation_basis": AGREEMENT_CALCULATION_BASIS,
+                    "p_agreement_version": AGREEMENT_VERSION,
+                    "p_accepted_name": accepted_name,
+                    "p_ip": client_ip,
+                    "p_ua": user_agent[:250],
+                }
+                req = urllib.request.Request(
+                    f"{SUPABASE_URL}/rest/v1/rpc/create_lead_with_agreement",
+                    data=json.dumps(rpc_payload).encode("utf-8"),
+                    headers={
+                        "apikey": SUPABASE_KEY,
+                        "Authorization": f"Bearer {SUPABASE_KEY}",
+                        "Content-Type": "application/json",
+                    },
+                    method="POST",
+                )
+                with urllib.request.urlopen(req, timeout=5) as resp:
+                    rpc_res = json.loads(resp.read().decode("utf-8"))
+                circuit_breaker.record_success()
+                return {
+                    "status": "success",
+                    "leadId": rpc_res.get("lead_id"),
+                    "leadCode": rpc_res.get("lead_code"),
+                    "agreementId": rpc_res.get("agreement_id"),
+                    "leadStatus": "REQUEST_RECEIVED",
+                }, 201
+            except urllib.error.HTTPError as he:
+                if he.code == 409 or "23505" in he.read().decode("utf-8", errors="ignore"):
+                    return {"error": "Duplicate lead", "message": "An active request already exists for this property."}, 409
+                circuit_breaker.record_failure()
+            except Exception:
+                circuit_breaker.record_failure()
+
+        lead_id = f"lead-{int(time.time() * 1000)}"
+        lead_code = f"SK-{int(time.time()) % 1000000:06d}"
+        record = {
+            "id": lead_id,
+            "leadCode": lead_code,
+            "userId": user_id,
+            "customerName": body.get("customerName", "SKANDX Buyer"),
+            "phone": body.get("phone", ""),
+            "email": body.get("email", ""),
+            "propertyId": prop_id,
+            "propertyTitle": body.get("propertyTitle", "Property Auction"),
+            "inquiryType": canonical_type,
+            "message": body.get("message", ""),
+            "status": "REQUEST_RECEIVED",
+            "createdAt": int(time.time()),
+        }
+        _in_memory_leads.append(record)
+        agreement_id = None
+        if require_agreement:
+            agreement_id = f"agr-{int(time.time() * 1000)}"
+            _in_memory_agreements.append({
+                "id": agreement_id,
+                "userId": user_id,
+                "propertyId": prop_id,
+                "leadId": lead_id,
+                "commissionRatePct": AGREEMENT_COMMISSION_RATE,
+                "agreementVersion": AGREEMENT_VERSION,
+                "acceptedName": accepted_name,
+            })
+        return {
+            "status": "success",
+            "leadId": lead_id,
+            "leadCode": lead_code,
+            "agreementId": agreement_id,
+            "leadStatus": "REQUEST_RECEIVED",
+        }, 201
+
+def persist_lead_update(lead_id, new_status, notes=None, assigned_advisor_id=None):
+    """Persist admin lead status, advisor assignment, and optional notes."""
+    with _leads_lock:
+        for item in _in_memory_leads:
+            if str(item.get("id")) == str(lead_id):
+                item["status"] = new_status
+                if notes is not None:
+                    item["message"] = notes
+                if assigned_advisor_id is not None:
+                    item["assignedAdvisorId"] = assigned_advisor_id
+
+    if SUPABASE_URL and SUPABASE_KEY and lead_id and circuit_breaker.allow_request():
+        try:
+            encoded_id = urllib.parse.quote(str(lead_id), safe="")
+            url = f"{SUPABASE_URL}/rest/v1/customer_leads?id=eq.{encoded_id}"
+            headers = {
+                "apikey": SUPABASE_KEY,
+                "Authorization": f"Bearer {SUPABASE_KEY}",
+                "Content-Type": "application/json",
+                "Prefer": "return=minimal"
+            }
+            body = {"status": new_status}
+            if notes is not None:
+                body["notes"] = notes
+            if assigned_advisor_id is not None:
+                body["assigned_advisor_id"] = assigned_advisor_id
+            req = urllib.request.Request(url, data=json.dumps(body).encode("utf-8"), headers=headers, method="PATCH")
+            with urllib.request.urlopen(req, timeout=5):
+                pass
+            circuit_breaker.record_success()
+        except Exception as e:
+            circuit_breaker.record_failure()
+            print(f"[Supabase Lead PATCH Notice]: {e}")
 
 def persist_property_update(prop_id, new_status, updated_fields=None):
     """Persist verified status and edited details to local storage and Supabase."""
@@ -463,8 +850,12 @@ def persist_property_update(prop_id, new_status, updated_fields=None):
                 "Prefer": "return=minimal"
             }
             body = {"review_status": new_status}
-            if "reserve" in updated_fields:
-                body["reserve_price_inr"] = updated_fields["reserve"]
+            for k, v in updated_fields.items():
+                db_col = ADMIN_EDITABLE_PROPERTY_FIELDS.get(k)
+                if db_col and v is not None:
+                    body[db_col] = v
+            encoded_id = urllib.parse.quote(str(prop_id), safe="")
+            url = f"{SUPABASE_URL}/rest/v1/auction_properties?id=eq.{encoded_id}"
             req = urllib.request.Request(url, data=json.dumps(body).encode("utf-8"), headers=headers, method="PATCH")
             with urllib.request.urlopen(req, timeout=5):
                 pass
@@ -612,14 +1003,6 @@ class ApiRequestHandler(http.server.BaseHTTPRequestHandler):
             token = auth_header.split(" ", 1)[1].strip()
         elif "X-Admin-Token" in self.headers:
             token = self.headers["X-Admin-Token"].strip()
-        else:
-            # Also check query param ?token=... for split-pane iframe notice viewers
-            try:
-                parsed = urllib.parse.urlparse(self.path)
-                qs = urllib.parse.parse_qs(parsed.query)
-                token = qs.get("token", [""])[0].strip()
-            except Exception:
-                token = ""
 
         return verify_admin_token(token)
 
@@ -646,11 +1029,11 @@ class ApiRequestHandler(http.server.BaseHTTPRequestHandler):
         path = parsed_url.path
         query_params = urllib.parse.parse_qs(parsed_url.query)
 
-        # Route 1: Public /api/auctions (Returns only published/verified properties)
-        if path == "/api/auctions":
+        # Route 1: Public /api/auctions & /api/v1/auctions (Returns only published/verified properties, PII-stripped)
+        if path in ("/api/auctions", "/api/v1/auctions"):
             t0 = time.time()
             data, source = get_raw_auctions()
-            filtered = [p for p in data if (p.get("review_status") or p.get("status") or "PUBLISHED") == "PUBLISHED"]
+            filtered, pagination = _filter_and_paginate_auctions(data, query_params)
             latency_ms = round((time.time() - t0) * 1000, 2)
 
             payload = json.dumps({
@@ -658,7 +1041,8 @@ class ApiRequestHandler(http.server.BaseHTTPRequestHandler):
                 "source": source,
                 "count": len(filtered),
                 "latency_ms": latency_ms,
-                "data": filtered
+                "data": filtered,
+                "pagination": pagination,
             }).encode("utf-8")
 
             self.send_response(200)
@@ -668,6 +1052,56 @@ class ApiRequestHandler(http.server.BaseHTTPRequestHandler):
             self.send_cors_headers()
             self.end_headers()
             self.wfile.write(payload)
+            return
+
+        # Route 1b: Public /api/v1/auctions/<idOrSlug>
+        elif path.startswith("/api/v1/auctions/"):
+            id_or_slug = urllib.parse.unquote(path[len("/api/v1/auctions/"):]).strip("/")
+            data, _ = get_raw_auctions()
+            match = next(
+                (
+                    serialize_public_auction(p)
+                    for p in data
+                    if _is_published_auction(p) and (str(p.get("id")) == id_or_slug or p.get("slug") == id_or_slug)
+                ),
+                None,
+            )
+            if not match:
+                self._send_json(404, {"error": "Not Found", "message": "Auction listing not found."})
+                return
+            self._send_json(200, {"status": "success", "data": match}, cache_private=False)
+            return
+
+        # Route 1c: Public /api/v1/districts
+        elif path == "/api/v1/districts":
+            data, _ = get_raw_auctions()
+            counts = {}
+            for p in data:
+                if _is_published_auction(p) and p.get("district"):
+                    d = str(p["district"]).strip()
+                    counts[d] = counts.get(d, 0) + 1
+            districts = [{"district": k, "count": v} for k, v in sorted(counts.items())]
+            self._send_json(200, {"status": "success", "data": districts}, cache_private=False)
+            return
+
+        # Route 1d: Public /sitemap.xml
+        elif path == "/sitemap.xml":
+            data, _ = get_raw_auctions()
+            base_url = os.getenv("PUBLIC_SITE_URL", "https://skandx.com").rstrip("/")
+            urls = [f"{base_url}/", f"{base_url}/auctions", f"{base_url}/about", f"{base_url}/services"]
+            for p in data:
+                if _is_published_auction(p):
+                    slug_or_id = p.get("slug") or p.get("id")
+                    if slug_or_id:
+                        urls.append(f"{base_url}/properties/{urllib.parse.quote(str(slug_or_id))}")
+            xml_items = "".join(f"<url><loc>{u}</loc></url>" for u in urls)
+            xml_body = f'<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">{xml_items}</urlset>'.encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/xml; charset=utf-8")
+            self.send_header("Content-Length", str(len(xml_body)))
+            self.send_cors_headers()
+            self.end_headers()
+            self.wfile.write(xml_body)
             return
 
         # Route 2: Admin /api/admin/properties (Protected: Returns all properties including PENDING_REVIEW)
@@ -696,6 +1130,49 @@ class ApiRequestHandler(http.server.BaseHTTPRequestHandler):
             self.send_cors_headers()
             self.end_headers()
             self.wfile.write(payload)
+            return
+
+        # Route 3b: Customer /api/v1/me/leads (Protected by customer Supabase JWT, excludes internal notes)
+        elif path == "/api/v1/me/leads":
+            user_id = verify_customer_jwt(self.headers.get("Authorization", ""))
+            if not user_id:
+                self._send_json(401, {"error": "Unauthorized", "message": "Valid customer session required."})
+                return
+            all_leads, _ = load_leads(limit=200)
+            mine = [
+                {
+                    "id": l.get("id"),
+                    "leadCode": l.get("leadCode"),
+                    "propertyId": l.get("propertyId"),
+                    "propertyTitle": l.get("propertyTitle"),
+                    "inquiryType": l.get("inquiryType"),
+                    "status": l.get("status"),
+                    "createdAt": l.get("createdAt"),
+                }
+                for l in all_leads
+                if l.get("userId") == user_id
+            ]
+            self._send_json(200, {"status": "success", "leads": mine})
+            return
+
+        # Route 3c: Admin /api/admin/advisors (Protected: Returns active admin_users for lead assignment)
+        elif path == "/api/admin/advisors":
+            if not self.check_admin_auth():
+                self.send_unauthorized()
+                return
+            advisors = []
+            if SUPABASE_URL and SUPABASE_KEY and circuit_breaker.allow_request():
+                try:
+                    req = urllib.request.Request(
+                        f"{SUPABASE_URL}/rest/v1/admin_users?select=id,full_name,email,role&is_active=eq.true",
+                        headers={"apikey": SUPABASE_KEY, "Authorization": f"Bearer {SUPABASE_KEY}"},
+                    )
+                    with urllib.request.urlopen(req, timeout=4) as resp:
+                        advisors = json.loads(resp.read().decode("utf-8"))
+                    circuit_breaker.record_success()
+                except Exception:
+                    circuit_breaker.record_failure()
+            self._send_json(200, {"status": "success", "advisors": advisors})
             return
 
         # Route 3: Admin /api/admin/leads (Protected: Returns customer inquiries with pagination)
@@ -980,8 +1457,16 @@ class ApiRequestHandler(http.server.BaseHTTPRequestHandler):
             self.wfile.write(payload)
             return
 
-        # Route: POST /api/contact (Public customer inquiry from "Contact" button)
+        # Route: POST /api/contact (Retired in Phase 3 in favor of POST /api/v1/leads)
         elif self.path == "/api/contact":
+            self._send_json(410, {
+                "error": "Gone",
+                "message": "POST /api/contact has been retired. Use POST /api/v1/leads with customer authentication.",
+            })
+            return
+
+        # Route: POST /api/v1/leads (Authenticated customer lead + optional 5% service agreement)
+        elif self.path == "/api/v1/leads":
             client_ip = self.get_client_ip()
             if not check_contact_rate_limit(client_ip, limit=15, window_seconds=60, prune_seconds=120):
                 err_payload = json.dumps({
@@ -996,6 +1481,11 @@ class ApiRequestHandler(http.server.BaseHTTPRequestHandler):
                 self.wfile.write(err_payload)
                 return
 
+            user_id = verify_customer_jwt(self.headers.get("Authorization", ""))
+            if not user_id:
+                self._send_json(401, {"error": "Unauthorized", "message": "Please sign in to connect with an advisor."})
+                return
+
             try:
                 body = json.loads(post_data.decode("utf-8"))
             except Exception:
@@ -1003,81 +1493,24 @@ class ApiRequestHandler(http.server.BaseHTTPRequestHandler):
 
             phone = str(body.get("phone", "")).strip()
             if not phone or len(phone) < 7:
-                err = json.dumps({
+                self._send_json(400, {
                     "error": "Validation failed",
-                    "message": "A valid phone number (at least 7 digits) is required."
-                }).encode("utf-8")
-                self.send_response(400)
-                self.send_header("Content-Type", "application/json; charset=utf-8")
-                self.send_header("Content-Length", str(len(err)))
-                self.send_cors_headers()
-                self.end_headers()
-                self.wfile.write(err)
+                    "message": "A valid phone number (at least 7 digits) is required.",
+                })
                 return
 
-            saved = save_lead({
-                "customerName": body.get("customerName", "Anonymous Bidder"),
-                "phone": body.get("phone", ""),
-                "email": body.get("email", ""),
-                "propertyId": body.get("propertyId", ""),
-                "propertyTitle": body.get("propertyTitle", "Property Auction"),
-                "locality": body.get("locality", ""),
-                "inquiryType": body.get("inquiryType", "General Inquiry"),
-                "message": body.get("message", ""),
-            })
-
-            payload = json.dumps({
-                "status": "success",
-                "leadId": saved.get("id"),
-                "message": "Inquiry recorded successfully. Assigned to auction desk.",
-                "lead": saved
-            }).encode("utf-8")
-
-            self.send_response(201)
-            self.send_header("Content-Type", "application/json; charset=utf-8")
-            self.send_header("Content-Length", str(len(payload)))
-            self.send_header("Cache-Control", "no-store, no-cache, must-revalidate, private")
-            self.send_header("Pragma", "no-cache")
-            self.send_cors_headers()
-            self.end_headers()
-            self.wfile.write(payload)
+            res_body, code = create_lead_and_agreement(
+                user_id=user_id,
+                body=body,
+                client_ip=client_ip,
+                user_agent=self.headers.get("User-Agent", ""),
+            )
+            self._send_json(code, res_body)
             return
 
         # Route: POST /api/admin/properties/verify (Protected: Admin verifies & persists scraped property)
         elif self.path == "/api/admin/properties/verify":
-            if not self.check_admin_auth():
-                self.send_unauthorized()
-                return
-
-            try:
-                body = json.loads(post_data.decode("utf-8"))
-                prop_id = body.get("id")
-                new_status = body.get("status", "PUBLISHED")
-            except Exception:
-                prop_id = None
-                new_status = "PUBLISHED"
-                body = {}
-
-            # Persist status and edited fields to disk snapshot & database
-            persist_property_update(prop_id, new_status, updated_fields=body)
-
-            # Invalidate memory cache so next read reflects update
-            _cache["data"] = None
-
-            payload = json.dumps({
-                "status": "success",
-                "message": f"Property {prop_id} successfully persisted as {new_status}.",
-                "verified": new_status == "PUBLISHED"
-            }).encode("utf-8")
-
-            self.send_response(200)
-            self.send_header("Content-Type", "application/json; charset=utf-8")
-            self.send_header("Content-Length", str(len(payload)))
-            self.send_header("Cache-Control", "no-store, no-cache, must-revalidate, private")
-            self.send_header("Pragma", "no-cache")
-            self.send_cors_headers()
-            self.end_headers()
-            self.wfile.write(payload)
+            self._handle_admin_property_update(post_data)
             return
 
         # Route: POST /api/scrape/trigger (Protected: Triggers crawler job with concurrency lock)
@@ -1139,6 +1572,98 @@ class ApiRequestHandler(http.server.BaseHTTPRequestHandler):
         self.send_cors_headers()
         self.end_headers()
         self.wfile.write(err_body)
+
+    def _send_json(self, status_code: int, body_obj: dict, cache_private: bool = True):
+        payload = json.dumps(body_obj).encode("utf-8")
+        self.send_response(status_code)
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Content-Length", str(len(payload)))
+        if cache_private:
+            self.send_header("Cache-Control", "no-store, no-cache, must-revalidate, private")
+            self.send_header("Pragma", "no-cache")
+        self.send_cors_headers()
+        self.end_headers()
+        self.wfile.write(payload)
+
+    def _handle_admin_property_update(self, raw_body: bytes):
+        if not self.check_admin_auth():
+            self.send_unauthorized()
+            return
+        try:
+            body = json.loads(raw_body.decode("utf-8"))
+        except Exception:
+            self._send_json(400, {"error": "Invalid JSON payload."})
+            return
+
+        prop_id = body.get("id")
+        if not prop_id:
+            self._send_json(400, {"error": "Missing required field 'id'."})
+            return
+
+        new_status = body.get("publication_status") or body.get("status", "PUBLISHED")
+        if new_status == "PUBLISHED" and isinstance(body.get("verification_dimensions"), dict):
+            dims = body["verification_dimensions"]
+            src_ok = (dims.get("source_checked") or {}).get("status") == "COMPLETED"
+            auc_ok = (dims.get("auction_details_checked") or {}).get("status") == "COMPLETED"
+            if not (src_ok and auc_ok):
+                self._send_json(400, {
+                    "error": "Publication gate failed",
+                    "message": "source_checked and auction_details_checked must be COMPLETED before publishing.",
+                })
+                return
+        persist_property_update(prop_id, new_status, updated_fields=body)
+        _cache["data"] = None
+        self._send_json(200, {
+            "status": "success",
+            "message": f"Property {prop_id} successfully persisted as {new_status}.",
+            "verified": new_status == "PUBLISHED",
+        })
+
+    def do_PATCH(self):
+        """Handle PATCH requests for admin property and lead updates."""
+        content_length = int(self.headers.get("Content-Length", 0))
+        if content_length > 1048576:
+            self._send_json(413, {"error": "Payload Too Large"})
+            return
+
+        raw_body = self.rfile.read(content_length) if content_length > 0 else b"{}"
+        path = urllib.parse.urlparse(self.path).path
+
+        if path == "/api/admin/properties":
+            self._handle_admin_property_update(raw_body)
+            return
+
+        if path == "/api/admin/leads":
+            if not self.check_admin_auth():
+                self.send_unauthorized()
+                return
+            try:
+                body = json.loads(raw_body.decode("utf-8"))
+            except Exception:
+                self._send_json(400, {"error": "Invalid JSON payload."})
+                return
+
+            lead_id = body.get("id")
+            new_status = str(body.get("status", "")).strip()
+            if not lead_id or new_status not in VALID_LEAD_STATUSES:
+                self._send_json(400, {
+                    "error": "Validation failed",
+                    "message": f"Valid 'id' and 'status' in {sorted(VALID_LEAD_STATUSES)} required.",
+                })
+                return
+
+            notes = body.get("notes")
+            assigned_advisor_id = body.get("assigned_advisor_id")
+            persist_lead_update(lead_id, new_status, notes=notes, assigned_advisor_id=assigned_advisor_id)
+            self._send_json(200, {
+                "status": "success",
+                "id": lead_id,
+                "leadStatus": new_status,
+                "assignedAdvisorId": assigned_advisor_id,
+            })
+            return
+
+        self._send_json(404, {"error": "Not Found", "message": "Invalid PATCH endpoint."})
 
 def main():
     server_address = ("0.0.0.0", PORT)

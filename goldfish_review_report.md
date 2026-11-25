@@ -1,40 +1,18 @@
-# Goldfish Review & Resolution Report (Stage 9 Implementation Readiness)
+# Goldfish Review Resolution Log (`goldfish_review_report.md`)
 
-**Target Document**: [PROJECT.md](file:///c:/Users/rajkr/Documents/code-base/real%20estate/PROJECT.md)  
-**Resolution Mode**: Elephant Context Remediation (`egm-resolve`)  
-**Input Report**: [implementation_readiness_report.md](file:///c:/Users/rajkr/Documents/code-base/real%20estate/implementation_readiness_report.md)
+* **Target Document:** `docs/designs/customer-platform-mvp.md`
+* **Date:** 2026-11-25
 
----
+All Blockers and Major findings from Stages 5–9 (`zoom_out_report.md`, `comprehension_report.md`, `critic_report.md`, `intermediate_zoom_out_report.md`, `implementation_readiness_report.md`) were evaluated and resolved in `docs/designs/customer-platform-mvp.md`:
 
-## 1. Classification & Evaluation of Stage 9 Findings
-
-| Finding ID | Title | Auditor Persona | Severity | Verdict | Resolution Strategy |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **IR-1** | Schema Drift with `supabase_client.py` & Missing DDL | `egm-implementation-readiness` / `egm-codebase-details` | 🔴 Blocker | **PROPOSE FIX** | Align Section 3.1 & 9.2 with `supabase_client.py` field names (`reserve_price_inr`, `area_sqft`, `village_or_locality`, `auction_event_hash`, `asset_fingerprint`). Embed complete PostgreSQL DDL and RLS policies. |
-| **IR-2** | Decoupling Playwright Breaks API Trigger & Admin UI | `egm-implementation-readiness` / `egm-codebase-details` | 🔴 Blocker | **PROPOSE FIX** | Specify migration of `POST /api/scrape/trigger` to dispatch GitHub Actions workflow via GitHub REST API (`workflow_dispatch`), preserving the admin trigger button safely. |
-| **IR-3** | `DashboardView.jsx` Runtime Crash on Bidding Purge | `egm-codebase-details` | 🔴 Blocker | **PROPOSE FIX** | Mandate refactoring `DashboardView.jsx` to default `myBids = {}` and purge the active bids tab alongside `BiddingModal.jsx`. |
-| **IR-4** | React 19 `<Suspense>` Crash on `React.lazy()` | `egm-codebase-details` | 🔴 Blocker | **PROPOSE FIX** | Mandate enclosing lazy-loaded `AdminLoginView` and `AdminView` inside `<React.Suspense fallback={<LoadingSpinner />}>`. |
-| **IR-5** | Proxy IP Blindness in Contact Rate-Limiting | `egm-implementation-readiness` / `egm-codebase-details` | 🟡 Major | **PROPOSE FIX** | Extract client IP from `X-Forwarded-For` with fallback, guard with `threading.Lock()`, and permit 15 req/min burst for offline queue flushes. |
-| **IR-6** | `possession_type` Dropped in `api.js` Normalization | `egm-codebase-details` | 🟡 Major | **PROPOSE FIX** | Explicitly mandate mapping `possessionType: item.possession_type` in `fetchLiveAuctions()` in `frontend/src/data/api.js`. |
-| **IR-7** | Ephemeral Gemini Token Counter in GitHub Actions | `egm-implementation-readiness` / `egm-codebase-details` | 🟡 Major | **PROPOSE FIX** | Persist daily token usage in Supabase table `gemini_spend_tracker` across ephemeral virtual machines. |
-| **IR-8** | Split-Pane PDF Preview Blocked by Bank CORS/Frame Headers | `egm-implementation-readiness` | 🟡 Major | **PROPOSE FIX** | Add authenticated streaming proxy endpoint `GET /api/admin/pdf-proxy?url=...` in `app.py`. |
-| **IR-9** | Marketing Headers & Non-Imperative Copy | `egm-style` | 🟢 Nit | **PROPOSE FIX** | Calibrate headings to neutral technical terms and enforce imperative task operations document-wide. |
-
----
-
-## 2. Execution Log
-
-1. **Section 3.1 & Section 9.2 (Schema & DDL)**:
-   - Synchronized column definitions with `backend/ingestion/database/supabase_client.py`.
-   - Embedded complete PostgreSQL DDL including indexes and RLS read policies.
-2. **Section 9.1 (Auth, Suspense & Rate Limiting)**:
-   - Added `<React.Suspense>` boundary requirement for React 19 lazy admin chunks.
-   - Specified `X-Forwarded-For` parsing and `threading.Lock()` for the contact rate limiter.
-3. **Section 9.2 (Database Persistence & PDF Viewer)**:
-   - Added `DashboardView.jsx` refactoring step to eliminate `Object.keys(myBids)` crash.
-   - Specified `GET /api/admin/pdf-proxy` proxy endpoint for bank PDF circulars.
-4. **Section 9.3 (Scraper Decoupling & Spend Controls)**:
-   - Defined GitHub REST API `workflow_dispatch` trigger for `POST /api/scrape/trigger`.
-   - Specified persistent Supabase token ledger `gemini_spend_tracker`.
-5. **Section 9.4 (Monetization & Possession Badging)**:
-   - Added normalization update in `frontend/src/data/api.js` for `possessionType`.
+| Source | Finding | Resolution |
+| :--- | :--- | :--- |
+| Stage 5–7 | Dual status, `authenticated` PII read, `notes` leak, non-atomic writes, `compared_properties` bloat, acronyms | Standardized on `publication_status` after `004`, revoked `anon`/`authenticated` `SELECT` on `auction_properties` & `customer_leads`, added `create_lead_with_agreement` RPC, dropped `compared_properties` & billing columns, expanded acronyms. |
+| Stage 8 Major 1 | `leads.jsonl` dual-store & unauthenticated `POST /api/leads` / `POST /api/contact` | Removed `leads.jsonl` fallback in Stage 0, aliased `GET /api/auctions` to `GET /api/v1/auctions`, retired `POST /api/contact` in Phase 3. |
+| Stage 8 Nits 2–4 | Legal sign-off gate, new-insert `slug`, `ON DELETE RESTRICT` | Added legal sign-off as Phase 3 prod go-live gate, added `slug` generation in `supabase_client.py`, documented soft-delete/anonymization for `service_agreements` retention. |
+| Stage 9 Blocker 1 | Admin token format & `pytest` import fail-closed | Retained `skandx-adm-{ts}-{sig}` (8h TTL) in Stage 0; fail closed at request/login/verify time so `pytest` collection works with fixture-injected `ADMIN_JWT_SECRET`. |
+| Stage 9 Blocker 2 | `ReviewStatus` in Stage 0 vs. `publication_status` in Phase 1 | Stage 0 uses `ReviewStatus.NEEDS_MANUAL_REVIEW` in `evaluate_sanity()`; Phase 1 (`004`) transitions to `publication_status`. |
+| Stage 9 Blocker 3 | `do_PATCH` & editable field allowlist | Added `do_PATCH` to `ApiRequestHandler`, `PATCH /api/admin/properties` (with `POST /api/admin/properties/verify` alias), and explicit `ADMIN_EDITABLE_PROPERTY_COLUMNS`. |
+| Stage 9 Blocker 4 | `inquiry_type` allowlist, RPC signature, server config | Defined UI-to-enum mapping, full `create_lead_with_agreement(...)` SQL signature, and `AGREEMENT_VERSION` / `AGREEMENT_CALCULATION_BASIS` defaults. |
+| Stage 9 Blocker 5 | Stage 0 vs. Phase 3 `PATCH /api/admin/leads` | Stage 0 persists `status` & `notes` on `002`; Phase 3 (`006`) adds `assigned_advisor_id` + `GET /api/admin/advisors`. |
+| Stage 9 Majors 1–5 | Query/pagination contract, `004`/`006` fixes, target files, route redirects, `frameworkFilter` | Added query/pagination contract, trimmed `slug` backfill + dropped `idx_auction_properties_status`, added `service_agreements` RLS, listed all target files, added `/properties` & `#property/:id` redirects, and removed `frameworkFilter`. |

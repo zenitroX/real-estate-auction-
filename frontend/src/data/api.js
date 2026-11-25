@@ -1,7 +1,9 @@
 import { INITIAL_PROPERTIES, GALLERY_POOL } from './propertiesData';
+import { supabase } from '../lib/supabaseClient';
 
 // Support external backend URL when frontend is hosted separately (e.g. Vercel -> Render)
 export const API_BASE = (import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || '').replace(/\/+$/, '');
+const ENABLE_DEMO_DATA = import.meta.env.DEV && import.meta.env.VITE_ENABLE_DEMO_DATA === 'true';
 
 export function getAdminAuthHeader() {
   try {
@@ -16,11 +18,85 @@ export function getAdminAuthHeader() {
   return {};
 }
 
+function mapAssetCategoryToUiType(assetCategory) {
+  const raw = String(assetCategory || '').toLowerCase();
+  if (raw.includes('commercial') || raw.includes('office') || raw.includes('shop')) return 'commercial';
+  if (raw.includes('plot') || raw.includes('land') || raw.includes('agricultural')) return 'land';
+  if (raw.includes('industrial') || raw.includes('shed') || raw.includes('factory')) return 'industrial';
+  return 'residential';
+}
+
+function mapAuctionItem(item, index) {
+  const reserve = item.reserve_price_inr != null ? Number(item.reserve_price_inr) : null;
+  const emd = item.emd_amount_inr != null ? Number(item.emd_amount_inr) : null;
+  const auctionTime = item.auction_date ? new Date(item.auction_date).getTime() : null;
+  const daysAhead = auctionTime != null ? (auctionTime - Date.now()) / 86400000 : null;
+  const type = mapAssetCategoryToUiType(item.asset_category);
+  const localityParts = [item.village_or_locality, item.district, item.state].filter(Boolean);
+  const locality = localityParts.length > 0 ? localityParts.join(', ') : 'Tamil Nadu';
+
+  const heroImg = GALLERY_POOL[index % GALLERY_POOL.length];
+  const secondaryImg = GALLERY_POOL[(index + 1) % GALLERY_POOL.length];
+
+  return {
+    id: String(item.id || `auction-${index}`),
+    slug: item.slug || null,
+    title: item.property_title || `${item.bank_name || 'Bank'} Auction Property`,
+    badge: 'BANK AUCTION',
+    type,
+    assetCategory: item.asset_category || null,
+    possessionType: item.possession_type || null,
+    locality,
+    district: item.district || null,
+    taluk: item.taluk || null,
+    pincode: item.pincode || null,
+    address: item.area_description || locality,
+    bank: item.bank_name || 'Not available',
+    branch: item.branch_name || 'Not available',
+    assetCode: item.patta_or_door_no || String(item.id || ''),
+    contact: '1800 - 202 - SKANDX',
+    officer: 'Auction Advisory Desk',
+    reserve,
+    previousReserve: item.previous_reserve_price_inr != null ? Number(item.previous_reserve_price_inr) : null,
+    priceDropPct: item.price_drop_percentage != null ? Number(item.price_drop_percentage) : null,
+    increment: item.bid_increment_inr != null ? Number(item.bid_increment_inr) : null,
+    emdPct: reserve && emd ? Math.round((emd / reserve) * 100) : null,
+    emd,
+    emdLastDate: item.emd_last_date || null,
+    inspectionDateInfo: item.inspection_date_info || null,
+    area: item.area_sqft != null ? Number(item.area_sqft) : null,
+    areaDescription: item.area_description || null,
+    surveyNumbers: Array.isArray(item.survey_numbers) ? item.survey_numbers : [],
+    boundaries: item.boundaries || null,
+    daysAhead,
+    auctionEnd: auctionTime,
+    auctionDateIso: item.auction_date || null,
+    featured: index < 4,
+    verified: (item.publication_status || item.review_status) === 'PUBLISHED',
+    status: item.publication_status || item.review_status || 'PENDING_ADMIN_APPROVAL',
+    verifiedDate: item.created_at ? new Date(item.created_at).toLocaleDateString('en-IN') : 'Not yet confirmed',
+    images: [heroImg, secondaryImg, GALLERY_POOL[0]],
+    desc: item.area_description || `SARFAESI bank auction notice issued by ${item.bank_name || 'authorized bank'}. Review verification status and risk disclosures before participating.`,
+    isLiveApi: true,
+    sourcePortal: item.source_portal || null,
+    sourceUrl: item.source_pdf_url || null,
+    biddingPortalUrl: item.bidding_portal_url || null,
+    verificationDimensions: item.verification_dimensions || {},
+    riskDisclosures: Array.isArray(item.risk_disclosures) ? item.risk_disclosures : [],
+    lastSourceConfirmedAt: item.last_source_confirmed_at || null,
+  };
+}
+
 /**
- * Fetch live bank auction listings for customers (verified & published only)
+ * Fetch live bank auction listings for customers (published only, no mock mixing in production).
  */
-export async function fetchLiveAuctions() {
-  const endpoint = `${API_BASE}/api/auctions`;
+export async function fetchLiveAuctions(params = {}) {
+  const qs = new URLSearchParams();
+  Object.entries(params).forEach(([k, v]) => {
+    if (v !== undefined && v !== null && v !== '') qs.set(k, String(v));
+  });
+  const query = qs.toString();
+  const endpoint = `${API_BASE}/api/v1/auctions${query ? `?${query}` : ''}`;
 
   try {
     const res = await fetch(endpoint, {
@@ -31,72 +107,33 @@ export async function fetchLiveAuctions() {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const json = await res.json();
 
-    if (json.status === 'success' && Array.isArray(json.data) && json.data.length > 0) {
-      const mapped = json.data.map((item, index) => {
-        const reserve = Number(item.reserve_price) || 5000000;
-        const emd = Number(item.emd_amount) || Math.round(reserve * 0.1);
-        const auctionDate = item.auction_date
-          ? new Date(item.auction_date).getTime()
-          : Date.now() + (index + 2) * 86400000;
-        const daysAhead = Math.max(0.5, (auctionDate - Date.now()) / 86400000);
-
-        let type = 'residential';
-        const rawType = (item.property_type || '').toLowerCase();
-        if (rawType.includes('commercial') || rawType.includes('office') || rawType.includes('shop')) type = 'commercial';
-        else if (rawType.includes('plot') || rawType.includes('land')) type = 'land';
-        else if (rawType.includes('industrial') || rawType.includes('shed') || rawType.includes('factory')) type = 'industrial';
-
-        const heroImg = GALLERY_POOL[index % GALLERY_POOL.length];
-        const secondaryImg = GALLERY_POOL[(index + 1) % GALLERY_POOL.length];
-
-        return {
-          id: `live-${item.id || index}`,
-          title: item.property_title || `${item.bank_name || 'Bank'} Auction Property`,
-          badge: 'BANK AUCTION',
-          type,
-          locality: item.city ? `${item.city}, ${item.state || 'India'}` : (item.address || 'Chennai, Tamil Nadu'),
-          address: item.address || `${item.city || 'Chennai'}, India`,
-          bank: item.bank_name || 'Public Sector Bank',
-          branch: item.branch || 'Main Branch',
-          assetCode: item.asset_id || `SARF${Math.floor(10000 + Math.random() * 90000)}`,
-          contact: '1800 - 202 - SKANDX',
-          officer: 'Nodal Liaison Officer',
-          reserve,
-          increment: Math.max(25000, Math.round((reserve * 0.01) / 1000) * 1000),
-          emdPct: 10,
-          area: item.area_sqft || 1800,
-          landArea: item.land_area_sqft || null,
-          beds: type === 'residential' ? 3 : null,
-          baths: type === 'residential' ? 2 : 2,
-          daysAhead,
-          auctionEnd: auctionDate,
-          emd,
-          featured: index < 4,
-          verified: true,
-          status: 'PUBLISHED',
-          verifiedDate: 'Recent',
-          images: [heroImg, secondaryImg, GALLERY_POOL[0]],
-          desc: item.description || `Official SARFAESI Act recovery auction authorized by ${item.bank_name || 'authorized banking institution'}. Borrower account: ${item.borrower_name || 'Protected'}. Clear title guarantee upon issuance of Sale Certificate.`,
-          isLiveApi: true,
-          sourceUrl: item.source_url || null,
-        };
-      });
-
+    if (json.status === 'success' && Array.isArray(json.data)) {
+      const mapped = json.data.map(mapAuctionItem);
       return {
         source: json.source || 'BACKEND_LIVE',
-        latencyMs: json.latency_ms || 1.2,
-        properties: mergeProperties(INITIAL_PROPERTIES, mapped),
+        latencyMs: json.latency_ms || 0,
+        properties: mapped,
+        error: null,
       };
     }
-  } catch (err) {
-    // Seamless instant fallback without redundant network roundtrip
-  }
 
-  return {
-    source: 'OFFLINE_READY',
-    latencyMs: 0.1,
-    properties: INITIAL_PROPERTIES,
-  };
+    throw new Error('Unexpected API response format');
+  } catch (err) {
+    if (ENABLE_DEMO_DATA) {
+      return {
+        source: 'DEMO_MODE',
+        latencyMs: 0,
+        properties: INITIAL_PROPERTIES,
+        error: null,
+      };
+    }
+    return {
+      source: 'ERROR',
+      latencyMs: 0,
+      properties: [],
+      error: err instanceof Error ? err.message : 'Failed to load auction listings',
+    };
+  }
 }
 
 const OFFLINE_LEADS_KEY = 'skandx_pending_leads';
@@ -124,141 +161,181 @@ export async function flushOfflineLeads() {
   if (!pending.length) return;
   try {
     for (const lead of pending) {
-      await fetch(`${API_BASE}/api/contact`, {
+      const res = await fetch(`${API_BASE}/api/contact`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(lead),
       });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
     }
     localStorage.removeItem(OFFLINE_LEADS_KEY);
-    console.info(`[Lead Sync]: Flushed ${pending.length} queued leads.`);
   } catch {
     // Keep in storage for next connection
   }
 }
 
 /**
- * Admin: Authenticate for admin.skandx.com portal (with test mode fallback)
+ * Admin: Authenticate for admin.skandx.com portal (fails closed on invalid credentials or network error).
  */
 export async function loginAdminApi(email, password) {
-  try {
-    const res = await fetch(`${API_BASE}/api/admin/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    });
-    const data = await res.json().catch(() => ({}));
-    if (res.ok) {
-      return data;
-    }
-  } catch (err) {
-    console.warn('[Admin Login API]: Backend unreachable, using test mode fallback', err);
+  const res = await fetch(`${API_BASE}/api/admin/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.message || data.error || `Login failed (HTTP ${res.status})`);
   }
-
-  // Seamless test mode fallback when backend is offline or static proxy returns 405
-  return {
-    status: 'success',
-    token: 'skandx-test-token-bypass',
-    admin: {
-      name: 'Chief Auction Officer (Test Mode)',
-      email: email || 'admin@skandx.com',
-      role: 'SUPER_ADMIN',
-    },
-  };
+  return data;
 }
 
 export const adminLoginApi = loginAdminApi;
 
+async function getCustomerAuthHeader() {
+  if (!supabase) return {};
+  try {
+    const { data } = await supabase.auth.getSession();
+    const token = data?.session?.access_token;
+    if (token) return { Authorization: `Bearer ${token}` };
+  } catch {
+    // Ignore session lookup error
+  }
+  return {};
+}
+
 /**
- * Submit customer inquiry (lead) from "Contact" button with zero data loss guarantee
+ * Submit customer inquiry / advisor connection request via POST /api/v1/leads.
  */
 export async function submitLeadApi(leadData) {
-  try {
-    const res = await fetch(`${API_BASE}/api/contact`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(leadData),
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    flushOfflineLeads();
-    return data;
-  } catch (err) {
-    console.warn('[Lead API Network Delay/Sleep]: Queuing inquiry in local storage', err);
-    saveOfflineLead(leadData);
-    return {
-      status: 'queued',
-      message: 'Inquiry safely recorded offline. Our liaison desk will contact you once synchronized.',
-      queued: true,
-    };
+  const authHeaders = await getCustomerAuthHeader();
+  const res = await fetch(`${API_BASE}/api/v1/leads`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...authHeaders,
+    },
+    body: JSON.stringify(leadData),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || `HTTP ${res.status}`);
+    err.status = res.status;
+    throw err;
   }
+  return data;
 }
 
 /**
- * Admin: Verify and publish or reject a scraped property with updated fields
+ * Fetch authenticated customer's own leads via GET /api/v1/me/leads.
+ */
+export async function fetchMyLeadsApi() {
+  const authHeaders = await getCustomerAuthHeader();
+  const res = await fetch(`${API_BASE}/api/v1/me/leads`, {
+    headers: { ...authHeaders },
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || `HTTP ${res.status}`);
+    err.status = res.status;
+    throw err;
+  }
+  return data;
+}
+
+/**
+ * Admin: Fetch active advisors from GET /api/admin/advisors.
+ */
+export async function fetchAdminAdvisorsApi() {
+  const res = await fetch(`${API_BASE}/api/admin/advisors`, {
+    headers: { ...getAdminAuthHeader() },
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || `HTTP ${res.status}`);
+    err.status = res.status;
+    throw err;
+  }
+  return data;
+}
+
+/**
+ * Admin: Verify, edit, and publish or reject a scraped property via PATCH /api/admin/properties.
  */
 export async function verifyPropertyApi(id, status = 'PUBLISHED', updatedFields = {}) {
-  try {
-    const res = await fetch(`${API_BASE}/api/admin/properties/verify`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...getAdminAuthHeader(),
-      },
-      body: JSON.stringify({ id, status, ...updatedFields }),
-    });
-    if (res.ok) {
-      return await res.json();
-    }
-  } catch (err) {
-    console.warn('[Admin Verify API]: Backend offline or unreachable, applying local test update', err);
+  const res = await fetch(`${API_BASE}/api/admin/properties`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      ...getAdminAuthHeader(),
+    },
+    body: JSON.stringify({ id, status, ...updatedFields }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || `HTTP ${res.status}`);
+    err.status = res.status;
+    throw err;
   }
-
-  return {
-    status: 'success',
-    id,
-    action: status,
-    local: true,
-    message: `Property ${id} updated to ${status} in test mode.`,
-  };
+  return data;
 }
 
 /**
- * Admin: Trigger on-demand scraper run
+ * Admin: Persist lead status and optional notes via PATCH /api/admin/leads.
+ */
+export async function updateLeadStatusApi(id, status, notes = undefined) {
+  const body = { id, status };
+  if (notes !== undefined) body.notes = notes;
+  const res = await fetch(`${API_BASE}/api/admin/leads`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      ...getAdminAuthHeader(),
+    },
+    body: JSON.stringify(body),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || `HTTP ${res.status}`);
+    err.status = res.status;
+    throw err;
+  }
+  return data;
+}
+
+/**
+ * Admin: Trigger on-demand scraper run.
  */
 export async function triggerScrapeApi() {
-  try {
-    const res = await fetch(`${API_BASE}/api/scrape/trigger`, {
-      method: 'POST',
-      headers: {
-        ...getAdminAuthHeader(),
-      },
-    });
-    return await res.json();
-  } catch (err) {
-    console.warn('[Scrape Trigger Error]: Fallback', err);
-    return { status: 'started', message: 'Scrape started in background' };
+  const res = await fetch(`${API_BASE}/api/scrape/trigger`, {
+    method: 'POST',
+    headers: {
+      ...getAdminAuthHeader(),
+    },
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || `HTTP ${res.status}`);
+    err.status = res.status;
+    throw err;
   }
+  return data;
 }
 
 /**
- * Admin: Fetch leads with pagination support
+ * Admin: Fetch leads with pagination support.
  */
 export async function fetchAdminLeadsApi(limit = 100, offset = 0) {
-  try {
-    const res = await fetch(`${API_BASE}/api/admin/leads?limit=${limit}&offset=${offset}`, {
-      headers: {
-        ...getAdminAuthHeader(),
-      },
-    });
-    return await res.json();
-  } catch (err) {
-    return null;
+  const res = await fetch(`${API_BASE}/api/admin/leads?limit=${limit}&offset=${offset}`, {
+    headers: {
+      ...getAdminAuthHeader(),
+    },
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.message || data.error || `HTTP ${res.status}`);
+    err.status = res.status;
+    throw err;
   }
-}
-
-function mergeProperties(baseProps, liveProps) {
-  const seenTitles = new Set(baseProps.map((p) => (p.title || '').toLowerCase()));
-  const filteredLive = liveProps.filter((p) => !seenTitles.has((p.title || '').toLowerCase()));
-  return [...baseProps, ...filteredLive];
+  return data;
 }

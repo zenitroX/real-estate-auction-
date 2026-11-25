@@ -1,90 +1,66 @@
-# Critic Review Report (Stage 7)
+# Stage 7: Critic Review Report
 
-**Target Document**: [PROJECT.md](file:///c:/Users/rajkr/Documents/code-base/real%20estate/PROJECT.md)  
-**Evaluators**: Hostile Design Critic (`egm-design`), Structural Layout Validator (`egm-structural`), and Technical Copy Editor (`egm-style`)  
-**Standard**: Feature-Spec-Standard (Architecture, Security, Layout, and Technical Prose)
-
----
-
-## 1. Executive Critic Summary & Convergence Matrix
-
-All three reviewers independently converged on four systemic architectural and documentation contradictions in `PROJECT.md`:
-1. **Cosmetic Security Theater**: Calling client-side `#admin` URL switching "bank-grade subdomain isolation" and a plain HTML form a "256-bit encrypted authentication screen."
-2. **Disconnected Auth Handshake**: The frontend generates 3-segment client timestamps while the backend requires 4-segment HMAC signatures, resulting in permanent HTTP 401 rejections that the frontend optimistically masks with green success toasts.
-3. **Container Resource Exhaustion**: Spawning headless Playwright Chromium and multimodal Gemini OCR subprocesses inside the user-facing HTTP server process without resource limits or job queues.
-4. **Omission of Core Engineering Contracts**: Complete omission of the Ingestion Engine in the ecosystem diagram, missing formal API schemas, missing database definitions, and missing data loss / ephemeral storage failure models.
+* **Target Document:** `docs/designs/customer-platform-mvp.md` (FeatureRange: lines 1–205)
+* **Reviewers:** `egm-design`, `egm-structural`, `egm-style`
+* **Goldfish Context:** `concepts_brief.md`, `backend/migrations/001..003.sql`
+* **Date:** 2026-11-25
 
 ---
 
-## 2. Hostile Design Critic Findings (`egm-design`)
+## Blockers
 
-### 🔴 Blocker Findings
+### 1. `authenticated` role can still read borrower PII from `auction_properties` (and ambiguous view security in `004`)
+* **Scope:** Lines 98, 147 (vs. `001_create_auction_properties.sql` lines 52–54)
+* **Issue:** `"Public Read Published"` in `001` has no `TO anon` clause, so it applies to both `anon` and `authenticated`. Revoking only `anon` `SELECT` leaves logged-in customers able to run `supabase.from('auction_properties').select('*')` and read `borrower_name`, `contact_phone`, `authorized_officer_name`, `raw_extracted_json`, and `review_notes`. Leaving an optional `public_auction_listings` view is also unsafe without `security_invoker`.
+* **Recommendation:** Unconditionally `DROP POLICY "Public Read Published"` and `REVOKE SELECT ON auction_properties FROM anon, authenticated`, routing all public reads through `backend/app.py`'s `PUBLIC_AUCTION_COLUMNS` serializer.
 
-#### 2.1 Fictitious "Subdomain Isolation" & Bundled Admin Code
-- **Scope**: [PROJECT.md#L7-L50](file:///c:/Users/rajkr/Documents/code-base/real%20estate/PROJECT.md#L7-L50), [PROJECT.md#L149-L161](file:///c:/Users/rajkr/Documents/code-base/real%20estate/PROJECT.md#L149-L161), [domain.js](file:///c:/Users/rajkr/Documents/code-base/real%20estate/frontend/src/utils/domain.js)
-- **Technical Mechanism**: Both `skandx.com` and `admin.skandx.com` CNAME to the exact same React SPA deployment. The boundary is purely client-side code (`window.location.hash.startsWith('#admin')`).
-- **Concrete Risk**: Public visitors download the entire admin suite, administrative endpoints, and operational forms in the public JS bundle. Adding `#admin` bypasses the boundary instantly.
-- **Remediation**: Split Vite builds into independent marketplace and admin bundles, or enforce server-side authentication at the edge before serving administrative assets.
+### 2. `"Customer Read Own Leads"` RLS policy exposes internal admin `notes`
+* **Scope:** Lines 119, 156 (vs. `002_create_customer_leads.sql` line 13)
+* **Issue:** `GET /api/v1/me/leads` excludes internal admin notes, but `"Customer Read Own Leads"` (`FOR SELECT USING (auth.uid() = user_id)`) on `customer_leads` lets any authenticated customer query `supabase.from('customer_leads').select('*')` directly and read `notes`.
+* **Recommendation:** Revoke `SELECT` on `customer_leads` from `authenticated` (routing all customer reads through `GET /api/v1/me/leads`) or isolate internal admin notes in a `service_role`-only column/table.
 
-#### 2.2 Broken Auth Token Protocol Causing Silent Persistence Failures
-- **Scope**: [PROJECT.md#L66-L73](file:///c:/Users/rajkr/Documents/code-base/real%20estate/PROJECT.md#L66-L73), [AdminLoginView.jsx](file:///c:/Users/rajkr/Documents/code-base/real%20estate/frontend/src/views/AdminLoginView.jsx#L26-L43), [backend/app.py](file:///c:/Users/rajkr/Documents/code-base/real%20estate/backend/app.py#L53-L75), [App.jsx](file:///c:/Users/rajkr/Documents/code-base/real%20estate/frontend/src/App.jsx#L192-L215)
-- **Technical Mechanism**: `AdminLoginView.jsx` issues `skandx-adm-${Date.now()}`. `backend/app.py` rejects any token lacking a 4-segment HMAC signature (`skandx-adm-{ts}-{sig}`). The frontend catches HTTP 401 and returns `{ status: 'success', local: true }`, displaying a green toast while the backend drops the update.
-- **Concrete Risk**: No administrative approvals, price edits, or lead updates persist to Supabase in production.
-- **Remediation**: Wire `AdminLoginView.jsx` directly to `POST /api/admin/login` and eliminate the silent try-catch masks in `api.js`.
-
-#### 2.3 In-Process Playwright Spawning Leading to Memory Exhaustion & API Crashes
-- **Scope**: [PROJECT.md#L3](file:///c:/Users/rajkr/Documents/code-base/real%20estate/PROJECT.md#L3), [PROJECT.md#L77-L78](file:///c:/Users/rajkr/Documents/code-base/real%20estate/PROJECT.md#L77-L78), [backend/app.py](file:///c:/Users/rajkr/Documents/code-base/real%20estate/backend/app.py#L574-L608)
-- **Technical Mechanism**: Spawning headless Chromium via `subprocess.run` inside the web server process consumes 600MB–1.5GB RAM.
-- **Concrete Risk**: On cloud containers with 512MB RAM ceilings (Render/Railway free tier), the Linux OOM killer issues `SIGKILL 137`, taking down the public REST API.
-- **Remediation**: Decouple crawlers into standalone scheduled background workers or GitHub Actions workflows.
-
-#### 2.4 Silent Suppression of Database Failures with Ephemeral Data Loss
-- **Scope**: [PROJECT.md#L3](file:///c:/Users/rajkr/Documents/code-base/real%20estate/PROJECT.md#L3), [PROJECT.md#L39-L42](file:///c:/Users/rajkr/Documents/code-base/real%20estate/PROJECT.md#L39-L42), [backend/app.py](file:///c:/Users/rajkr/Documents/code-base/real%20estate/backend/app.py#L155-L182)
-- **Technical Mechanism**: In `backend/app.py`, errors syncing leads to Supabase are swallowed with `except Exception: pass`, falling back only to container disk (`leads.json`).
-- **Concrete Risk**: Ephemeral cloud containers destroy local disk contents upon restart or redeployment, leading to permanent loss of high-intent customer leads.
-- **Remediation**: Enforce strict error reporting: if the database write fails, return HTTP 500 so the client can queue the lead in browser offline storage (`saveOfflineLead()`).
-
-### 🟡 Major Findings
-- **2.5 Hardcoded Public Fallback Secrets**: Plaintext admin credentials (`admin@skandx.com` / `skandx@admin2026`) in source and documentation.
-- **2.6 Permissive CORS Wildcard & Unthrottled Lead Scraping**: `Access-Control-Allow-Origin: *` without rate limiting or CAPTCHA on `POST /api/contact`.
-- **2.7 O(N) Disk JSON Read-Modify-Write Thrashing**: Every lead submission locks and rewrites the full array in `leads.json`.
-- **2.8 Uncontrolled Gemini OCR Token Quota Exhaustion**: Large newspaper PDFs without daily spend caps or circuit breakers.
-- **2.9 Multi-Instance State Drift**: In-memory caches and file locks diverge when running multiple container replicas.
+### 3. Non-atomic `customer_leads` and `service_agreements` writes over PostgREST
+* **Scope:** Lines 56, 157, 203
+* **Issue:** Two separate PostgREST inserts are not transactional and can leave a paid-assistance lead without a `service_agreements` row or an orphaned agreement row on `409` duplicate-lead failure.
+* **Recommendation:** Execute paid-assistance lead + agreement creation inside a single PostgreSQL RPC function (`CREATE FUNCTION`) called by `backend/app.py`, mapping `23505` unique-violation errors to HTTP `409`.
 
 ---
 
-## 3. Structural Layout Validator Findings (`egm-structural`)
+## Major
 
-### 🔴 Blocker Findings
-- **3.1 Omission of Ingestion Engine in Architecture Diagram**: Section 1 diagram depicts a simple CRUD REST server, leaving external bank portals, Playwright scraping workers, and the Gemini OCR pipeline invisible.
-- **3.2 Missing Core Specification Sections**: Document lacks formal `## Data Models & Schema` (tables, fields, enums) and `## API Specification` (endpoints, HTTP methods, payloads, responses).
+### 4. Unstandardized `customer_leads.status` breaks duplicate-lead prevention
+* **Scope:** Lines 56, 155 (`002` line 14)
+* **Recommendation:** Define a canonical `status` `CHECK` constraint/enum (e.g., `REQUEST_RECEIVED`, `CONTACTED`, `IN_PROGRESS`, `CLOSED`) aligned across CUJ 3, `006`, and `backend/app.py`.
 
-### 🟡 Major Findings
-- **3.3 Structural Misrepresentation of Client Architecture**: Diagram shows two separate client systems instead of one React SPA with internal route branching.
-- **3.4 Missing Threat Model & Security Architecture**: No architectural specification for token lifetimes, RBAC, or anti-spoofing controls.
-- **3.5 Missing Non-Functional Requirements & Resilience Strategy**: No Core Web Vitals targets, crawler throughput SLAs, or failure recovery policies.
-- **3.6 Inconsistent Subsection Heading Hierarchy**: Mixed decimal numbering, lettered prefixes (`### A. Customer Website`), and interrogative headers (`### How to Test Locally:`).
+### 5. `service_agreements` terms and `inquiry_type` gate must be enforced server-side
+* **Scope:** Lines 126–127, 157, 203
+* **Recommendation:** Validate `inquiry_type` against an explicit server-side allowlist and populate `commission_rate_pct`, `calculation_basis`, and `agreement_version` strictly on the server.
+
+### 6. Missing `customer_profiles` schema and inconsistent `auth.users` foreign keys
+* **Scope:** Lines 149–151, 153, 157
+* **Recommendation:** Define `customer_profiles` columns explicitly (`user_id` PK) and add `REFERENCES auth.users(id)` + `ON DELETE` rules to `customer_leads.user_id` and `service_agreements.user_id`.
+
+### 7. Re-ingestion upsert behavior can overwrite `publication_status` and `verification_dimensions`
+* **Scope:** Line 105 (`001` line 36)
+* **Recommendation:** Ensure `ON CONFLICT (auction_event_hash) DO UPDATE` preserves existing `publication_status`, `verification_dimensions`, and `risk_disclosures`.
+
+### 8. Admin HMAC identity/role mapping and "in production" fail-closed trigger are underspecified
+* **Scope:** Lines 116, 120, 192
+* **Recommendation:** Fail closed unconditionally when `ADMIN_JWT_SECRET` is unset (test override via `pytest` fixture only) and specify how HMAC tokens map to `admin_users.id` / `email` and `is_active`.
+
+### 9. Rollback instructions omit restoring dropped RLS policies
+* **Scope:** Lines 147, 156, 162
+* **Recommendation:** Explicitly include restoring `"Public Read Published"` and `"Public Insert Leads"` (or full snapshot restore) in rollback steps.
+
+### 10. `slug` column in `004` lacks uniqueness, backfill, and route resolution contract
+* **Scope:** Lines 85, 144, 169
+* **Recommendation:** Define `:slugId` lookup/parsing (e.g., trailing `id` extraction) or enforce unique indexed `slug` with backfill in `004`.
 
 ---
 
-## 4. Technical Copy Editor Findings (`egm-style`)
+## Nits
 
-### 🔴 Blocker Findings
-- **4.1 Fabricated Cryptographic Capability Claim** (Line 67): Replace *"256-bit encrypted authentication screen"* with *"Form-based authentication view requiring admin credentials."*
-- **4.2 Ungrounded Compliance and Security Framing** (Line 9): Replace *"For bank-grade security, access control, and clean brand separation..."* with *"SKANDX separates customer and administrative interfaces using subdomain-based routing:"*
-
-### 🟡 Major Findings
-- **4.3 Uncalibrated "Production-Ready" Claim** (Line 3): Strip ungrounded "production-ready" descriptor while hardcoded fallbacks and broken handshakes remain.
-- **4.4 Unsubstantiated SEO Claims** (Line 25): Replace *"• Lightweight & fast for SEO"* with *"• Client-side search UI"*.
-- **4.5 Exaggerated Latency & Logging Claims** (Lines 21, 23, 71): Replace *"Audit-trail session management"* with *"Session management"*, and *"Instant [✓ Verify & Publish]"* with explicit status update description.
-- **4.6 Uncalibrated Communication Protocol Framing** (Line 75): Replace *"Real-time stream of inquiries"* with *"Inquiries submitted from the customer Contact modal"*.
-
----
-
-## 5. Consolidated Remediation Action Items
-
-1. **Clarify Security Architecture & Subdomain Scope**: Document truthful client-side routing realities, eliminate "bank-grade" and "256-bit" marketing hype, and specify true edge-level or Supabase Auth protections.
-2. **Document Ingestion Engine & Pipeline**: Add the crawler, Gemini OCR, and deduplication pipeline into the Section 1 ecosystem diagram.
-3. **Add Data Models & API Specifications**: Add formal schemas for `auction_properties`, `customer_leads`, and the REST endpoints.
-4. **Document Task Queue Architecture**: Specify that heavy Playwright scraping and multimodal OCR run on detached background workers, not inside the synchronous web server process.
-5. **Normalize Headings & Clean Copy**: Eliminate trailing colons, lettered prefixes, and informal promotional filler.
+11. **Expired auction lifecycle** (Lines 103, 109): Clarify query-time `auction_date >= NOW()` filtering vs. `EXPIRED` status sync.
+12. **Legacy `GET /api/auctions` status** (Lines 20, 84, 198): State explicitly that `/api/auctions` remains as a safe-column alias.
+13. **External `source_pdf_url` PII risk** (Line 96): Note that `source_pdf_url` only links to public bank/newspaper notices.
+14. **Formatting dividers** (Lines 183–205): Add `---` dividers before Sections 9–11.

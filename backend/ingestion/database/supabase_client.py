@@ -16,11 +16,11 @@ logger = logging.getLogger("auction_engine.database")
 def evaluate_sanity(property_data: ExtractedAuctionProperty) -> Tuple[ReviewStatus, Optional[str]]:
     """
     Evaluate automated sanity checks on an extracted auction property.
-    Flags 'NEEDS_MANUAL_REVIEW' if:
+    All ingested properties require manual admin approval before publication
+    (never auto-published). Flags specific issues if:
       - EMD > 25% of reserve price or EMD <= 0 (standard SARFAESI EMD is 10%, max ~20-25%)
       - Reserve price < 50,000 INR (likely failed Lakh/Crore conversion)
       - Survey numbers list is empty
-    Otherwise returns 'PUBLISHED'.
     """
     reasons: List[str] = []
 
@@ -43,10 +43,8 @@ def evaluate_sanity(property_data: ExtractedAuctionProperty) -> Tuple[ReviewStat
     if not property_data.survey_numbers or len(property_data.survey_numbers) == 0:
         reasons.append("No survey numbers or identification numbers extracted")
 
-    if reasons:
-        return ReviewStatus.NEEDS_MANUAL_REVIEW, "; ".join(reasons)
-
-    return ReviewStatus.PUBLISHED, None
+    note = "; ".join(reasons) if reasons else "Awaiting manual admin approval"
+    return ReviewStatus.NEEDS_MANUAL_REVIEW, note
 
 
 def prepare_auction_record(
@@ -83,9 +81,14 @@ def prepare_auction_record(
     if property_data.boundaries:
         boundaries_dict = property_data.boundaries.model_dump(exclude_none=True)
 
+    slug_base = "-".join(
+        part for part in "".join(c if c.isalnum() else " " for c in (property_data.bank_name + " " + property_data.village_or_locality).lower()).split()
+    ) or "auction"
+
     record: Dict[str, Any] = {
         "asset_fingerprint": asset_fp,
         "auction_event_hash": event_hash,
+        "slug": f"{slug_base}-{event_hash[:8]}",
         "bank_name": property_data.bank_name,
         "branch_name": property_data.branch_name,
         "borrower_name": property_data.borrower_name,

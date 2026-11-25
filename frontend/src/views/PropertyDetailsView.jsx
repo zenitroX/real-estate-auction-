@@ -55,7 +55,44 @@ export default function PropertyDetailsView({
     if (!property?.id) return;
     setActiveImageIndex(0);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [property?.id]);
+
+    const pageTitle = `${property.title} — Bank Auction in ${property.locality || 'Tamil Nadu'} | SKANDX`;
+    document.title = pageTitle;
+
+    const descText = `${property.bank || 'Bank'} auction property in ${property.locality || 'Tamil Nadu'}. Reserve price: ${property.reserve ? formatPriceShort(property.reserve) : 'Not available'}.`;
+    let metaDesc = document.querySelector('meta[name="description"]');
+    if (!metaDesc) {
+      metaDesc = document.createElement('meta');
+      metaDesc.setAttribute('name', 'description');
+      document.head.appendChild(metaDesc);
+    }
+    metaDesc.setAttribute('content', descText);
+
+    const canonicalUrl = `${window.location.origin}/properties/${encodeURIComponent(property.slug || property.id)}`;
+    let canonicalLink = document.querySelector('link[rel="canonical"]');
+    if (!canonicalLink) {
+      canonicalLink = document.createElement('link');
+      canonicalLink.setAttribute('rel', 'canonical');
+      document.head.appendChild(canonicalLink);
+    }
+    canonicalLink.setAttribute('href', canonicalUrl);
+
+    let ldScript = document.getElementById('skandx-property-jsonld');
+    if (!ldScript) {
+      ldScript = document.createElement('script');
+      ldScript.id = 'skandx-property-jsonld';
+      ldScript.type = 'application/ld+json';
+      document.head.appendChild(ldScript);
+    }
+    ldScript.textContent = JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'RealEstateListing',
+      name: property.title,
+      description: descText,
+      url: canonicalUrl,
+      ...(property.reserve ? { offers: { '@type': 'Offer', price: property.reserve, priceCurrency: 'INR' } } : {}),
+    });
+  }, [property]);
 
   useEffect(() => {
     if (!property?.auctionEnd) return;
@@ -281,7 +318,7 @@ export default function PropertyDetailsView({
                 className="btn btn-gold btn-lg btn-block"
                 onClick={() => onContact(property)}
               >
-                <PhoneCall size={18} /> Contact Property Desk
+                <PhoneCall size={18} /> Connect with Auction Advisor
               </button>
 
               {/* Instant Channel Options */}
@@ -306,7 +343,7 @@ export default function PropertyDetailsView({
               </div>
 
               <p className="demo-note">
-                <Info size={14} /> Official bank recovery asset &middot; Zero agent commission markup.
+                <Info size={14} /> Free to browse. Substantive buyer assistance carries a proposed 5% success fee upon acquisition.
               </p>
             </div>
           </div>
@@ -314,28 +351,84 @@ export default function PropertyDetailsView({
 
         {/* Highlights & Bank Details Grid */}
         <div className="detail-below">
-          {/* Key Highlights Card */}
+          {/* 8-Dimension Progressive Verification & Risk Disclosures */}
           <div className="detail-card">
             <h3>
-              <CheckCircle2 size={20} color="#E8B849" /> Key Highlights & Verification
+              <CheckCircle2 size={20} color="#E8B849" /> Verification Status & Risk Disclosures
             </h3>
-            <ul className="highlight-list">
-              <li>
-                <CheckCircle2 size={16} /> Official Bank Owned Property under SARFAESI Act, 2002
-              </li>
-              <li>
-                <CheckCircle2 size={16} /> Verified 30-Year Search Report & Encumbrance Certificate
-              </li>
-              <li>
-                <CheckCircle2 size={16} /> {property.possessionType || 'Physical vacant'} possession handover upon Sale Certificate
-              </li>
-              <li>
-                <CheckCircle2 size={16} /> Clear CMDA / Municipal planning approval status
-              </li>
-              <li>
-                <CheckCircle2 size={16} /> Direct liaison with authorizing nodal branch recovery team
-              </li>
-            </ul>
+            <p style={{ fontSize: '0.82rem', color: '#64748B', marginBottom: 12 }}>
+              Admin-approved for publication. Individual checks below show what has and has not been verified; this is not legal title certification.
+            </p>
+            <div style={{ display: 'grid', gap: 8, marginBottom: 16 }}>
+              {[
+                ['source_checked', 'Original Auction Source Checked'],
+                ['auction_details_checked', 'Core Auction Details Checked'],
+                ['documents_reviewed', 'Auction Documents Reviewed'],
+                ['ec_reviewed', 'Encumbrance Certificate (EC) Reviewed'],
+                ['revenue_records_reviewed', 'Revenue Records (Patta/Chitta) Reviewed'],
+                ['physical_inspection_completed', 'Physical Site Inspection'],
+                ['possession_assessed', 'Possession Status Assessed'],
+                ['legal_review_completed', 'Legal Title Review'],
+              ].map(([key, label]) => {
+                const dim = (property.verificationDimensions || {})[key] || {};
+                const status = dim.status || 'PENDING';
+                const badgeColor =
+                  status === 'COMPLETED'
+                    ? '#166534'
+                    : status === 'FLAGGED'
+                      ? '#991B1B'
+                      : '#92400E';
+                const badgeBg =
+                  status === 'COMPLETED'
+                    ? '#DCFCE7'
+                    : status === 'FLAGGED'
+                      ? '#FEE2E2'
+                      : '#FEF3C7';
+                return (
+                  <div
+                    key={key}
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: '8px 10px',
+                      borderRadius: 8,
+                      background: '#F8FAFC',
+                      border: '1px solid #E2E8F0',
+                      fontSize: '0.84rem',
+                    }}
+                  >
+                    <span>
+                      {label}
+                      {dim.review_period ? ` (${dim.review_period})` : ''}
+                    </span>
+                    <span
+                      style={{
+                        padding: '2px 8px',
+                        borderRadius: 999,
+                        fontSize: '0.72rem',
+                        fontWeight: 700,
+                        color: badgeColor,
+                        background: badgeBg,
+                      }}
+                    >
+                      {status}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div style={{ padding: '10px 12px', borderRadius: 8, background: '#FFFBEB', border: '1px solid #FDE68A', fontSize: '0.82rem', color: '#92400E' }}>
+              <strong>Disclosed Risks:</strong>{' '}
+              {(property.riskDisclosures && property.riskDisclosures.length > 0
+                ? property.riskDisclosures
+                : [
+                    `Possession: ${property.possessionType || 'Not yet confirmed'}`,
+                    'Physical inspection & independent legal review should be completed before bidding.',
+                  ]
+              ).join(' · ')}
+            </div>
           </div>
 
           {/* Bank Details Card (With Masked Officer Personal Contact) */}

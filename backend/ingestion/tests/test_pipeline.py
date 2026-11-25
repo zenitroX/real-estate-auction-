@@ -242,7 +242,7 @@ def test_sanity_checker_catches_invalid_emd():
     assert status == ReviewStatus.NEEDS_MANUAL_REVIEW
     assert "No survey numbers" in (reason or "")
 
-    # 5. Clean, valid property -> PUBLISHED
+    # 5. Clean, valid property -> still NEEDS_MANUAL_REVIEW (never auto-published)
     valid_prop = ExtractedAuctionProperty(
         bank_name="Indian Overseas Bank",
         asset_category=AssetCategory.LAND_PLOT,
@@ -256,8 +256,36 @@ def test_sanity_checker_catches_invalid_emd():
         auction_date="2026-12-01T11:00:00",
     )
     status, reason = evaluate_sanity(valid_prop)
-    assert status == ReviewStatus.PUBLISHED
-    assert reason is None
+    assert status == ReviewStatus.NEEDS_MANUAL_REVIEW
+    assert reason == "Awaiting manual admin approval"
+
+
+def test_opensource_extractor_parses_sarfaesi_text():
+    from ocr_pipeline.opensource_extractor import OpenSourceAuctionExtractor
+    from ocr_pipeline.pdf_router import RoutePath, RoutedDocument
+
+    sample_text = (
+        "E-AUCTION SALE NOTICE - SARFAESI ACT 2002\n"
+        "Indian Bank, Adyar Branch, Chennai\n"
+        "Property: Residential Plot at S.No. 142/3A, 1500 sq.ft, Physical Possession\n"
+        "Reserve Price: Rs. 65,00,000\n"
+        "Earnest Money Deposit (EMD): Rs. 6,50,000\n"
+        "Auction Date: 28/12/2026\n"
+    )
+    routed = RoutedDocument(
+        route=RoutePath.DIGITAL_TEXT,
+        mime_type="application/pdf",
+        text_content=sample_text,
+        page_count=1,
+    )
+    batch = OpenSourceAuctionExtractor().extract(routed)
+    assert len(batch.properties) == 1
+    prop = batch.properties[0]
+    assert prop.bank_name == "Indian Bank"
+    assert prop.district == "Chennai"
+    assert prop.reserve_price_inr == 6500000
+    assert prop.emd_amount_inr == 650000
+    assert "142/3A" in prop.survey_numbers
 
 
 def test_price_drop_calculation_on_repeat_auction():
@@ -288,7 +316,7 @@ def test_price_drop_calculation_on_repeat_auction():
     assert record["previous_reserve_price_inr"] == 5000000
     # Drop: ((50,00,000 - 45,00,000) / 50,00,000) * 100 = 10.00%
     assert record["price_drop_percentage"] == 10.0
-    assert record["review_status"] == ReviewStatus.PUBLISHED.value
+    assert record["review_status"] == ReviewStatus.NEEDS_MANUAL_REVIEW.value
 
 
 def test_document_router_image_handling(tmp_path):

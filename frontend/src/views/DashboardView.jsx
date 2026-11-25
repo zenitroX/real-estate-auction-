@@ -74,10 +74,8 @@ export default function DashboardView({
   const navItems = [
     { id: 'overview', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'saved', label: 'Saved Properties', icon: Heart },
-    { id: 'alerts', label: 'Alerts & Notifications', icon: Bell },
     { id: 'profile', label: 'My Profile', icon: User },
-    { id: 'kyc', label: 'KYC & Documents', icon: ShieldCheck },
-    { id: 'support', label: 'Support', icon: Headset },
+    { id: 'support', label: 'Advisor Requests', icon: Headset },
   ];
 
   return (

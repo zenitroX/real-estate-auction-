@@ -1,4 +1,4 @@
-# SKANDX Unified Backend Dependencies (API + Scrapers + Multimodal AI OCR)
+# SKANDX Unified Backend Dependencies (API + Scrapers + Open-Source PDF/OCR)
 python-dotenv>=1.0.1
 pydantic>=2.10.0
 pydantic-settings>=2.7.0
@@ -7,8 +7,7 @@ httpx>=0.28.0
 tenacity>=9.0.0
 rich>=13.9.0
 
-# Multimodal AI & OCR
-google-genai>=1.2.0
+# Open-Source PDF & OCR
 pymupdf>=1.25.0
 
 # Web Scraping Engine

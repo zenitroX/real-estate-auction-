@@ -1,43 +1,44 @@
-# Stage 9 Re-Audit Verification: Implementation Readiness Report
+# Stage 9: Implementation Readiness Test Report
 
-**Target Document**: [PROJECT.md](file:///c:/Users/rajkr/Documents/code-base/real%20estate/PROJECT.md) (Lines 346–437, Section 9: Detailed Implementation Plan; Lines 87–205, Section 3: Data Models & Schema)  
-**Auditor**: Pragmatic Tech Lead (`egm-implementation-readiness`)  
-**Verdict**: 🟢 **PASSED / OFFICIAL SIGN-OFF FOR IMPLEMENTATION**
-
----
-
-## 1. Executive Summary & Verification Sign-Off
-
-The remediated [PROJECT.md](file:///c:/Users/rajkr/Documents/code-base/real%20estate/PROJECT.md) has successfully integrated all required architectural controls, error boundaries, and execution steps.
-
-All 4 prior blockers and 4 major gaps have been resolved:
-- **Schema & DDL Complete**: Section 3.1 embeds the full 33-attribute production DDL matching `supabase_client.py` (`reserve_price_inr`, `emd_amount_inr`, `area_sqft`, `village_or_locality`, `auction_event_hash`, `asset_fingerprint`, `boundaries`, `raw_extracted_json`) with explicit RLS read policies.
-- **Scraper Decoupling Protected**: Migration of `POST /api/scrape/trigger` to dispatch GitHub Actions via REST API (`workflow_dispatch`) returning `HTTP 202 Accepted` ensures Docker container stripping never breaks the admin trigger button.
-- **DashboardView Crash Prevented**: Mandates defaulting `myBids = {}` and removing the active bids tab in `DashboardView.jsx` before deleting bidding state from `App.jsx`.
-- **React 19 `<Suspense>` Enforced**: Encloses dynamic `React.lazy()` admin imports within `<React.Suspense fallback={<LoadingSpinner />}>`.
-- **Proxy-Aware Rate Limiting**: Extracts client IP from `X-Forwarded-For` with fallback, guarded by `threading.Lock()` and 15 req/min burst allowance.
-- **Possession Type Normalization**: Formally mapped in `fetchLiveAuctions()` in `frontend/src/data/api.js`.
-- **Persistent Spend Tracking**: Tracks daily Gemini tokens in Supabase table `gemini_spend_tracker` across ephemeral CI runs.
-- **PDF Proxy**: Streams bank notices via `GET /api/admin/pdf-proxy` to bypass bank CORS / `X-Frame-Options`.
+* **Target Document:** `docs/designs/customer-platform-mvp.md` (Section 12 + Sections 5–11)
+* **Reviewers:** `egm-implementation-readiness`, `egm-codebase-details`, `egm-style`
+* **Goldfish Context:** `concepts_brief.md`
+* **Date:** 2026-11-25
 
 ---
 
-## 2. Definitive Sign-Off Matrix
+## Blockers
 
-| Item | Prior Status | Re-Audit Verdict | Resolution Implemented |
-| :--- | :---: | :---: | :--- |
-| **P0: Auth Handshake & 401 Rollback** | 🔴 Blocker | 🟢 **PASSED** | Direct `POST /api/admin/login` call, signed HMAC storage, and rollback in `handleVerifyProperty`. |
-| **P0: React 19 `<Suspense>` Boundaries** | 🔴 Blocker | 🟢 **PASSED** | `<React.Suspense fallback={...}>` specified for `AdminLoginView` and `AdminView`. |
-| **P0: DashboardView Crash Prevention** | 🔴 Blocker | 🟢 **PASSED** | Explicit default `myBids = {}` and active bids tab removal in `DashboardView.jsx`. |
-| **P0: Scraper Decoupling Path** | 🔴 Blocker | 🟢 **PASSED** | GitHub REST API workflow dispatch preserves the admin trigger button cleanly. |
-| **P1: Supabase DDL & RLS Policies** | 🔴 Blocker | 🟢 **PASSED** | Full 33-attribute production DDL and public read RLS policy embedded in Section 3.1. |
-| **P1: Proxy Rate Limiting** | 🟡 Major | 🟢 **PASSED** | `X-Forwarded-For` client IP resolution, `threading.Lock()`, and 15 req/min burst window. |
-| **P2: Split-Pane PDF Viewer CORS Proxy** | 🟡 Major | 🟢 **PASSED** | Streaming proxy endpoint `GET /api/admin/pdf-proxy` bypasses `X-Frame-Options`. |
-| **P3: Durable Gemini Spend Control** | 🟡 Major | 🟢 **PASSED** | Persistent `gemini_spend_tracker` Supabase table replaces ephemeral in-memory counter. |
-| **P4: Possession Normalization** | 🟡 Major | 🟢 **PASSED** | Mapped in `api.js` and rendered on `PropertyCard.jsx` (`PHYSICAL` vs `SYMBOLIC`). |
+1. **Admin Token Format & Auth Verification Contradiction** (`Section 5.3`, `Section 12 Stage 0`):
+   * `backend/app.py` and `backend/test_app_security.py` use `skandx-adm-{ts}-{sig}` (24h TTL, no payload) and `ADMIN_EMAIL`/`ADMIN_PASSWORD` env vars without querying `admin_users`. Also, `test_app_security.py` imports `backend.app` at module top level without setting `ADMIN_JWT_SECRET`.
+   * **Needed:** Specify whether Stage 0 migrates to `payload_b64.sig` + 8h TTL + `admin_users` lookup or keeps `skandx-adm-{ts}-{sig}`, and fail closed at request/login time (not module import time) so `pytest` collection works.
+2. **Stage 0 vs. Phase 1 Status Column & `ReviewStatus` Mismatch** (`Section 5.2`, `Section 12 Stage 0 & Phase 1`):
+   * `ReviewStatus` in `backend/ingestion/models/auction_schema.py` only defines `PUBLISHED`, `NEEDS_MANUAL_REVIEW`, `EXPIRED`, `SOLD`, while `004` (`publication_status`) is in Phase 1.
+   * **Needed:** Specify that `evaluate_sanity()` returns `ReviewStatus.NEEDS_MANUAL_REVIEW` in Stage 0, and `004` switches to `publication_status` in Phase 1.
+3. **Property Update Endpoint & Editable Field Allowlist Unspecified** (`Section 5`, `Section 5.3`, `Section 12 Stage 0`):
+   * `backend/app.py` currently uses `POST /api/admin/properties/verify` and `ApiRequestHandler` has no `do_PATCH`.
+   * **Needed:** Define `do_PATCH` on `ApiRequestHandler`, exact path (`/api/admin/properties` with `id` in body, keeping `POST /api/admin/properties/verify` as a Stage 0 alias or updating `api.js`), and the exact column allowlist for `persist_property_update()`.
+4. **Lead/Agreement RPC Signature, Allowlist Mapping & Agreement Config Missing** (`Section 5.3`, `Section 5.4`, `Section 6`, `Section 12 Phase 3`):
+   * `ContactModal.jsx` uses labels like `'Site Inspection'` and `POST /api/contact` exists without JWT/allowlist.
+   * **Needed:** Define `POST /api/contact` retirement/mapping, UI-to-enum mapping, SQL signature for `create_lead_with_agreement(...)`, and server config defaults for `agreement_version` and `calculation_basis`.
+5. **Stage 0 vs. Phase 3 Dependency Conflict on `PATCH /api/admin/leads`** (`Section 5.3`, `Section 12 Stage 0 & Phase 3`):
+   * In Stage 0, `002_create_customer_leads.sql` only has `status` (no `assigned_advisor_id`).
+   * **Needed:** Clarify that Stage 0 `PATCH /api/admin/leads` persists `status` (and `notes`) on `002`, while Phase 3 (`006`) adds `assigned_advisor_id` and `GET /api/admin/advisors`.
 
 ---
 
-## 3. Protocol Conclusion
+## Major Findings
 
-The EGM Goldfish Review Protocol is officially concluded. The technical specification and implementation plan are mathematically and architecturally complete. Execution may commence immediately on **Phase 1: Security & Auth Hardening**.
+1. **Missing Query & Response Contracts for Phase 1/2 Public Auction Endpoints:** Specify exact query params (`q`, `district`, `type`, `bank`, `possession`, `min_price`, `max_price`, `deadline`, `include_expired`, `ids`, `sort`, `page`, `limit`), pagination envelope, and `GET /api/auctions` alias.
+2. **Migration Schema Gaps (`004`, `005`, `006`):** Trim leading/trailing hyphens in `004` `slug` backfill, drop `idx_auction_properties_status` when retiring `review_status` or keep indexed, clarify `DashboardView.jsx` tabs (`KYC`, `Alerts`) in Phase 2, and add `ENABLE ROW LEVEL SECURITY` + `SELECT` policy (`auth.uid() = user_id`) for `service_agreements` in `006`.
+3. **Target Files Omissions in Section 12:** Add `backend/test_app_security.py`, `backend/ingestion/models/auction_schema.py`, `frontend/src/data/propertiesData.js`, `frontend/src/data/initialUserData.js`, `frontend/src/App.jsx`, and backend `/sitemap.xml` route.
+4. **Frontend Route Mapping & Legacy Hash Redirects:** Specify `/properties` -> `/auctions` redirect, `/saved` vs `/account` for `DashboardView.jsx`, and `#property/:id` redirect in Stage 0.
+5. **`PropertiesView.jsx` Filter Cleanup:** Explicitly state removing `frameworkFilter` and moving from client-side `useMemo` filtering to server-side `GET /api/v1/auctions` queries in Phase 1.
+
+---
+
+## Nits
+
+1. Standardize `:idOrSlug` across Section 5 and Section 7.
+2. Use full `frontend/...` paths in Section 12.
+3. Note that `backend/test_app_security.py` must be updated in Stage 0 to remove the `skandx-test-token-bypass` assertion.

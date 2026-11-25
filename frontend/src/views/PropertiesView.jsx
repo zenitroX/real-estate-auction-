@@ -25,7 +25,6 @@ export default function PropertiesView({
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
   const [activeAssetCategory, setActiveAssetCategory] = useState('property'); // 'property' or 'movable'
   const [possessionFilter, setPossessionFilter] = useState('all'); // 'all', 'physical', 'symbolic'
-  const [frameworkFilter, setFrameworkFilter] = useState('all'); // 'all', 'sarfaesi', 'drt'
 
   // Available banks
   const availableBanks = ['Canara Bank', 'SBI', 'ICICI Bank', 'Indian Bank', 'Others'];
@@ -108,20 +107,26 @@ export default function PropertiesView({
       });
     }
 
+    // Possession status filter
+    if (possessionFilter !== 'all') {
+      result = result.filter((p) =>
+        String(p.possessionType || '').toLowerCase().includes(possessionFilter)
+      );
+    }
+
     // Sorting
     if (filters.sort === 'ending') {
-      result.sort((a, b) => a.auctionEnd - b.auctionEnd);
+      result.sort((a, b) => (a.auctionEnd || Infinity) - (b.auctionEnd || Infinity));
     } else if (filters.sort === 'price-asc') {
-      result.sort((a, b) => a.reserve - b.reserve);
+      result.sort((a, b) => (a.reserve || 0) - (b.reserve || 0));
     } else if (filters.sort === 'price-desc') {
-      result.sort((a, b) => b.reserve - a.reserve);
+      result.sort((a, b) => (b.reserve || 0) - (a.reserve || 0));
     } else {
-      // featured
       result.sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0));
     }
 
     return result;
-  }, [properties, filters]);
+  }, [properties, filters, possessionFilter]);
 
   // Count active filter constraints
   const activeFilterCount = useMemo(() => {
@@ -131,9 +136,8 @@ export default function PropertiesView({
     if (filters.banks.length < availableBanks.length) count += filters.banks.length;
     if (filters.minBudget > 0 || filters.maxBudget < 100000000) count += 1;
     if (possessionFilter !== 'all') count += 1;
-    if (frameworkFilter !== 'all') count += 1;
     return count;
-  }, [filters, possessionFilter, frameworkFilter, availableBanks.length]);
+  }, [filters, possessionFilter, availableBanks.length]);
 
   const handleToggleType = (type) => {
     setFilters((prev) => {
@@ -165,7 +169,6 @@ export default function PropertiesView({
       sort: 'ending',
     });
     setPossessionFilter('all');
-    setFrameworkFilter('all');
   };
 
   // Reusable Filter Sections for both Desktop Left Sidebar & Mobile Drawer
@@ -324,25 +327,6 @@ export default function PropertiesView({
         </div>
       </div>
 
-      {/* 7. Legal Action Framework */}
-      <div className="bn-filter-section">
-        <label className="bn-section-label">Legal Framework</label>
-        <div className="bn-chip-group">
-          {[
-            { id: 'all', label: 'All Statutory' },
-            { id: 'sarfaesi', label: 'SARFAESI Act 2002' },
-            { id: 'drt', label: 'DRT Recovery Orders' },
-          ].map((frm) => (
-            <button
-              key={frm.id}
-              className={`bn-chip ${frameworkFilter === frm.id ? 'active' : ''}`}
-              onClick={() => setFrameworkFilter(frm.id)}
-            >
-              {frm.label}
-            </button>
-          ))}
-        </div>
-      </div>
     </>
   );
 

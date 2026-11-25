@@ -1,4 +1,5 @@
 import os
+os.environ.setdefault("ADMIN_JWT_SECRET", "pytest-admin-jwt-secret-key-2026")
 import time
 import json
 import socket
@@ -42,8 +43,7 @@ def test_admin_token_rejects_unauthorized_forged_tokens():
     assert verify_admin_token("bypass") is False
     assert verify_admin_token("skandx-test") is False
     assert verify_admin_token("skandx-test-token") is False
-    # Explicitly allowed staging/test token must be accepted
-    assert verify_admin_token("skandx-test-token-bypass") is True
+    assert verify_admin_token("skandx-test-token-bypass") is False
 
 def test_save_and_load_lead_atomic():
     test_lead = {
@@ -123,14 +123,27 @@ def api_server():
 
 
 def test_contact_endpoint_burst_and_rate_limiting_http(api_server, monkeypatch):
-    # Mock save_lead to avoid synchronous Supabase cloud network calls during local burst test
-    monkeypatch.setattr("backend.app.save_lead", lambda data: {"id": "lead-mock", **data})
+    # Legacy /api/contact is retired (410 Gone)
+    legacy_req = urllib.request.Request(
+        f"{api_server}/api/contact",
+        data=b"{}",
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+    with pytest.raises(urllib.error.HTTPError) as legacy_exc:
+        urllib.request.urlopen(legacy_req, timeout=5)
+    assert legacy_exc.value.code == 410
+
+    monkeypatch.setattr("backend.app.verify_customer_jwt", lambda auth: "cust-burst-1")
+    monkeypatch.setattr("backend.app.create_lead_and_agreement", lambda **kw: ({"status": "success", "leadId": "lead-mock"}, 201))
 
     unique_ip = "198.51.100.42"
-    url = f"{api_server}/api/contact"
+    url = f"{api_server}/api/v1/leads"
     payload = json.dumps({
         "customerName": "Burst Tester",
         "phone": "9876543210",
+        "propertyId": "prop-burst",
+        "inquiryType": "General Auction Guidance",
         "message": "Testing burst"
     }).encode("utf-8")
 
@@ -141,6 +154,7 @@ def test_contact_endpoint_burst_and_rate_limiting_http(api_server, monkeypatch):
             data=payload,
             headers={
                 "Content-Type": "application/json",
+                "Authorization": "Bearer fake-cust-jwt",
                 "X-Forwarded-For": unique_ip
             },
             method="POST"
@@ -501,12 +515,11 @@ def test_test_token_bypass_rejected_in_production_mode():
         if "PYTEST_CURRENT_TEST" in os.environ:
             del os.environ["PYTEST_CURRENT_TEST"]
 
-        # In production mode: skandx-test-token-bypass MUST be rejected
+        # skandx-test-token-bypass must ALWAYS be rejected
         assert verify_admin_token("skandx-test-token-bypass") is False
 
-        # If explicitly enabled via environment, it is accepted
         os.environ["ALLOW_TEST_TOKEN"] = "true"
-        assert verify_admin_token("skandx-test-token-bypass") is True
+        assert verify_admin_token("skandx-test-token-bypass") is False
 
     finally:
         if orig_env is not None:
@@ -601,6 +614,271 @@ def test_admin_login_rejects_default_credentials_in_production_environment(api_s
     body = json.loads(exc_info.value.read().decode("utf-8"))
     assert body.get("status") == "error"
     assert "ADMIN_EMAIL and ADMIN_PASSWORD must be explicitly configured" in body.get("message", "")
+
+
+def test_public_auctions_strips_pii_and_internal_fields(api_server, monkeypatch):
+    sample_rows = [
+        {
+            "id": "prop-1",
+            "property_title": "Residential Plot in Adyar",
+            "bank_name": "State Bank of India",
+            "branch_name": "Adyar Branch",
+            "district": "Chennai",
+            "village_or_locality": "Adyar",
+            "reserve_price_inr": 8500000,
+            "emd_amount_inr": 850000,
+            "auction_date": "2026-12-20T11:00:00Z",
+            "review_status": "PUBLISHED",
+            "borrower_name": "Secret Borrower Name",
+            "contact_phone": "+91 98400 12345",
+            "authorized_officer_name": "Officer Secret",
+            "raw_extracted_json": {"raw": "secret"},
+            "review_notes": "Internal legal note",
+            "asset_fingerprint": "fp-123",
+            "auction_event_hash": "hash-123",
+        }
+    ]
+    monkeypatch.setattr("backend.app.get_raw_auctions", lambda: (sample_rows, "TEST_MOCK"))
+
+    for route in ("/api/auctions", "/api/v1/auctions"):
+        with urllib.request.urlopen(f"{api_server}{route}", timeout=5) as resp:
+            assert resp.status == 200
+            payload = json.loads(resp.read().decode("utf-8"))
+            assert payload["count"] == 1
+            item = payload["data"][0]
+            assert item["reserve_price_inr"] == 8500000
+            assert item["district"] == "Chennai"
+            for forbidden in (
+                "borrower_name",
+                "contact_phone",
+                "authorized_officer_name",
+                "raw_extracted_json",
+                "review_notes",
+                "asset_fingerprint",
+                "auction_event_hash",
+            ):
+                assert forbidden not in item
+
+
+def test_patch_admin_leads_auth_and_persistence(api_server):
+    lead = save_lead({
+        "customerName": "Stage 0 Lead",
+        "phone": "9876543211",
+        "propertyId": "prop-1",
+        "inquiryType": "General Inquiry",
+    })
+    patch_body = json.dumps({"id": lead["id"], "status": "SCHEDULED", "notes": "Call at 4 PM"}).encode("utf-8")
+
+    # Unauthenticated PATCH must return 401
+    unauth_req = urllib.request.Request(
+        f"{api_server}/api/admin/leads",
+        data=patch_body,
+        headers={"Content-Type": "application/json"},
+        method="PATCH",
+    )
+    with pytest.raises(urllib.error.HTTPError) as exc_info:
+        urllib.request.urlopen(unauth_req, timeout=5)
+    assert exc_info.value.code == 401
+
+    # Authenticated PATCH must persist status
+    token = generate_admin_token()
+    auth_req = urllib.request.Request(
+        f"{api_server}/api/admin/leads",
+        data=patch_body,
+        headers={"Content-Type": "application/json", "Authorization": f"Bearer {token}"},
+        method="PATCH",
+    )
+    with urllib.request.urlopen(auth_req, timeout=5) as resp:
+        assert resp.status == 200
+        res = json.loads(resp.read().decode("utf-8"))
+        assert res["leadStatus"] == "SCHEDULED"
+
+    leads, _ = load_leads(limit=20)
+    matched = [l for l in leads if l["id"] == lead["id"]]
+    assert matched and matched[0]["status"] == "SCHEDULED"
+
+
+def test_patch_admin_properties_persists_all_editable_fields(api_server, monkeypatch):
+    captured = {}
+
+    def fake_persist(prop_id, new_status, updated_fields=None):
+        captured["id"] = prop_id
+        captured["status"] = new_status
+        captured["fields"] = updated_fields
+
+    monkeypatch.setattr("backend.app.persist_property_update", fake_persist)
+    token = generate_admin_token()
+    body = json.dumps({
+        "id": "prop-99",
+        "status": "PUBLISHED",
+        "title": "Updated Title",
+        "reserve": 4200000,
+        "district": "Coimbatore",
+        "branch": "RS Puram",
+    }).encode("utf-8")
+
+    req = urllib.request.Request(
+        f"{api_server}/api/admin/properties",
+        data=body,
+        headers={"Content-Type": "application/json", "Authorization": f"Bearer {token}"},
+        method="PATCH",
+    )
+    with urllib.request.urlopen(req, timeout=5) as resp:
+        assert resp.status == 200
+    assert captured["id"] == "prop-99"
+    assert captured["status"] == "PUBLISHED"
+    assert captured["fields"]["district"] == "Coimbatore"
+    assert captured["fields"]["branch"] == "RS Puram"
+
+
+def test_ingestion_evaluate_sanity_never_auto_publishes():
+    import sys
+    ingestion_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "backend", "ingestion")
+    if ingestion_dir not in sys.path:
+        sys.path.insert(0, ingestion_dir)
+    from models.auction_schema import ExtractedAuctionProperty, ReviewStatus
+    from database.supabase_client import evaluate_sanity
+
+    prop = ExtractedAuctionProperty(
+        bank_name="Indian Bank",
+        asset_category="LAND_PLOT",
+        possession_type="PHYSICAL",
+        area_description="1200 sq ft residential plot",
+        village_or_locality="Velachery",
+        district="Chennai",
+        survey_numbers=["123/4A"],
+        reserve_price_inr=5000000,
+        emd_amount_inr=500000,
+        auction_date="2026-12-25T11:00:00Z",
+    )
+    status, _ = evaluate_sanity(prop)
+    assert status == ReviewStatus.NEEDS_MANUAL_REVIEW
+
+
+def test_phase1_verification_projection_detail_districts_and_sitemap(api_server, monkeypatch):
+    sample = [
+        {
+            "id": "p-101",
+            "slug": "adyar-plot-p-101",
+            "property_title": "Adyar Plot",
+            "bank_name": "Indian Bank",
+            "district": "Chennai",
+            "village_or_locality": "Adyar",
+            "reserve_price_inr": 7500000,
+            "emd_amount_inr": 750000,
+            "auction_date": "2027-01-15T11:00:00Z",
+            "publication_status": "PUBLISHED",
+            "verification_dimensions": {
+                "source_checked": {
+                    "status": "COMPLETED",
+                    "reviewed_at": "2026-11-25T10:00:00Z",
+                    "review_period": "2026-11",
+                    "reviewer": "internal-staff@skandx.com",
+                    "notes": "Internal sensitive note",
+                    "evidence_ref": "s3://private/doc.pdf",
+                }
+            },
+            "risk_disclosures": ["Physical inspection pending"],
+        }
+    ]
+    monkeypatch.setattr("backend.app.get_raw_auctions", lambda: (sample, "TEST"))
+
+    with urllib.request.urlopen(f"{api_server}/api/v1/auctions/adyar-plot-p-101", timeout=5) as resp:
+        assert resp.status == 200
+        item = json.loads(resp.read().decode("utf-8"))["data"]
+        src_dim = item["verification_dimensions"]["source_checked"]
+        assert src_dim["status"] == "COMPLETED"
+        assert "reviewer" not in src_dim
+        assert "notes" not in src_dim
+        assert "evidence_ref" not in src_dim
+
+    with urllib.request.urlopen(f"{api_server}/api/v1/districts", timeout=5) as resp:
+        assert resp.status == 200
+        districts = json.loads(resp.read().decode("utf-8"))["data"]
+        assert districts == [{"district": "Chennai", "count": 1}]
+
+    with urllib.request.urlopen(f"{api_server}/sitemap.xml", timeout=5) as resp:
+        assert resp.status == 200
+        xml = resp.read().decode("utf-8")
+        assert "/properties/adyar-plot-p-101" in xml
+
+
+def test_phase3_leads_agreement_dedup_and_isolation(api_server, monkeypatch):
+    monkeypatch.setattr("backend.app._contact_rate_limits", {})
+
+    # 1. Unauthenticated POST /api/v1/leads -> 401
+    unauth_req = urllib.request.Request(
+        f"{api_server}/api/v1/leads",
+        data=json.dumps({"phone": "9876543210", "propertyId": "p-101"}).encode("utf-8"),
+        headers={"Content-Type": "application/json", "X-Forwarded-For": "203.0.113.10"},
+        method="POST",
+    )
+    with pytest.raises(urllib.error.HTTPError) as exc:
+        urllib.request.urlopen(unauth_req, timeout=5)
+    assert exc.value.code == 401
+
+    monkeypatch.setattr("backend.app.verify_customer_jwt", lambda auth: "user-abc" if "user-abc" in auth else "user-xyz")
+
+    # 2. Paid assistance without agreement -> 400
+    no_agr_req = urllib.request.Request(
+        f"{api_server}/api/v1/leads",
+        data=json.dumps({
+            "phone": "9876543210",
+            "propertyId": "p-101",
+            "inquiryType": "Physical Property Inspection",
+            "agreementAccepted": False,
+        }).encode("utf-8"),
+        headers={"Content-Type": "application/json", "Authorization": "Bearer user-abc", "X-Forwarded-For": "203.0.113.11"},
+        method="POST",
+    )
+    with pytest.raises(urllib.error.HTTPError) as exc:
+        urllib.request.urlopen(no_agr_req, timeout=5)
+    assert exc.value.code == 400
+
+    # 3. Paid assistance with agreement -> 201
+    ok_req = urllib.request.Request(
+        f"{api_server}/api/v1/leads",
+        data=json.dumps({
+            "customerName": "Raj",
+            "phone": "9876543210",
+            "propertyId": "p-101",
+            "inquiryType": "Physical Property Inspection",
+            "message": "Internal test note",
+            "agreementAccepted": True,
+            "acceptedName": "Raj",
+        }).encode("utf-8"),
+        headers={"Content-Type": "application/json", "Authorization": "Bearer user-abc", "X-Forwarded-For": "203.0.113.12"},
+        method="POST",
+    )
+    with urllib.request.urlopen(ok_req, timeout=5) as resp:
+        assert resp.status == 201
+        res = json.loads(resp.read().decode("utf-8"))
+        assert res["leadStatus"] == "REQUEST_RECEIVED"
+        assert res["agreementId"] is not None
+
+    # 4. Duplicate active lead -> 409
+    with pytest.raises(urllib.error.HTTPError) as exc:
+        urllib.request.urlopen(ok_req, timeout=5)
+    assert exc.value.code == 409
+
+    # 5. Cross-user isolation on GET /api/v1/me/leads
+    other_req = urllib.request.Request(
+        f"{api_server}/api/v1/me/leads",
+        headers={"Authorization": "Bearer user-xyz"},
+    )
+    with urllib.request.urlopen(other_req, timeout=5) as resp:
+        assert json.loads(resp.read().decode("utf-8"))["leads"] == []
+
+    own_req = urllib.request.Request(
+        f"{api_server}/api/v1/me/leads",
+        headers={"Authorization": "Bearer user-abc"},
+    )
+    with urllib.request.urlopen(own_req, timeout=5) as resp:
+        own_leads = json.loads(resp.read().decode("utf-8"))["leads"]
+        assert len(own_leads) == 1
+        assert "notes" not in own_leads[0] and "message" not in own_leads[0]
+
+
 
 
 
