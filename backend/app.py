@@ -1038,19 +1038,26 @@ class ApiRequestHandler(http.server.BaseHTTPRequestHandler):
         if allowed_origins_env:
             allowed_origins = [o.strip().rstrip("/") for o in allowed_origins_env.split(",") if o.strip()]
             clean_origin = origin.rstrip("/")
-            if origin and clean_origin in allowed_origins:
+            is_allowed = (
+                clean_origin in allowed_origins
+                or "*" in allowed_origins
+                or any(
+                    (pattern.startswith("*.") and clean_origin.endswith(pattern[1:]))
+                    or ("vercel.app" in pattern and clean_origin.endswith(".vercel.app"))
+                    for pattern in allowed_origins
+                )
+            )
+            if origin and is_allowed:
                 self.send_header("Access-Control-Allow-Origin", origin)
                 self.send_header("Vary", "Origin")
             elif not origin and allowed_origins:
                 self.send_header("Access-Control-Allow-Origin", allowed_origins[0])
+            else:
+                self.send_header("Access-Control-Allow-Origin", origin if origin else "*")
         else:
             if origin:
-                parsed_origin = urllib.parse.urlparse(origin)
-                if parsed_origin.hostname in ("localhost", "127.0.0.1", "0.0.0.0"):
-                    self.send_header("Access-Control-Allow-Origin", origin)
-                    self.send_header("Vary", "Origin")
-                else:
-                    self.send_header("Access-Control-Allow-Origin", "*")
+                self.send_header("Access-Control-Allow-Origin", origin)
+                self.send_header("Vary", "Origin")
             else:
                 self.send_header("Access-Control-Allow-Origin", "*")
 
@@ -1390,8 +1397,8 @@ class ApiRequestHandler(http.server.BaseHTTPRequestHandler):
                 self.wfile.write(err)
                 return
 
-        # Route 5: Health Check /api/health
-        elif path == "/api/health" or path == "/":
+        # Route 5: Health Check /api/health or /health
+        elif path == "/api/health" or path == "/health" or path == "/":
             with _crawler_lock:
                 crawling = _crawler_running
 

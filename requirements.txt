@@ -1,0 +1,2 @@
+# Delegates to backend requirements for Render or root-level runners
+-r backend/requirements.txt
