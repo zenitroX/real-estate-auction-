@@ -218,3 +218,31 @@ def route_document(
             page_count=1,
             reason=f"PyMuPDF parse error ({e}); falling back to Multimodal Vision",
         )
+
+
+def extract_pdf_images(file_source: Union[str, Path, bytes], min_size_bytes: int = 2048) -> List[bytes]:
+    """
+    Extract embedded property photographs, building plans, and scans from PDF pages.
+    Filters out small icons, borders, or watermark graphics smaller than min_size_bytes.
+    """
+    images = []
+    if not fitz:
+        return images
+    try:
+        if isinstance(file_source, bytes):
+            doc = fitz.open(stream=file_source, filetype="pdf")
+        else:
+            doc = fitz.open(str(file_source))
+
+        for page_idx in range(len(doc)):
+            page = doc[page_idx]
+            for img_info in page.get_images(full=True):
+                xref = img_info[0]
+                base_img = doc.extract_image(xref)
+                img_bytes = base_img.get("image")
+                # Filter out tiny bullets, icons, or horizontal rules (< 2KB)
+                if img_bytes and len(img_bytes) >= min_size_bytes:
+                    images.append(img_bytes)
+    except Exception as e:
+        logger.debug("PDF image extraction notice: %s", e)
+    return images

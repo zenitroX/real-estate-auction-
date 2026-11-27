@@ -99,6 +99,10 @@ class ExtractedAuctionProperty(BaseModel):
     bidding_portal_url: Optional[str] = Field(
         None, description="Portal URL mentioned in notice, e.g., baanknet.com or mstcecommerce.com"
     )
+    images: List[str] = Field(
+        default_factory=list,
+        description="Direct URLs or local paths to property photographs extracted from portal or notice",
+    )
 
     @field_validator("survey_numbers", mode="before")
     @classmethod

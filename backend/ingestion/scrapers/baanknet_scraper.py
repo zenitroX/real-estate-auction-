@@ -120,6 +120,26 @@ class BaanknetScraper(BaseScraper):
         # Yield collected records and download referenced PDFs
         logger.info("Total Baanknet property records intercepted: %d", len(self.intercepted_records))
         for item in self.intercepted_records:
+            # Extract property images from listing payload
+            images = []
+            for key in ("images", "propertyImages", "photos", "photoUrls", "imageUrls", "property_photos", "media"):
+                val = item.get(key)
+                if isinstance(val, list):
+                    for v in val:
+                        if isinstance(v, str) and (v.startswith("http") or v.startswith("/")):
+                            images.append(v)
+                        elif isinstance(v, dict):
+                            url = v.get("url") or v.get("src") or v.get("imageUrl") or v.get("path")
+                            if url and isinstance(url, str):
+                                images.append(url)
+            for key in ("image", "imageUrl", "photo", "photoUrl", "thumbnail", "thumbnailUrl", "mainImage", "property_image", "picture"):
+                val = item.get(key)
+                if isinstance(val, str) and (val.startswith("http") or val.startswith("/")):
+                    images.append(val)
+            # Deduplicate image URLs
+            seen_imgs = set()
+            clean_images = [img for img in images if not (img in seen_imgs or seen_imgs.add(img))]
+
             # Discover PDF link inside item
             pdf_url = (
                 item.get("noticeUrl")
@@ -140,6 +160,7 @@ class BaanknetScraper(BaseScraper):
                 "source": "baanknet",
                 "portal_url": BAANKNET_LISTING_URL,
                 "listing_data": item,
+                "images": clean_images,
                 "pdf_url": pdf_url,
                 "pdf_path": str(pdf_path) if pdf_path else None,
             }
