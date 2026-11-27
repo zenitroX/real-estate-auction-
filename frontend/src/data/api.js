@@ -31,21 +31,31 @@ function mapAuctionItem(item, index) {
   const emd = item.emd_amount_inr != null ? Number(item.emd_amount_inr) : null;
   const auctionTime = item.auction_date ? new Date(item.auction_date).getTime() : null;
   const daysAhead = auctionTime != null ? (auctionTime - Date.now()) / 86400000 : null;
-  const type = mapAssetCategoryToUiType(item.asset_category);
+  const type = item.ui_type || mapAssetCategoryToUiType(item.asset_category);
   const localityParts = [item.village_or_locality, item.district, item.state].filter(Boolean);
   const locality = localityParts.length > 0 ? localityParts.join(', ') : 'Tamil Nadu';
 
-  const heroImg = GALLERY_POOL[index % GALLERY_POOL.length];
-  const secondaryImg = GALLERY_POOL[(index + 1) % GALLERY_POOL.length];
+  const meta = item.metadata || item.raw_extracted_json || {};
+  const images = Array.isArray(item.images) && item.images.length > 0
+    ? item.images
+    : (Array.isArray(meta.images) && meta.images.length > 0
+        ? meta.images
+        : [GALLERY_POOL[index % GALLERY_POOL.length], GALLERY_POOL[(index + 1) % GALLERY_POOL.length], GALLERY_POOL[0]]);
+
+  const furnishing = item.furnishing || meta.furnishing || 'NA';
+  const projectName = item.project_name || meta.project_name || 'NA';
+  const builtUpArea = item.built_up_area || meta.built_up_area || null;
+  const beds = item.beds != null ? Number(item.beds) : (meta.beds != null ? Number(meta.beds) : null);
+  const baths = item.baths != null ? Number(item.baths) : (meta.baths != null ? Number(meta.baths) : null);
 
   return {
     id: String(item.id || `auction-${index}`),
     slug: item.slug || null,
     title: item.property_title || `${item.bank_name || 'Bank'} Auction Property`,
-    badge: 'BANK AUCTION',
+    badge: meta.badge || 'BANK AUCTION',
     type,
     assetCategory: item.asset_category || null,
-    possessionType: item.possession_type || null,
+    possessionType: item.possession_type || 'Physical',
     locality,
     district: item.district || null,
     taluk: item.taluk || null,
@@ -54,8 +64,8 @@ function mapAuctionItem(item, index) {
     bank: item.bank_name || 'Not available',
     branch: item.branch_name || 'Not available',
     assetCode: item.patta_or_door_no || String(item.id || ''),
-    contact: '1800 - 202 - SKANDX',
-    officer: 'Auction Advisory Desk',
+    contact: item.contact_phone || '1800 - 202 - SKANDX',
+    officer: item.authorized_officer_name || 'Auction Advisory Desk',
     reserve,
     previousReserve: item.previous_reserve_price_inr != null ? Number(item.previous_reserve_price_inr) : null,
     priceDropPct: item.price_drop_percentage != null ? Number(item.price_drop_percentage) : null,
@@ -65,6 +75,11 @@ function mapAuctionItem(item, index) {
     emdLastDate: item.emd_last_date || null,
     inspectionDateInfo: item.inspection_date_info || null,
     area: item.area_sqft != null ? Number(item.area_sqft) : null,
+    builtUpArea,
+    furnishing,
+    projectName,
+    beds,
+    baths,
     areaDescription: item.area_description || null,
     surveyNumbers: Array.isArray(item.survey_numbers) ? item.survey_numbers : [],
     boundaries: item.boundaries || null,
@@ -75,8 +90,8 @@ function mapAuctionItem(item, index) {
     verified: (item.publication_status || item.review_status) === 'PUBLISHED',
     status: item.publication_status || item.review_status || 'PENDING_ADMIN_APPROVAL',
     verifiedDate: item.created_at ? new Date(item.created_at).toLocaleDateString('en-IN') : 'Not yet confirmed',
-    images: [heroImg, secondaryImg, GALLERY_POOL[0]],
-    desc: item.area_description || `SARFAESI bank auction notice issued by ${item.bank_name || 'authorized bank'}. Review verification status and risk disclosures before participating.`,
+    images,
+    desc: item.desc || meta.desc || item.area_description || `SARFAESI bank auction notice issued by ${item.bank_name || 'authorized bank'}. Review verification status and risk disclosures before participating.`,
     isLiveApi: true,
     sourcePortal: item.source_portal || null,
     sourceUrl: item.source_pdf_url || null,
@@ -88,7 +103,7 @@ function mapAuctionItem(item, index) {
 }
 
 /**
- * Fetch live bank auction listings for customers (published only, no mock mixing in production).
+ * Fetch live bank auction listings for customers (published only, loaded directly from Supabase / Backend API).
  */
 export async function fetchLiveAuctions(params = {}) {
   const qs = new URLSearchParams();
@@ -96,44 +111,56 @@ export async function fetchLiveAuctions(params = {}) {
     if (v !== undefined && v !== null && v !== '') qs.set(k, String(v));
   });
   const query = qs.toString();
-  const endpoint = `${API_BASE}/api/v1/auctions${query ? `?${query}` : ''}`;
+  const primaryBase = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
+  const candidateUrls = [];
+  if (primaryBase) candidateUrls.push(`${primaryBase}/api/v1/auctions${query ? `?${query}` : ''}`);
+  candidateUrls.push(`http://localhost:8000/api/v1/auctions${query ? `?${query}` : ''}`);
+  candidateUrls.push(`/api/v1/auctions${query ? `?${query}` : ''}`);
 
-  try {
-    const res = await fetch(endpoint, {
-      cache: 'no-store',
-      headers: { Accept: 'application/json' },
-    });
+  let lastErr = null;
+  for (const endpoint of candidateUrls) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3500);
+      const res = await fetch(endpoint, {
+        cache: 'no-store',
+        headers: { Accept: 'application/json' },
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
 
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const json = await res.json();
+      if (!res.ok) continue;
+      const json = await res.json();
 
-    if (json.status === 'success' && Array.isArray(json.data)) {
-      const mapped = json.data.map(mapAuctionItem);
-      return {
-        source: json.source || 'BACKEND_LIVE',
-        latencyMs: json.latency_ms || 0,
-        properties: mapped,
-        error: null,
-      };
+      if (json.status === 'success' && Array.isArray(json.data) && json.data.length > 0) {
+        const mapped = json.data.map(mapAuctionItem);
+        return {
+          source: json.source || 'SUPABASE_LIVE',
+          latencyMs: json.latency_ms || 0,
+          properties: mapped,
+          error: null,
+        };
+      }
+    } catch (err) {
+      lastErr = err;
     }
+  }
 
-    throw new Error('Unexpected API response format');
-  } catch (err) {
-    if (ENABLE_DEMO_DATA) {
-      return {
-        source: 'DEMO_MODE',
-        latencyMs: 0,
-        properties: INITIAL_PROPERTIES,
-        error: null,
-      };
-    }
+  // Fallback to demo data if enabled, or return error
+  if (ENABLE_DEMO_DATA) {
     return {
-      source: 'ERROR',
+      source: 'DEMO_MODE',
       latencyMs: 0,
-      properties: [],
-      error: err instanceof Error ? err.message : 'Failed to load auction listings',
+      properties: INITIAL_PROPERTIES,
+      error: null,
     };
   }
+  return {
+    source: 'ERROR',
+    latencyMs: 0,
+    properties: [],
+    error: lastErr instanceof Error ? lastErr.message : 'Failed to load auction listings',
+  };
 }
 
 const OFFLINE_LEADS_KEY = 'skandx_pending_leads';

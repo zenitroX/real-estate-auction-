@@ -1,474 +1,1532 @@
 [
   {
-    "id": "89501536-d531-4aff-9adc-d3a4e6e7dfe6",
-    "asset_fingerprint": "3eec164c657ee6e4129a56f39c50e61bb21fa616340fec64dcd2473077725221",
-    "auction_event_hash": "068e4fac1da649d9832a7e31e6634bb5554bb693285488bf04f54b9d4a75e4cb",
-    "bank_name": "Punjab National Bank",
-    "branch_name": "Salem Junction Branch",
-    "borrower_name": "Thiru. C. Subramani & Smt. S. Lakshmi",
-    "asset_category": "AGRICULTURAL",
-    "possession_type": "PHYSICAL",
-    "survey_numbers": [
-      "R.S. No. 78/2B",
-      "79/1"
-    ],
-    "patta_or_door_no": "Patta No. 891",
-    "village_or_locality": "Omalur",
-    "taluk": "Omalur",
-    "district": "Salem",
-    "state": "Tamil Nadu",
-    "pincode": "636455",
-    "area_description": "Fertile Coconut and Mango Grove measuring 2 Acres 50 Cents with borewell and 5 HP pump set",
-    "area_sqft": 108900.0,
-    "boundaries": {
-      "east": "S.F. No. 78/2A Coconut Thoppu",
-      "west": "Omalur-Mecheri Panchayat Road",
-      "north": "Periya Kulam Channel / Cart Track",
-      "south": "Land of Ramanathan"
-    },
-    "reserve_price_inr": 3500000,
-    "previous_reserve_price_inr": null,
-    "price_drop_percentage": null,
-    "emd_amount_inr": 350000,
-    "bid_increment_inr": 50000,
-    "emd_last_date": "2026-12-29T17:00:00+00:00",
-    "inspection_date_info": "Direct site inspection permitted on 22-12-2026",
-    "auction_date": "2026-12-31T11:00:00+00:00",
-    "authorized_officer_name": "Chief Manager (Zonal Sastra)",
-    "contact_phone": "+91-427-2341200",
-    "source_portal": "Bank Foreclosure Notice",
-    "source_pdf_url": null,
-    "bidding_portal_url": "https://baanknet.com",
-    "review_status": "PUBLISHED",
-    "review_notes": null,
-    "raw_extracted_json": {
-      "state": "Tamil Nadu",
-      "taluk": "Omalur",
-      "pincode": "636455",
-      "district": "Salem",
-      "area_sqft": 108900.0,
-      "bank_name": "Punjab National Bank",
-      "boundaries": {
-        "east": "S.F. No. 78/2A Coconut Thoppu",
-        "west": "Omalur-Mecheri Panchayat Road",
-        "north": "Periya Kulam Channel / Cart Track",
-        "south": "Land of Ramanathan"
-      },
-      "branch_name": "Salem Junction Branch",
-      "auction_date": "2026-12-31T11:00:00",
-      "borrower_name": "Thiru. C. Subramani & Smt. S. Lakshmi",
-      "contact_phone": "+91-427-2341200",
-      "emd_last_date": "2026-12-29T17:00:00",
-      "asset_category": "AGRICULTURAL",
-      "emd_amount_inr": 350000,
-      "survey_numbers": [
-        "R.S. No. 78/2B",
-        "79/1"
-      ],
-      "possession_type": "PHYSICAL",
-      "area_description": "Fertile Coconut and Mango Grove measuring 2 Acres 50 Cents with borewell and 5 HP pump set",
-      "patta_or_door_no": "Patta No. 891",
-      "bid_increment_inr": 50000,
-      "reserve_price_inr": 3500000,
-      "bidding_portal_url": "https://baanknet.com",
-      "village_or_locality": "Omalur",
-      "inspection_date_info": "Direct site inspection permitted on 22-12-2026",
-      "authorized_officer_name": "Chief Manager (Zonal Sastra)"
-    },
-    "created_at": "2026-11-06T15:06:36.598113+00:00",
-    "updated_at": "2026-11-06T15:06:36.598113+00:00"
-  },
-  {
-    "id": "c77285cb-2583-4ba3-a294-f11c787d1c24",
-    "asset_fingerprint": "27e3e9cd8376da155ea3a81b071a64051d68a7081600bb1fcb4a4a88098acbfd",
-    "auction_event_hash": "710c22b36a08309a883b86d00bafecabcb829d82da42b090e7b139dddbdbc975",
+    "id": "f62387bf-69f2-45bb-a50e-ed535aba341a",
+    "property_title": "Bank Foreclosure Asset",
     "bank_name": "State Bank of India",
-    "branch_name": "Stressed Assets Recovery Branch (SARB), Coimbatore",
-    "borrower_name": "Thiru. K. Rangarajan, S/o. Kandasamy",
-    "asset_category": "HOUSE_VILLA",
-    "possession_type": "PHYSICAL",
+    "branch_name": null,
+    "borrower_name": null,
+    "asset_category": "FLAT_APARTMENT",
+    "possession_type": "SYMBOLIC",
     "survey_numbers": [
-      "124/2A",
-      "125"
+      "1",
+      "223/2",
+      "697/2",
+      "48",
+      "328/2",
+      "108",
+      "371/6",
+      "434/2",
+      "579",
+      "970/2"
     ],
-    "patta_or_door_no": "Patta No. 452",
-    "village_or_locality": "Irugur Village",
-    "taluk": "Sulur",
-    "district": "Coimbatore",
+    "patta_or_door_no": null,
+    "village_or_locality": "Chennai",
+    "taluk": null,
+    "district": "Chennai",
     "state": "Tamil Nadu",
     "pincode": null,
-    "area_description": "5 Cents (2178 Sq.ft) with 1200 Sq.ft RCC building",
-    "area_sqft": 2178.0,
-    "boundaries": {
-      "east": "S.F. No. 124/2B land",
-      "west": "Panchayat Pipe Line",
-      "north": "20 feet East-West Road",
-      "south": "Property of Murugesan"
-    },
-    "reserve_price_inr": 4050000,
-    "previous_reserve_price_inr": 4500000,
-    "price_drop_percentage": 10.0,
-    "emd_amount_inr": 405000,
-    "bid_increment_inr": 50000,
-    "emd_last_date": "2026-12-26T17:00:00+00:00",
+    "area_description": "30, Ground",
+    "area_sqft": null,
+    "boundaries": null,
+    "reserve_price_inr": 950000.0,
+    "previous_reserve_price_inr": null,
+    "price_drop_percentage": null,
+    "emd_amount_inr": 95000.0,
+    "bid_increment_inr": null,
+    "emd_last_date": null,
     "inspection_date_info": null,
-    "auction_date": "2026-12-28T11:00:00+00:00",
+    "auction_date": "2026-12-31T11:00:00+00:00",
     "authorized_officer_name": null,
     "contact_phone": null,
-    "source_portal": "Local Folder (sample_notices)",
-    "source_pdf_url": "sbi_repeat_auction_price_drop.pdf",
-    "bidding_portal_url": "https://baanknet.com",
+    "source_portal": "State Bank of India",
+    "source_pdf_url": "statebankofindia_37c4fe713b6e84ea.pdf",
+    "bidding_portal_url": null,
+    "auction_event_hash": "5e5184146be90a729324daea55bca56509ab835f506b30e1c91d5905be167f8b",
+    "asset_fingerprint": "4d944ffcc6335e99620fa24705f8866a14e5e5d1e27f941bcb9e6e0c574585a2",
     "review_status": "PUBLISHED",
-    "review_notes": null,
+    "review_notes": "Awaiting manual admin approval",
     "raw_extracted_json": {
       "state": "Tamil Nadu",
-      "taluk": "Sulur",
+      "taluk": null,
       "pincode": null,
-      "district": "Coimbatore",
-      "area_sqft": 2178.0,
+      "district": "Chennai",
+      "area_sqft": null,
       "bank_name": "State Bank of India",
-      "boundaries": {
-        "east": "S.F. No. 124/2B land",
-        "west": "Panchayat Pipe Line",
-        "north": "20 feet East-West Road",
-        "south": "Property of Murugesan"
-      },
-      "branch_name": "Stressed Assets Recovery Branch (SARB), Coimbatore",
-      "auction_date": "2026-12-28T11:00:00",
-      "borrower_name": "Thiru. K. Rangarajan, S/o. Kandasamy",
+      "boundaries": null,
+      "branch_name": null,
+      "auction_date": "2026-12-31T11:00:00",
+      "borrower_name": null,
       "contact_phone": null,
-      "emd_last_date": "2026-12-26T17:00:00",
-      "asset_category": "HOUSE_VILLA",
-      "emd_amount_inr": 405000,
+      "emd_last_date": null,
+      "asset_category": "FLAT_APARTMENT",
+      "emd_amount_inr": 95000,
       "survey_numbers": [
-        "124/2A",
-        "125"
+        "1",
+        "223/2",
+        "697/2",
+        "48",
+        "328/2",
+        "108",
+        "371/6",
+        "434/2",
+        "579",
+        "970/2"
       ],
-      "possession_type": "PHYSICAL",
-      "area_description": "5 Cents (2178 Sq.ft) with 1200 Sq.ft RCC building",
-      "patta_or_door_no": "Patta No. 452",
-      "bid_increment_inr": 50000,
-      "reserve_price_inr": 4050000,
-      "bidding_portal_url": "https://baanknet.com",
-      "village_or_locality": "Irugur Village",
+      "possession_type": "SYMBOLIC",
+      "area_description": "30, Ground",
+      "patta_or_door_no": null,
+      "bid_increment_inr": null,
+      "reserve_price_inr": 950000,
+      "bidding_portal_url": null,
+      "village_or_locality": "Chennai",
       "inspection_date_info": null,
       "authorized_officer_name": null
     },
-    "created_at": "2026-11-06T14:33:46.014351+00:00",
-    "updated_at": "2026-11-06T14:33:46.014351+00:00"
+    "created_at": "2026-11-25T17:21:33.289076+00:00",
+    "publication_status": "PUBLISHED",
+    "verification_dimensions": {},
+    "risk_disclosures": [],
+    "slug": "state-bank-of-india-chennai-5e518414",
+    "last_source_confirmed_at": null
   },
   {
-    "id": "5222f90a-f23f-44c2-b7b9-342d7e7c7598",
-    "asset_fingerprint": "d8afdebaf16d29ed874e7dd2490088e3dd4f6419904881ed65b329b96a098cc9",
-    "auction_event_hash": "c213db28e5a0c7bb419ee96fc57b8a1701431f30994c2b994aa309f903df36f3",
-    "bank_name": "Bank of Baroda",
-    "branch_name": "Textile Park Branch, Tiruppur",
-    "borrower_name": "M/s. Tirupur Garments Export Pvt Ltd",
-    "asset_category": "INDUSTRIAL",
-    "possession_type": "SYMBOLIC",
-    "survey_numbers": [
-      "S.F. No. 340/2",
-      "341/1A"
-    ],
-    "patta_or_door_no": "Plot No. 18 & 19, SIDCO Industrial Estate",
-    "village_or_locality": "Mudalipalayam",
-    "taluk": "Tiruppur South",
-    "district": "Tiruppur",
-    "state": "Tamil Nadu",
-    "pincode": "641606",
-    "area_description": "Industrial Land measuring 45 Cents with 15,000 Sq.ft RCC/Galvalume Shed",
-    "area_sqft": 19602.0,
-    "boundaries": {
-      "east": "Plot No. 20 (Dyeing Unit)",
-      "west": "Plot No. 17 (Knitting Factory)",
-      "north": "40 feet SIDCO Main Road",
-      "south": "Substation & EB Transformer"
-    },
-    "reserve_price_inr": 24000000,
-    "previous_reserve_price_inr": null,
-    "price_drop_percentage": null,
-    "emd_amount_inr": 2400000,
-    "bid_increment_inr": 200000,
-    "emd_last_date": "2026-12-22T17:00:00+00:00",
-    "inspection_date_info": "18-12-2026 from 11:00 AM to 3:00 PM",
-    "auction_date": "2026-12-24T14:00:00+00:00",
-    "authorized_officer_name": "Senior Manager (Recovery)",
-    "contact_phone": "+91-421-2489000",
-    "source_portal": "Bank Foreclosure Notice",
-    "source_pdf_url": null,
-    "bidding_portal_url": "https://www.bankeauctions.com",
-    "review_status": "PUBLISHED",
-    "review_notes": null,
-    "raw_extracted_json": {
-      "state": "Tamil Nadu",
-      "taluk": "Tiruppur South",
-      "pincode": "641606",
-      "district": "Tiruppur",
-      "area_sqft": 19602.0,
-      "bank_name": "Bank of Baroda",
-      "boundaries": {
-        "east": "Plot No. 20 (Dyeing Unit)",
-        "west": "Plot No. 17 (Knitting Factory)",
-        "north": "40 feet SIDCO Main Road",
-        "south": "Substation & EB Transformer"
-      },
-      "branch_name": "Textile Park Branch, Tiruppur",
-      "auction_date": "2026-12-24T14:00:00",
-      "borrower_name": "M/s. Tirupur Garments Export Pvt Ltd",
-      "contact_phone": "+91-421-2489000",
-      "emd_last_date": "2026-12-22T17:00:00",
-      "asset_category": "INDUSTRIAL",
-      "emd_amount_inr": 2400000,
-      "survey_numbers": [
-        "S.F. No. 340/2",
-        "341/1A"
-      ],
-      "possession_type": "SYMBOLIC",
-      "area_description": "Industrial Land measuring 45 Cents with 15,000 Sq.ft RCC/Galvalume Shed",
-      "patta_or_door_no": "Plot No. 18 & 19, SIDCO Industrial Estate",
-      "bid_increment_inr": 200000,
-      "reserve_price_inr": 24000000,
-      "bidding_portal_url": "https://www.bankeauctions.com",
-      "village_or_locality": "Mudalipalayam",
-      "inspection_date_info": "18-12-2026 from 11:00 AM to 3:00 PM",
-      "authorized_officer_name": "Senior Manager (Recovery)"
-    },
-    "created_at": "2026-11-06T15:06:36.023986+00:00",
-    "updated_at": "2026-11-06T15:06:36.023986+00:00"
-  },
-  {
-    "id": "d1aa9b7a-f6dd-4822-8b6c-2ee58321f08b",
-    "asset_fingerprint": "abd852b868b49d222ea720d4541cb62bb176624ec283318e42127461aaf84844",
-    "auction_event_hash": "967f09a12cb37885ee52fb9b711b958f07d8611c9b4dfb21e4df262b267ec902",
-    "bank_name": "Canara Bank",
-    "branch_name": "Madurai Main / ARMB Branch",
-    "borrower_name": "Thiru. P. Sundaram",
+    "id": "be21fd21-c599-4e2c-9ce6-17494252ce90",
+    "property_title": "Bank Foreclosure Asset",
+    "bank_name": "State Bank of India",
+    "branch_name": null,
+    "borrower_name": null,
     "asset_category": "COMMERCIAL",
     "possession_type": "PHYSICAL",
     "survey_numbers": [
-      "Town Survey No. 112/3B"
+      "652/1"
     ],
-    "patta_or_door_no": "Door No. 45/A, Bypass Road",
-    "village_or_locality": "Ponmeni",
-    "taluk": "Madurai South",
-    "district": "Madurai",
-    "state": "Tamil Nadu",
-    "pincode": "625016",
-    "area_description": "Commercial Showroom Building of 3,200 Sq.ft (Ground + 1st Floor)",
-    "area_sqft": 3200.0,
-    "boundaries": {
-      "east": "Commercial Complex of Muthuvel",
-      "west": "20 feet North-South Cross Road",
-      "north": "Madurai-Theni National Highway",
-      "south": "Private Residential Layout"
-    },
-    "reserve_price_inr": 8200000,
-    "previous_reserve_price_inr": null,
-    "price_drop_percentage": null,
-    "emd_amount_inr": 820000,
-    "bid_increment_inr": 50000,
-    "emd_last_date": "2026-12-18T17:00:00+00:00",
-    "inspection_date_info": "12-12-2026 to 15-12-2026 with prior appointment",
-    "auction_date": "2026-12-20T10:30:00+00:00",
-    "authorized_officer_name": "Assistant General Manager",
-    "contact_phone": "+91-452-2348000",
-    "source_portal": "Bank Foreclosure Notice",
-    "source_pdf_url": null,
-    "bidding_portal_url": "https://canarabank.com/eauction",
-    "review_status": "PUBLISHED",
-    "review_notes": null,
-    "raw_extracted_json": {
-      "state": "Tamil Nadu",
-      "taluk": "Madurai South",
-      "pincode": "625016",
-      "district": "Madurai",
-      "area_sqft": 3200.0,
-      "bank_name": "Canara Bank",
-      "boundaries": {
-        "east": "Commercial Complex of Muthuvel",
-        "west": "20 feet North-South Cross Road",
-        "north": "Madurai-Theni National Highway",
-        "south": "Private Residential Layout"
-      },
-      "branch_name": "Madurai Main / ARMB Branch",
-      "auction_date": "2026-12-20T10:30:00",
-      "borrower_name": "Thiru. P. Sundaram",
-      "contact_phone": "+91-452-2348000",
-      "emd_last_date": "2026-12-18T17:00:00",
-      "asset_category": "COMMERCIAL",
-      "emd_amount_inr": 820000,
-      "survey_numbers": [
-        "Town Survey No. 112/3B"
-      ],
-      "possession_type": "PHYSICAL",
-      "area_description": "Commercial Showroom Building of 3,200 Sq.ft (Ground + 1st Floor)",
-      "patta_or_door_no": "Door No. 45/A, Bypass Road",
-      "bid_increment_inr": 50000,
-      "reserve_price_inr": 8200000,
-      "bidding_portal_url": "https://canarabank.com/eauction",
-      "village_or_locality": "Ponmeni",
-      "inspection_date_info": "12-12-2026 to 15-12-2026 with prior appointment",
-      "authorized_officer_name": "Assistant General Manager"
-    },
-    "created_at": "2026-11-06T15:06:35.360912+00:00",
-    "updated_at": "2026-11-06T15:06:35.360912+00:00"
-  },
-  {
-    "id": "100c70f5-ad12-4a35-aef5-779c282cb30d",
-    "asset_fingerprint": "c9c88c18d9e2e9bc4fa6dd4a6e97e3fd6fd3dbd1012d777b01a1b5b927f317ed",
-    "auction_event_hash": "237f79c1cd43b3a875f15269493b98380c241a528910b32a1a3079877550038b",
-    "bank_name": "Indian Overseas Bank",
-    "branch_name": "Anna Nagar West Branch, Chennai",
-    "borrower_name": "M/s. Sri Balaji Logistics & Traders",
-    "asset_category": "FLAT_APARTMENT",
-    "possession_type": "PHYSICAL",
-    "survey_numbers": [
-      "T.S. No. 42/1",
-      "Block 14"
-    ],
-    "patta_or_door_no": "Flat No. 3A, 3rd Floor, Lotus Enclave",
-    "village_or_locality": "Anna Nagar West",
-    "taluk": "Aminjikarai",
+    "patta_or_door_no": null,
+    "village_or_locality": "Chennai",
+    "taluk": null,
     "district": "Chennai",
     "state": "Tamil Nadu",
-    "pincode": "600040",
-    "area_description": "3 BHK Luxury Flat measuring 1,650 Sq.ft super built-up area",
-    "area_sqft": 1650.0,
-    "boundaries": {
-      "east": "Lift and Common Staircase",
-      "west": "Compound Wall & Private Garden",
-      "north": "30 feet Main Road",
-      "south": "Flat No. 3B"
-    },
-    "reserve_price_inr": 11500000,
-    "previous_reserve_price_inr": null,
-    "price_drop_percentage": null,
-    "emd_amount_inr": 1150000,
-    "bid_increment_inr": 100000,
-    "emd_last_date": "2026-12-14T17:00:00+00:00",
-    "inspection_date_info": "10-12-2026 from 10:00 AM to 4:00 PM",
-    "auction_date": "2026-12-16T11:00:00+00:00",
-    "authorized_officer_name": "Chief Manager & Recovery Head",
-    "contact_phone": "+91-44-26154000",
-    "source_portal": "Bank Foreclosure Notice",
-    "source_pdf_url": null,
-    "bidding_portal_url": "https://www.iob.in/Tender_Eauction",
-    "review_status": "PUBLISHED",
-    "review_notes": null,
-    "raw_extracted_json": {
-      "state": "Tamil Nadu",
-      "taluk": "Aminjikarai",
-      "pincode": "600040",
-      "district": "Chennai",
-      "area_sqft": 1650.0,
-      "bank_name": "Indian Overseas Bank",
-      "boundaries": {
-        "east": "Lift and Common Staircase",
-        "west": "Compound Wall & Private Garden",
-        "north": "30 feet Main Road",
-        "south": "Flat No. 3B"
-      },
-      "branch_name": "Anna Nagar West Branch, Chennai",
-      "auction_date": "2026-12-16T11:00:00",
-      "borrower_name": "M/s. Sri Balaji Logistics & Traders",
-      "contact_phone": "+91-44-26154000",
-      "emd_last_date": "2026-12-14T17:00:00",
-      "asset_category": "FLAT_APARTMENT",
-      "emd_amount_inr": 1150000,
-      "survey_numbers": [
-        "T.S. No. 42/1",
-        "Block 14"
-      ],
-      "possession_type": "PHYSICAL",
-      "area_description": "3 BHK Luxury Flat measuring 1,650 Sq.ft super built-up area",
-      "patta_or_door_no": "Flat No. 3A, 3rd Floor, Lotus Enclave",
-      "bid_increment_inr": 100000,
-      "reserve_price_inr": 11500000,
-      "bidding_portal_url": "https://www.iob.in/Tender_Eauction",
-      "village_or_locality": "Anna Nagar West",
-      "inspection_date_info": "10-12-2026 from 10:00 AM to 4:00 PM",
-      "authorized_officer_name": "Chief Manager & Recovery Head"
-    },
-    "created_at": "2026-11-06T15:06:34.678479+00:00",
-    "updated_at": "2026-11-06T15:06:34.678479+00:00"
-  },
-  {
-    "id": "1efdcbf3-274e-41f5-81dd-ed049e5b4ff5",
-    "asset_fingerprint": "27e3e9cd8376da155ea3a81b071a64051d68a7081600bb1fcb4a4a88098acbfd",
-    "auction_event_hash": "46cf76f28670dafdd367c304481c82aade82b764d4db1fe430a5f3c9022e22ee",
-    "bank_name": "State Bank of India",
-    "branch_name": "Stressed Assets Recovery Branch (SARB), Coimbatore",
-    "borrower_name": "K. Rangarajan",
-    "asset_category": "HOUSE_VILLA",
-    "possession_type": "PHYSICAL",
-    "survey_numbers": [
-      "124/2A",
-      "125"
-    ],
-    "patta_or_door_no": "Patta No. 452",
-    "village_or_locality": "Irugur Village",
-    "taluk": "Sulur",
-    "district": "Coimbatore",
-    "state": "Tamil Nadu",
     "pincode": null,
-    "area_description": "Land measuring 5 Cents (2178 Sq.ft) with 1200 Sq.ft RCC building",
-    "area_sqft": 2178.0,
-    "boundaries": {
-      "east": "S.F. No. 124/2B land",
-      "west": "Panchayat Pipe Line",
-      "north": "20 feet East-West Road",
-      "south": "Property of Murugesan"
-    },
-    "reserve_price_inr": 4500000,
+    "area_description": "See auction notice",
+    "area_sqft": null,
+    "boundaries": null,
+    "reserve_price_inr": 1000000.0,
     "previous_reserve_price_inr": null,
     "price_drop_percentage": null,
-    "emd_amount_inr": 450000,
-    "bid_increment_inr": 50000,
-    "emd_last_date": "2026-11-23T17:00:00+00:00",
+    "emd_amount_inr": 100000.0,
+    "bid_increment_inr": null,
+    "emd_last_date": null,
     "inspection_date_info": null,
-    "auction_date": "2026-11-25T11:00:00+00:00",
+    "auction_date": "2026-12-31T11:00:00+00:00",
     "authorized_officer_name": null,
     "contact_phone": null,
-    "source_portal": "Local Folder (sample_notices)",
-    "source_pdf_url": "sbi_sarfaesi_notice.pdf",
-    "bidding_portal_url": "https://baanknet.com",
+    "source_portal": "State Bank of India",
+    "source_pdf_url": "statebankofindia_5bca867bf5d05f95.pdf",
+    "bidding_portal_url": null,
+    "auction_event_hash": "77a7c51612ed71d06c222fb18ef24bc7035d23d23aa9625f824a5fbfec7fe4f5",
+    "asset_fingerprint": "4fb8643496b6323e4546e5437cae3c7f8a1286e2dfa944bdf4c039de481ee997",
     "review_status": "PUBLISHED",
-    "review_notes": null,
+    "review_notes": "Awaiting manual admin approval",
     "raw_extracted_json": {
       "state": "Tamil Nadu",
-      "taluk": "Sulur",
+      "taluk": null,
       "pincode": null,
-      "district": "Coimbatore",
-      "area_sqft": 2178.0,
+      "district": "Chennai",
+      "area_sqft": null,
       "bank_name": "State Bank of India",
-      "boundaries": {
-        "east": "S.F. No. 124/2B land",
-        "west": "Panchayat Pipe Line",
-        "north": "20 feet East-West Road",
-        "south": "Property of Murugesan"
-      },
-      "branch_name": "Stressed Assets Recovery Branch (SARB), Coimbatore",
-      "auction_date": "2026-11-25T11:00:00",
-      "borrower_name": "K. Rangarajan",
+      "boundaries": null,
+      "branch_name": null,
+      "auction_date": "2026-12-31T11:00:00",
+      "borrower_name": null,
       "contact_phone": null,
-      "emd_last_date": "2026-11-23T17:00:00",
-      "asset_category": "HOUSE_VILLA",
-      "emd_amount_inr": 450000,
+      "emd_last_date": null,
+      "asset_category": "COMMERCIAL",
+      "emd_amount_inr": 100000,
       "survey_numbers": [
-        "124/2A",
-        "125"
+        "652/1"
       ],
       "possession_type": "PHYSICAL",
-      "area_description": "Land measuring 5 Cents (2178 Sq.ft) with 1200 Sq.ft RCC building",
-      "patta_or_door_no": "Patta No. 452",
-      "bid_increment_inr": 50000,
-      "reserve_price_inr": 4500000,
-      "bidding_portal_url": "https://baanknet.com",
-      "village_or_locality": "Irugur Village",
+      "area_description": "See auction notice",
+      "patta_or_door_no": null,
+      "bid_increment_inr": null,
+      "reserve_price_inr": 1000000,
+      "bidding_portal_url": null,
+      "village_or_locality": "Chennai",
       "inspection_date_info": null,
       "authorized_officer_name": null
     },
-    "created_at": "2026-11-06T14:31:11.92698+00:00",
-    "updated_at": "2026-11-06T14:33:58.453859+00:00"
+    "created_at": "2026-11-25T17:21:47.845707+00:00",
+    "publication_status": "PUBLISHED",
+    "verification_dimensions": {},
+    "risk_disclosures": [],
+    "slug": "state-bank-of-india-chennai-77a7c516",
+    "last_source_confirmed_at": null
+  },
+  {
+    "id": "bd255c96-7fb1-4455-bfa8-1de64fdc50d9",
+    "property_title": "Bank Foreclosure Asset",
+    "bank_name": "State Bank of India",
+    "branch_name": null,
+    "borrower_name": null,
+    "asset_category": "FLAT_APARTMENT",
+    "possession_type": "PHYSICAL",
+    "survey_numbers": [],
+    "patta_or_door_no": null,
+    "village_or_locality": "Chennai",
+    "taluk": null,
+    "district": "Chennai",
+    "state": "Tamil Nadu",
+    "pincode": null,
+    "area_description": "765.70 sq ft",
+    "area_sqft": 765.7,
+    "boundaries": null,
+    "reserve_price_inr": 1000000.0,
+    "previous_reserve_price_inr": null,
+    "price_drop_percentage": null,
+    "emd_amount_inr": 370000.0,
+    "bid_increment_inr": null,
+    "emd_last_date": null,
+    "inspection_date_info": null,
+    "auction_date": "2026-12-31T11:00:00+00:00",
+    "authorized_officer_name": null,
+    "contact_phone": null,
+    "source_portal": "State Bank of India",
+    "source_pdf_url": "statebankofindia_b6abefd331671943.pdf",
+    "bidding_portal_url": null,
+    "auction_event_hash": "7593df321ddd740f4e6663d3bfcd53212f6cc923686d0791308d4d6f6d602a30",
+    "asset_fingerprint": "2e46b4439321901cc099d30e363b663f838ed98ff3fd27f90d0b9a560864b6e4",
+    "review_status": "PUBLISHED",
+    "review_notes": "EMD (370000) exceeds 25% of reserve price (1000000); No survey numbers or identification numbers extracted",
+    "raw_extracted_json": {
+      "state": "Tamil Nadu",
+      "taluk": null,
+      "pincode": null,
+      "district": "Chennai",
+      "area_sqft": 765.7,
+      "bank_name": "State Bank of India",
+      "boundaries": null,
+      "branch_name": null,
+      "auction_date": "2026-12-31T11:00:00",
+      "borrower_name": null,
+      "contact_phone": null,
+      "emd_last_date": null,
+      "asset_category": "FLAT_APARTMENT",
+      "emd_amount_inr": 370000,
+      "survey_numbers": [],
+      "possession_type": "PHYSICAL",
+      "area_description": "765.70 sq ft",
+      "patta_or_door_no": null,
+      "bid_increment_inr": null,
+      "reserve_price_inr": 1000000,
+      "bidding_portal_url": null,
+      "village_or_locality": "Chennai",
+      "inspection_date_info": null,
+      "authorized_officer_name": null
+    },
+    "created_at": "2026-11-25T17:16:14.106928+00:00",
+    "publication_status": "PUBLISHED",
+    "verification_dimensions": {},
+    "risk_disclosures": [],
+    "slug": "state-bank-of-india-chennai-7593df32",
+    "last_source_confirmed_at": null
+  },
+  {
+    "id": "c693d935-799e-4539-8bc2-cd3be4d595bc",
+    "property_title": "Bank Foreclosure Asset",
+    "bank_name": "Bank of India",
+    "branch_name": null,
+    "borrower_name": null,
+    "asset_category": "LAND_PLOT",
+    "possession_type": "PHYSICAL",
+    "survey_numbers": [],
+    "patta_or_door_no": null,
+    "village_or_locality": "Chennai",
+    "taluk": null,
+    "district": "Chennai",
+    "state": "Tamil Nadu",
+    "pincode": null,
+    "area_description": "See auction notice",
+    "area_sqft": null,
+    "boundaries": null,
+    "reserve_price_inr": 1000000.0,
+    "previous_reserve_price_inr": null,
+    "price_drop_percentage": null,
+    "emd_amount_inr": 100000.0,
+    "bid_increment_inr": null,
+    "emd_last_date": null,
+    "inspection_date_info": null,
+    "auction_date": "2026-12-31T11:00:00+00:00",
+    "authorized_officer_name": null,
+    "contact_phone": null,
+    "source_portal": "State Bank of India",
+    "source_pdf_url": "statebankofindia_bfb886e1960daed3.pdf",
+    "bidding_portal_url": null,
+    "auction_event_hash": "036ed88063db84c4780e402d7bda8d68d2d5ee7e7e013263045a2c7098c21925",
+    "asset_fingerprint": "5265be4d6881feb8bbd5d28c60b1967f43484d2b4b159b439988e76423909d1f",
+    "review_status": "PUBLISHED",
+    "review_notes": "No survey numbers or identification numbers extracted",
+    "raw_extracted_json": {
+      "state": "Tamil Nadu",
+      "taluk": null,
+      "pincode": null,
+      "district": "Chennai",
+      "area_sqft": null,
+      "bank_name": "Bank of India",
+      "boundaries": null,
+      "branch_name": null,
+      "auction_date": "2026-12-31T11:00:00",
+      "borrower_name": null,
+      "contact_phone": null,
+      "emd_last_date": null,
+      "asset_category": "LAND_PLOT",
+      "emd_amount_inr": 100000,
+      "survey_numbers": [],
+      "possession_type": "PHYSICAL",
+      "area_description": "See auction notice",
+      "patta_or_door_no": null,
+      "bid_increment_inr": null,
+      "reserve_price_inr": 1000000,
+      "bidding_portal_url": null,
+      "village_or_locality": "Chennai",
+      "inspection_date_info": null,
+      "authorized_officer_name": null
+    },
+    "created_at": "2026-11-25T17:16:05.132497+00:00",
+    "publication_status": "PUBLISHED",
+    "verification_dimensions": {},
+    "risk_disclosures": [],
+    "slug": "bank-of-india-chennai-036ed880",
+    "last_source_confirmed_at": null
+  },
+  {
+    "id": "96351304-a94d-5235-8697-3d8947e64be0",
+    "property_title": "Residential Villa (3 BHK)",
+    "bank_name": "State Bank of India",
+    "branch_name": "Katpadi, Vellore",
+    "borrower_name": "Confidential (Bank NPA Asset)",
+    "asset_category": "VILLA",
+    "possession_type": "PHYSICAL",
+    "survey_numbers": [
+      "SBVEL33409",
+      "SF-113/A"
+    ],
+    "patta_or_door_no": "SBVEL33409",
+    "village_or_locality": "Gandhi Nagar, Vellore",
+    "taluk": "Vellore",
+    "district": "Vellore",
+    "state": "Tamil Nadu",
+    "pincode": "632006",
+    "area_description": "Plot No. 19, 14th East Cross Road, Gandhi Nagar, Vellore - 632006",
+    "area_sqft": 2150.0,
+    "boundaries": {
+      "east": "Private Property",
+      "west": "40ft Road",
+      "north": "Road",
+      "south": "Private Property"
+    },
+    "reserve_price_inr": 6800000.0,
+    "previous_reserve_price_inr": 7344000.0,
+    "price_drop_percentage": 7.4,
+    "emd_amount_inr": 680000.0,
+    "bid_increment_inr": 50000.0,
+    "emd_last_date": "2026-12-06T11:23:48.558577+00:00",
+    "inspection_date_info": "21-11-2026 10:00 to 05-12-2026 17:00",
+    "auction_date": "2026-12-06T15:23:48.558577+00:00",
+    "authorized_officer_name": "C. Vijayaraghavan",
+    "contact_phone": "+91 94441 55667",
+    "source_portal": "State Bank of India",
+    "source_pdf_url": "https://tender-notices.skandx.com/SBVEL33409_notice.pdf",
+    "bidding_portal_url": "https://www.bankeauctions.com",
+    "auction_event_hash": "816c2f6b6957811a368c3b81304952ecd9ecaddade2b50ece19fc33848e3e98a",
+    "asset_fingerprint": "3868a726538ce918a8af024873b7ebe3d83661f8b59c73194633edf152cc0143",
+    "review_status": "PUBLISHED",
+    "review_notes": "Official SARFAESI Tamil Nadu bank auction tender verified by SKANDX Legal Advisory Desk.",
+    "raw_extracted_json": {
+      "beds": 3,
+      "desc": "Contemporary independent villa in prime Gandhi Nagar near VIT University and Katpadi Railway Junction. Designed with vaulted ceilings, modular kitchen, covered double garage and security perimeter.",
+      "badge": "BANK AUCTION",
+      "baths": 3,
+      "images": [
+        "https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=900&q=75",
+        "https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=900&q=75",
+        "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=900&q=75",
+        "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=900&q=75"
+      ],
+      "contact": "+91 94441 55667",
+      "officer": "C. Vijayaraghavan",
+      "ui_type": "residential",
+      "furnishing": "Semi-Furnished",
+      "project_name": "Gandhi Nagar Palm Enclave",
+      "built_up_area": 1900
+    },
+    "created_at": "2026-11-27T12:59:49.573237+00:00",
+    "publication_status": "PUBLISHED",
+    "verification_dimensions": {
+      "title_encumbrance": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      },
+      "physical_possession": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      },
+      "sarfaesi_compliance": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      },
+      "reserve_price_benchmark": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      }
+    },
+    "risk_disclosures": [
+      "Asset sold under SARFAESI Act on As Is Where Is basis.",
+      "Verify municipal tax dues and encumbrance certificate prior to final bid."
+    ],
+    "slug": "residential-villa-3-bhk-vellore-p14",
+    "last_source_confirmed_at": null
+  },
+  {
+    "id": "3460236f-f0e9-5785-acbf-2d0fac8f3bd7",
+    "property_title": "Commercial Plot (Highway Frontage)",
+    "bank_name": "Indian Bank",
+    "branch_name": "Tirunelveli Town",
+    "borrower_name": "Confidential (Bank NPA Asset)",
+    "asset_category": "LAND_PLOT",
+    "possession_type": "PHYSICAL",
+    "survey_numbers": [
+      "IBTNV66512",
+      "SF-112/A"
+    ],
+    "patta_or_door_no": "IBTNV66512",
+    "village_or_locality": "New Bus Stand Road, Tirunelveli",
+    "taluk": "Tirunelveli",
+    "district": "Tirunelveli",
+    "state": "Tamil Nadu",
+    "pincode": "627007",
+    "area_description": "Survey No. 312/1A, Madurai-Tirunelveli National Highway, Tirunelveli - 627007",
+    "area_sqft": 4800.0,
+    "boundaries": {
+      "east": "Private Property",
+      "west": "40ft Road",
+      "north": "Road",
+      "south": "Private Property"
+    },
+    "reserve_price_inr": 5400000.0,
+    "previous_reserve_price_inr": 5832000.0,
+    "price_drop_percentage": 7.4,
+    "emd_amount_inr": 540000.0,
+    "bid_increment_inr": 50000.0,
+    "emd_last_date": "2026-12-05T08:59:48.558577+00:00",
+    "inspection_date_info": "20-11-2026 10:00 to 04-12-2026 17:00",
+    "auction_date": "2026-12-05T12:59:48.558577+00:00",
+    "authorized_officer_name": "M. Arumugam",
+    "contact_phone": "+91 97890 12345",
+    "source_portal": "Indian Bank",
+    "source_pdf_url": "https://tender-notices.skandx.com/IBTNV66512_notice.pdf",
+    "bidding_portal_url": "https://www.bankeauctions.com",
+    "auction_event_hash": "80f28bede41fb72e54d9e7c8f64751519c0afd4493b869af80bf7cc1d6f9b6b5",
+    "asset_fingerprint": "3869b95667f4ea004376e7657a7e1184a5f04d60775d87fd3f56115fdb7a473e",
+    "review_status": "PUBLISHED",
+    "review_notes": "Official SARFAESI Tamil Nadu bank auction tender verified by SKANDX Legal Advisory Desk.",
+    "raw_extracted_json": {
+      "beds": 0,
+      "desc": "Strategically positioned commercial corner plot with 60 feet National Highway frontage opposite the New Bus Stand. Unmatched commercial visibility for automobile showroom, hotel, or logistics hub.",
+      "badge": "BANK AUCTION",
+      "baths": 0,
+      "images": [
+        "https://images.unsplash.com/photo-1524813686514-a57563d77d61?auto=format&fit=crop&w=900&q=75",
+        "https://images.unsplash.com/photo-1600566752355-35792bedcfea?auto=format&fit=crop&w=900&q=75",
+        "https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=900&q=75",
+        "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=900&q=75"
+      ],
+      "contact": "+91 97890 12345",
+      "officer": "M. Arumugam",
+      "ui_type": "land",
+      "furnishing": "NA",
+      "project_name": "Tirunelveli Highway Commercial Hub",
+      "built_up_area": 0
+    },
+    "created_at": "2026-11-27T12:59:49.573237+00:00",
+    "publication_status": "PUBLISHED",
+    "verification_dimensions": {
+      "title_encumbrance": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      },
+      "physical_possession": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      },
+      "sarfaesi_compliance": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      },
+      "reserve_price_benchmark": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      }
+    },
+    "risk_disclosures": [
+      "Asset sold under SARFAESI Act on As Is Where Is basis.",
+      "Verify municipal tax dues and encumbrance certificate prior to final bid."
+    ],
+    "slug": "commercial-plot-highway-frontage-tirunelveli-p13",
+    "last_source_confirmed_at": null
+  },
+  {
+    "id": "8ff3ee26-d478-583e-b96c-746faedfd5be",
+    "property_title": "Independent House (3 BHK)",
+    "bank_name": "Canara Bank",
+    "branch_name": "Fairlands, Salem",
+    "borrower_name": "Confidential (Bank NPA Asset)",
+    "asset_category": "INDEPENDENT_HOUSE",
+    "possession_type": "PHYSICAL",
+    "survey_numbers": [
+      "CBSLM88342",
+      "SF-111/A"
+    ],
+    "patta_or_door_no": "CBSLM88342",
+    "village_or_locality": "Fairlands, Salem",
+    "taluk": "Salem",
+    "district": "Salem",
+    "state": "Tamil Nadu",
+    "pincode": "636016",
+    "area_description": "Plot No. 27, Brindavan Road, Fairlands, Salem - 636016",
+    "area_sqft": 2300.0,
+    "boundaries": {
+      "east": "Private Property",
+      "west": "40ft Road",
+      "north": "Road",
+      "south": "Private Property"
+    },
+    "reserve_price_inr": 7200000.0,
+    "previous_reserve_price_inr": 7776000.0,
+    "price_drop_percentage": 7.4,
+    "emd_amount_inr": 720000.0,
+    "bid_increment_inr": 50000.0,
+    "emd_last_date": "2026-12-05T08:59:48.558577+00:00",
+    "inspection_date_info": "20-11-2026 10:00 to 04-12-2026 17:00",
+    "auction_date": "2026-12-05T12:59:48.558577+00:00",
+    "authorized_officer_name": "N. Sivakumar",
+    "contact_phone": "+91 94421 88990",
+    "source_portal": "Canara Bank",
+    "source_pdf_url": "https://tender-notices.skandx.com/CBSLM88342_notice.pdf",
+    "bidding_portal_url": "https://www.bankeauctions.com",
+    "auction_event_hash": "5cf6979546c735ae3951f15ab2745fc3608f4bcf1a19b54d32293ab067e863bf",
+    "asset_fingerprint": "669db8d34486e4b9ee2579a853cb5892e828521b09fb08e8ae56ba60aeebaa68",
+    "review_status": "PUBLISHED",
+    "review_notes": "Official SARFAESI Tamil Nadu bank auction tender verified by SKANDX Legal Advisory Desk.",
+    "raw_extracted_json": {
+      "beds": 3,
+      "desc": "Spacious independent bungalow located in upscale Fairlands neighborhood. Features Italian marble flooring, 3 master suites, landscaped terrace garden, portico parking and CCTV surveillance.",
+      "badge": "BANK AUCTION",
+      "baths": 3,
+      "images": [
+        "https://images.unsplash.com/photo-1598228723793-52759bba239c?auto=format&fit=crop&w=900&q=75",
+        "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=900&q=75",
+        "https://images.unsplash.com/photo-1600566752355-35792bedcfea?auto=format&fit=crop&w=900&q=75",
+        "https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=900&q=75"
+      ],
+      "contact": "+91 94421 88990",
+      "officer": "N. Sivakumar",
+      "ui_type": "residential",
+      "furnishing": "Semi-Furnished",
+      "project_name": "Brindavan Heights",
+      "built_up_area": 2050
+    },
+    "created_at": "2026-11-27T12:59:49.573237+00:00",
+    "publication_status": "PUBLISHED",
+    "verification_dimensions": {
+      "title_encumbrance": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      },
+      "physical_possession": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      },
+      "sarfaesi_compliance": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      },
+      "reserve_price_benchmark": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      }
+    },
+    "risk_disclosures": [
+      "Asset sold under SARFAESI Act on As Is Where Is basis.",
+      "Verify municipal tax dues and encumbrance certificate prior to final bid."
+    ],
+    "slug": "independent-house-3-bhk-salem-p12",
+    "last_source_confirmed_at": null
+  },
+  {
+    "id": "37323503-a462-5424-920d-b5b088ad11ed",
+    "property_title": "Agricultural Land / Farm Plot",
+    "bank_name": "State Bank of India",
+    "branch_name": "Melur, Madurai",
+    "borrower_name": "Confidential (Bank NPA Asset)",
+    "asset_category": "LAND_PLOT",
+    "possession_type": "PHYSICAL",
+    "survey_numbers": [
+      "SBMDU44109",
+      "SF-109/A"
+    ],
+    "patta_or_door_no": "SBMDU44109",
+    "village_or_locality": "Melur Road, Madurai",
+    "taluk": "Madurai",
+    "district": "Madurai",
+    "state": "Tamil Nadu",
+    "pincode": "625106",
+    "area_description": "Survey No. 45/2B & 45/3, Melur Main Road, Madurai - 625106",
+    "area_sqft": 43560.0,
+    "boundaries": {
+      "east": "Private Property",
+      "west": "40ft Road",
+      "north": "Road",
+      "south": "Private Property"
+    },
+    "reserve_price_inr": 3800000.0,
+    "previous_reserve_price_inr": 4104000.0,
+    "price_drop_percentage": 7.4,
+    "emd_amount_inr": 380000.0,
+    "bid_increment_inr": 25000.0,
+    "emd_last_date": "2026-12-04T13:47:48.558577+00:00",
+    "inspection_date_info": "19-11-2026 10:00 to 03-12-2026 17:00",
+    "auction_date": "2026-12-04T17:47:48.558577+00:00",
+    "authorized_officer_name": "R. Karthikeyan",
+    "contact_phone": "+91 94860 33221",
+    "source_portal": "State Bank of India",
+    "source_pdf_url": "https://tender-notices.skandx.com/SBMDU44109_notice.pdf",
+    "bidding_portal_url": "https://www.bankeauctions.com",
+    "auction_event_hash": "0f466f6955f36204a153d31bc29e5fbb6714807dcebdedaac43760f6c089f5cd",
+    "asset_fingerprint": "05ab7f32a402e2475c917979c9525c46b051f7bc25bb4d969e9e40b0f0ffc555",
+    "review_status": "PUBLISHED",
+    "review_notes": "Official SARFAESI Tamil Nadu bank auction tender verified by SKANDX Legal Advisory Desk.",
+    "raw_extracted_json": {
+      "beds": 0,
+      "desc": "1 Acre fertile farm land with free agricultural electricity service connection, open well with continuous water source and fencing. High potential for farm house or agro-industrial development.",
+      "badge": "BANK AUCTION",
+      "baths": 0,
+      "images": [
+        "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=900&q=75",
+        "https://images.unsplash.com/photo-1554995207-c18c203602cb?auto=format&fit=crop&w=900&q=75",
+        "https://images.unsplash.com/photo-1600121848594-d8644e57abab?auto=format&fit=crop&w=900&q=75",
+        "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=900&q=75"
+      ],
+      "contact": "+91 94860 33221",
+      "officer": "R. Karthikeyan",
+      "ui_type": "land",
+      "furnishing": "NA",
+      "project_name": "Melur Farm Lands",
+      "built_up_area": 0
+    },
+    "created_at": "2026-11-27T12:59:49.573237+00:00",
+    "publication_status": "PUBLISHED",
+    "verification_dimensions": {
+      "title_encumbrance": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      },
+      "physical_possession": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      },
+      "sarfaesi_compliance": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      },
+      "reserve_price_benchmark": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      }
+    },
+    "risk_disclosures": [
+      "Asset sold under SARFAESI Act on As Is Where Is basis.",
+      "Verify municipal tax dues and encumbrance certificate prior to final bid."
+    ],
+    "slug": "agricultural-land-farm-plot-madurai-p10",
+    "last_source_confirmed_at": null
+  },
+  {
+    "id": "d5c3ad3d-b9e5-569c-825a-3d2efb59a4cc",
+    "property_title": "Commercial Office Space",
+    "bank_name": "ICICI Bank",
+    "branch_name": "Thillai Nagar, Tiruchirappalli",
+    "borrower_name": "Confidential (Bank NPA Asset)",
+    "asset_category": "COMMERCIAL",
+    "possession_type": "PHYSICAL",
+    "survey_numbers": [
+      "ICTRY77621",
+      "SF-110/A"
+    ],
+    "patta_or_door_no": "ICTRY77621",
+    "village_or_locality": "Thillai Nagar, Tiruchirappalli",
+    "taluk": "Tiruchirappalli",
+    "district": "Tiruchirappalli",
+    "state": "Tamil Nadu",
+    "pincode": "620018",
+    "area_description": "2nd Floor, Royal Enclave, 11th Cross West, Thillai Nagar, Tiruchirappalli - 620018",
+    "area_sqft": 1650.0,
+    "boundaries": {
+      "east": "Private Property",
+      "west": "40ft Road",
+      "north": "Road",
+      "south": "Private Property"
+    },
+    "reserve_price_inr": 5800000.0,
+    "previous_reserve_price_inr": 6264000.0,
+    "price_drop_percentage": 7.4,
+    "emd_amount_inr": 580000.0,
+    "bid_increment_inr": 25000.0,
+    "emd_last_date": "2026-12-04T13:47:48.558577+00:00",
+    "inspection_date_info": "19-11-2026 10:00 to 03-12-2026 17:00",
+    "auction_date": "2026-12-04T17:47:48.558577+00:00",
+    "authorized_officer_name": "D. Muralidharan",
+    "contact_phone": "+91 98431 66778",
+    "source_portal": "ICICI Bank",
+    "source_pdf_url": "https://tender-notices.skandx.com/ICTRY77621_notice.pdf",
+    "bidding_portal_url": "https://www.bankeauctions.com",
+    "auction_event_hash": "f3f911dc0bf352d11c163291c69a9d5d506708ee40d10d612ea53df54491b6b4",
+    "asset_fingerprint": "5992526a1a776208dfa98856f3dff257ec6ba30250aa4e7ab2d72aea47958736",
+    "review_status": "PUBLISHED",
+    "review_notes": "Official SARFAESI Tamil Nadu bank auction tender verified by SKANDX Legal Advisory Desk.",
+    "raw_extracted_json": {
+      "beds": 0,
+      "desc": "Ready-to-occupy fully air-conditioned corporate office in prime Thillai Nagar with 20 workstations, manager cabin, conference room, pantry and power backup. High corporate tenant demand.",
+      "badge": "BANK AUCTION",
+      "baths": 2,
+      "images": [
+        "https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop&w=900&q=75",
+        "https://images.unsplash.com/photo-1600121848594-d8644e57abab?auto=format&fit=crop&w=900&q=75",
+        "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=900&q=75",
+        "https://images.unsplash.com/photo-1600566752355-35792bedcfea?auto=format&fit=crop&w=900&q=75"
+      ],
+      "contact": "+91 98431 66778",
+      "officer": "D. Muralidharan",
+      "ui_type": "commercial",
+      "furnishing": "Fitted Workstations",
+      "project_name": "Royal Enclave Business Centre",
+      "built_up_area": 1500
+    },
+    "created_at": "2026-11-27T12:59:49.573237+00:00",
+    "publication_status": "PUBLISHED",
+    "verification_dimensions": {
+      "title_encumbrance": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      },
+      "physical_possession": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      },
+      "sarfaesi_compliance": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      },
+      "reserve_price_benchmark": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      }
+    },
+    "risk_disclosures": [
+      "Asset sold under SARFAESI Act on As Is Where Is basis.",
+      "Verify municipal tax dues and encumbrance certificate prior to final bid."
+    ],
+    "slug": "commercial-office-space-tiruchirappalli-p11",
+    "last_source_confirmed_at": null
+  },
+  {
+    "id": "154c86ad-548d-5caf-9678-3fb0e5a9b787",
+    "property_title": "Commercial Complex (G+2 Floors)",
+    "bank_name": "Indian Bank",
+    "branch_name": "Gandhipuram, Coimbatore",
+    "borrower_name": "Confidential (Bank NPA Asset)",
+    "asset_category": "COMMERCIAL",
+    "possession_type": "PHYSICAL",
+    "survey_numbers": [
+      "IBCBE55410",
+      "SF-107/A"
+    ],
+    "patta_or_door_no": "IBCBE55410",
+    "village_or_locality": "Gandhipuram, Coimbatore",
+    "taluk": "Coimbatore",
+    "district": "Coimbatore",
+    "state": "Tamil Nadu",
+    "pincode": "641012",
+    "area_description": "Cross Cut Road, Near 7th Street, Gandhipuram, Coimbatore - 641012",
+    "area_sqft": 5600.0,
+    "boundaries": {
+      "east": "Private Property",
+      "west": "40ft Road",
+      "north": "Road",
+      "south": "Private Property"
+    },
+    "reserve_price_inr": 31000000.0,
+    "previous_reserve_price_inr": 33480000.0,
+    "price_drop_percentage": 7.4,
+    "emd_amount_inr": 3100000.0,
+    "bid_increment_inr": 200000.0,
+    "emd_last_date": "2026-12-03T20:59:48.558577+00:00",
+    "inspection_date_info": "19-11-2026 10:00 to 03-12-2026 17:00",
+    "auction_date": "2026-12-04T00:59:48.558577+00:00",
+    "authorized_officer_name": "T. Balasubramanian",
+    "contact_phone": "+91 98422 77889",
+    "source_portal": "Indian Bank",
+    "source_pdf_url": "https://tender-notices.skandx.com/IBCBE55410_notice.pdf",
+    "bidding_portal_url": "https://www.bankeauctions.com",
+    "auction_event_hash": "58c4102867b2a62f8d1e3b999498e6ae36e23fa96ca2024d2e7b49ea491d0be9",
+    "asset_fingerprint": "a8057f365989ecf5227ec1a4e28a379bcf7ef4248e2d24e8dbec5125dd46b63e",
+    "review_status": "PUBLISHED",
+    "review_notes": "Official SARFAESI Tamil Nadu bank auction tender verified by SKANDX Legal Advisory Desk.",
+    "raw_extracted_json": {
+      "beds": 0,
+      "desc": "Freehold commercial building on vibrant Cross Cut Road with retail shops on ground floor and office spaces on upper floors. Robust rental return potential in the heart of Coimbatore's retail hub.",
+      "badge": "BANK AUCTION",
+      "baths": 6,
+      "images": [
+        "https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=900&q=75",
+        "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=900&q=75",
+        "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=900&q=75",
+        "https://images.unsplash.com/photo-1554995207-c18c203602cb?auto=format&fit=crop&w=900&q=75"
+      ],
+      "contact": "+91 98422 77889",
+      "officer": "T. Balasubramanian",
+      "ui_type": "commercial",
+      "furnishing": "Bare Shell",
+      "project_name": "Cross Cut Commerce Hub",
+      "built_up_area": 5200
+    },
+    "created_at": "2026-11-27T12:59:49.573237+00:00",
+    "publication_status": "PUBLISHED",
+    "verification_dimensions": {
+      "title_encumbrance": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      },
+      "physical_possession": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      },
+      "sarfaesi_compliance": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      },
+      "reserve_price_benchmark": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      }
+    },
+    "risk_disclosures": [
+      "Asset sold under SARFAESI Act on As Is Where Is basis.",
+      "Verify municipal tax dues and encumbrance certificate prior to final bid."
+    ],
+    "slug": "commercial-complex-g-2-floors-coimbatore-p8",
+    "last_source_confirmed_at": null
+  },
+  {
+    "id": "55a06cc1-b1f3-58e6-ac24-546cf3ed36f8",
+    "property_title": "Residential Villa (3 BHK)",
+    "bank_name": "Canara Bank",
+    "branch_name": "KK Nagar, Madurai",
+    "borrower_name": "Confidential (Bank NPA Asset)",
+    "asset_category": "VILLA",
+    "possession_type": "PHYSICAL",
+    "survey_numbers": [
+      "CBMDU99023",
+      "SF-108/A"
+    ],
+    "patta_or_door_no": "CBMDU99023",
+    "village_or_locality": "KK Nagar, Madurai",
+    "taluk": "Madurai",
+    "district": "Madurai",
+    "state": "Tamil Nadu",
+    "pincode": "625020",
+    "area_description": "Plot No. 85, 80 Feet Road, KK Nagar, Madurai - 625020",
+    "area_sqft": 2200.0,
+    "boundaries": {
+      "east": "Private Property",
+      "west": "40ft Road",
+      "north": "Road",
+      "south": "Private Property"
+    },
+    "reserve_price_inr": 6400000.0,
+    "previous_reserve_price_inr": 6912000.0,
+    "price_drop_percentage": 7.4,
+    "emd_amount_inr": 640000.0,
+    "bid_increment_inr": 50000.0,
+    "emd_last_date": "2026-12-03T20:59:48.558577+00:00",
+    "inspection_date_info": "19-11-2026 10:00 to 03-12-2026 17:00",
+    "auction_date": "2026-12-04T00:59:48.558577+00:00",
+    "authorized_officer_name": "A. Senthilkumar",
+    "contact_phone": "+91 97870 55443",
+    "source_portal": "Canara Bank",
+    "source_pdf_url": "https://tender-notices.skandx.com/CBMDU99023_notice.pdf",
+    "bidding_portal_url": "https://www.bankeauctions.com",
+    "auction_event_hash": "4f9886d01b5be597e399b72b57de2151346ad9863246d425db866110f83f43c5",
+    "asset_fingerprint": "b1ae19759101a613d783f4d57b6b7051cba31b247fb462af8fdc3ef8f586650d",
+    "review_status": "PUBLISHED",
+    "review_notes": "Official SARFAESI Tamil Nadu bank auction tender verified by SKANDX Legal Advisory Desk.",
+    "raw_extracted_json": {
+      "beds": 3,
+      "desc": "Peaceful residential villa on 80 Feet Road near Apollo Hospital and Court complex. Spacious bedrooms with attached baths, landscaped garden, Vaastu compliant construction with Cauvery water supply.",
+      "badge": "BANK AUCTION",
+      "baths": 3,
+      "images": [
+        "https://images.unsplash.com/photo-1518780664697-55e3ad937233?auto=format&fit=crop&w=900&q=75",
+        "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=900&q=75",
+        "https://images.unsplash.com/photo-1554995207-c18c203602cb?auto=format&fit=crop&w=900&q=75",
+        "https://images.unsplash.com/photo-1600121848594-d8644e57abab?auto=format&fit=crop&w=900&q=75"
+      ],
+      "contact": "+91 97870 55443",
+      "officer": "A. Senthilkumar",
+      "ui_type": "residential",
+      "furnishing": "Semi-Furnished",
+      "project_name": "Meenakshi Gardens",
+      "built_up_area": 1950
+    },
+    "created_at": "2026-11-27T12:59:49.573237+00:00",
+    "publication_status": "PUBLISHED",
+    "verification_dimensions": {
+      "title_encumbrance": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      },
+      "physical_possession": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      },
+      "sarfaesi_compliance": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      },
+      "reserve_price_benchmark": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      }
+    },
+    "risk_disclosures": [
+      "Asset sold under SARFAESI Act on As Is Where Is basis.",
+      "Verify municipal tax dues and encumbrance certificate prior to final bid."
+    ],
+    "slug": "residential-villa-3-bhk-madurai-p9",
+    "last_source_confirmed_at": null
+  },
+  {
+    "id": "eee569c0-66e0-53d7-ade0-d6548fb977de",
+    "property_title": "Industrial Shed & Land",
+    "bank_name": "Canara Bank",
+    "branch_name": "Ambattur, Chennai",
+    "borrower_name": "Confidential (Bank NPA Asset)",
+    "asset_category": "INDUSTRIAL",
+    "possession_type": "PHYSICAL",
+    "survey_numbers": [
+      "CBAMB78901",
+      "SF-105/A"
+    ],
+    "patta_or_door_no": "CBAMB78901",
+    "village_or_locality": "Ambattur Industrial Estate, Chennai",
+    "taluk": "Chennai",
+    "district": "Chennai",
+    "state": "Tamil Nadu",
+    "pincode": "600058",
+    "area_description": "Plot B-18, Ambattur Industrial Estate, South Phase, Chennai - 600058",
+    "area_sqft": 10500.0,
+    "boundaries": {
+      "east": "Private Property",
+      "west": "40ft Road",
+      "north": "Road",
+      "south": "Private Property"
+    },
+    "reserve_price_inr": 36000000.0,
+    "previous_reserve_price_inr": 38880000.0,
+    "price_drop_percentage": 7.4,
+    "emd_amount_inr": 3600000.0,
+    "bid_increment_inr": 250000.0,
+    "emd_last_date": "2026-12-03T04:55:00.558577+00:00",
+    "inspection_date_info": "18-11-2026 10:00 to 02-12-2026 17:00",
+    "auction_date": "2026-12-03T08:55:00.558577+00:00",
+    "authorized_officer_name": "G. Natarajan",
+    "contact_phone": "+91 94450 67812",
+    "source_portal": "Canara Bank",
+    "source_pdf_url": "https://tender-notices.skandx.com/CBAMB78901_notice.pdf",
+    "bidding_portal_url": "https://www.bankeauctions.com",
+    "auction_event_hash": "f14b9a060799533168652e747b0f93d9ed5438f46a3e451287ae44c3fa57fe64",
+    "asset_fingerprint": "46d5e37a5c8a33bac9666c5572ae9e7e9f3f7deeda935b0f9abce2adc6d587e7",
+    "review_status": "PUBLISHED",
+    "review_notes": "Official SARFAESI Tamil Nadu bank auction tender verified by SKANDX Legal Advisory Desk.",
+    "raw_extracted_json": {
+      "beds": 0,
+      "desc": "Heavy-duty industrial shed with 10-ton EOT crane bay, 150 kVA sanctioned HT power, dedicated borewell and effluent treatment provision. Situated inside SIDCO Ambattur industrial hub.",
+      "badge": "BANK AUCTION",
+      "baths": 2,
+      "images": [
+        "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=900&q=75",
+        "https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=900&q=75",
+        "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=900&q=75",
+        "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=900&q=75"
+      ],
+      "contact": "+91 94450 67812",
+      "officer": "G. Natarajan",
+      "ui_type": "industrial",
+      "furnishing": "Fitted Crane Bay",
+      "project_name": "Ambattur Heavy Engineering Shed",
+      "built_up_area": 8500
+    },
+    "created_at": "2026-11-27T12:59:49.573237+00:00",
+    "publication_status": "PUBLISHED",
+    "verification_dimensions": {
+      "title_encumbrance": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      },
+      "physical_possession": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      },
+      "sarfaesi_compliance": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      },
+      "reserve_price_benchmark": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      }
+    },
+    "risk_disclosures": [
+      "Asset sold under SARFAESI Act on As Is Where Is basis.",
+      "Verify municipal tax dues and encumbrance certificate prior to final bid."
+    ],
+    "slug": "industrial-shed-land-chennai-p6",
+    "last_source_confirmed_at": null
+  },
+  {
+    "id": "63917d2f-96ab-5cb9-b7a5-ac7f69f6c250",
+    "property_title": "Duplex House (3 BHK)",
+    "bank_name": "State Bank of India",
+    "branch_name": "RS Puram, Coimbatore",
+    "borrower_name": "Confidential (Bank NPA Asset)",
+    "asset_category": "INDEPENDENT_HOUSE",
+    "possession_type": "PHYSICAL",
+    "survey_numbers": [
+      "SBCBE12044",
+      "SF-106/A"
+    ],
+    "patta_or_door_no": "SBCBE12044",
+    "village_or_locality": "RS Puram, Coimbatore",
+    "taluk": "Coimbatore",
+    "district": "Coimbatore",
+    "state": "Tamil Nadu",
+    "pincode": "641002",
+    "area_description": "Plot No. 12, West Sambandam Road, RS Puram, Coimbatore - 641002",
+    "area_sqft": 2450.0,
+    "boundaries": {
+      "east": "Private Property",
+      "west": "40ft Road",
+      "north": "Road",
+      "south": "Private Property"
+    },
+    "reserve_price_inr": 8900000.0,
+    "previous_reserve_price_inr": 9612000.0,
+    "price_drop_percentage": 7.4,
+    "emd_amount_inr": 890000.0,
+    "bid_increment_inr": 50000.0,
+    "emd_last_date": "2026-12-03T04:55:00.558577+00:00",
+    "inspection_date_info": "18-11-2026 10:00 to 02-12-2026 17:00",
+    "auction_date": "2026-12-03T08:55:00.558577+00:00",
+    "authorized_officer_name": "P. Ravichandran",
+    "contact_phone": "+91 94433 11224",
+    "source_portal": "State Bank of India",
+    "source_pdf_url": "https://tender-notices.skandx.com/SBCBE12044_notice.pdf",
+    "bidding_portal_url": "https://www.bankeauctions.com",
+    "auction_event_hash": "3fb3b1d1ae646531b91826234760710756c0993295d69f23c85b6f8b8a99727c",
+    "asset_fingerprint": "731e54f54d5e6bc3a0578a1c6ded958788bfd8e4c219e0b3d27873c83738cbb6",
+    "review_status": "PUBLISHED",
+    "review_notes": "Official SARFAESI Tamil Nadu bank auction tender verified by SKANDX Legal Advisory Desk.",
+    "raw_extracted_json": {
+      "beds": 3,
+      "desc": "Elegant 3 BHK duplex home situated in Coimbatore's elite residential enclave RS Puram. Features teak wood fittings, Siruvani drinking water connection, solar water heater and covered car porch.",
+      "badge": "BANK AUCTION",
+      "baths": 3,
+      "images": [
+        "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=900&q=75",
+        "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=900&q=75",
+        "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=900&q=75",
+        "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=900&q=75"
+      ],
+      "contact": "+91 94433 11224",
+      "officer": "P. Ravichandran",
+      "ui_type": "residential",
+      "furnishing": "Semi-Furnished",
+      "project_name": "Sambandam Residency",
+      "built_up_area": 2200
+    },
+    "created_at": "2026-11-27T12:59:49.573237+00:00",
+    "publication_status": "PUBLISHED",
+    "verification_dimensions": {
+      "title_encumbrance": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      },
+      "physical_possession": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      },
+      "sarfaesi_compliance": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      },
+      "reserve_price_benchmark": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      }
+    },
+    "risk_disclosures": [
+      "Asset sold under SARFAESI Act on As Is Where Is basis.",
+      "Verify municipal tax dues and encumbrance certificate prior to final bid."
+    ],
+    "slug": "duplex-house-3-bhk-coimbatore-p7",
+    "last_source_confirmed_at": null
+  },
+  {
+    "id": "35a91e3b-3b71-5c29-b22a-6c7d24ae6dee",
+    "property_title": "Residential Plot (CMDA Approved)",
+    "bank_name": "State Bank of India",
+    "branch_name": "Tambaram, Chennai",
+    "borrower_name": "Confidential (Bank NPA Asset)",
+    "asset_category": "LAND_PLOT",
+    "possession_type": "PHYSICAL",
+    "survey_numbers": [
+      "SBTAM56102",
+      "SF-104/A"
+    ],
+    "patta_or_door_no": "SBTAM56102",
+    "village_or_locality": "Tambaram West, Chennai",
+    "taluk": "Chennai",
+    "district": "Chennai",
+    "state": "Tamil Nadu",
+    "pincode": "600045",
+    "area_description": "Survey No. 182/4, Gandhi Road, Tambaram West, Chennai - 600045",
+    "area_sqft": 2400.0,
+    "boundaries": {
+      "east": "Private Property",
+      "west": "40ft Road",
+      "north": "Road",
+      "south": "Private Property"
+    },
+    "reserve_price_inr": 4200000.0,
+    "previous_reserve_price_inr": 4536000.0,
+    "price_drop_percentage": 7.4,
+    "emd_amount_inr": 420000.0,
+    "bid_increment_inr": 25000.0,
+    "emd_last_date": "2026-12-02T01:04:36.558577+00:00",
+    "inspection_date_info": "17-11-2026 10:00 to 01-12-2026 17:00",
+    "auction_date": "2026-12-02T05:04:36.558577+00:00",
+    "authorized_officer_name": "V. Jayakumar",
+    "contact_phone": "+91 98840 33445",
+    "source_portal": "State Bank of India",
+    "source_pdf_url": "https://tender-notices.skandx.com/SBTAM56102_notice.pdf",
+    "bidding_portal_url": "https://www.bankeauctions.com",
+    "auction_event_hash": "7e2ab77fd6920d0df99f656f6f51eb4fbec13ec511493831cafdbfeee69ffded",
+    "asset_fingerprint": "c095c6259dfbfc0e3fc398f19ad6d257a3b7ea6cae80e08134f846f299056710",
+    "review_status": "PUBLISHED",
+    "review_notes": "Official SARFAESI Tamil Nadu bank auction tender verified by SKANDX Legal Advisory Desk.",
+    "raw_extracted_json": {
+      "beds": 0,
+      "desc": "Clear-title CMDA approved residential plot with 40-foot blacktop road frontage, street lighting, and sweet ground water at 25 feet. Ready for immediate construction of independent villa or apartments.",
+      "badge": "BANK AUCTION",
+      "baths": 0,
+      "images": [
+        "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=900&q=75",
+        "https://images.unsplash.com/photo-1600566752355-35792bedcfea?auto=format&fit=crop&w=900&q=75",
+        "https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=900&q=75",
+        "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=900&q=75"
+      ],
+      "contact": "+91 98840 33445",
+      "officer": "V. Jayakumar",
+      "ui_type": "land",
+      "furnishing": "NA",
+      "project_name": "Tambaram Green Acres",
+      "built_up_area": 0
+    },
+    "created_at": "2026-11-27T12:59:49.573237+00:00",
+    "publication_status": "PUBLISHED",
+    "verification_dimensions": {
+      "title_encumbrance": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      },
+      "physical_possession": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      },
+      "sarfaesi_compliance": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      },
+      "reserve_price_benchmark": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      }
+    },
+    "risk_disclosures": [
+      "Asset sold under SARFAESI Act on As Is Where Is basis.",
+      "Verify municipal tax dues and encumbrance certificate prior to final bid."
+    ],
+    "slug": "residential-plot-cmda-approved-chennai-p5",
+    "last_source_confirmed_at": null
+  },
+  {
+    "id": "0731564f-dfb3-5ca7-94f7-c294073dcca6",
+    "property_title": "Commercial Showroom / Office",
+    "bank_name": "Indian Bank",
+    "branch_name": "Anna Nagar, Chennai",
+    "borrower_name": "Confidential (Bank NPA Asset)",
+    "asset_category": "COMMERCIAL",
+    "possession_type": "PHYSICAL",
+    "survey_numbers": [
+      "IBCHN33801",
+      "SF-103/A"
+    ],
+    "patta_or_door_no": "IBCHN33801",
+    "village_or_locality": "Anna Nagar, Chennai",
+    "taluk": "Chennai",
+    "district": "Chennai",
+    "state": "Tamil Nadu",
+    "pincode": "600040",
+    "area_description": "Ground & 1st Floor, 2nd Avenue, Anna Nagar West, Chennai - 600040",
+    "area_sqft": 4800.0,
+    "boundaries": {
+      "east": "Private Property",
+      "west": "40ft Road",
+      "north": "Road",
+      "south": "Private Property"
+    },
+    "reserve_price_inr": 28500000.0,
+    "previous_reserve_price_inr": 30780000.0,
+    "price_drop_percentage": 7.4,
+    "emd_amount_inr": 2850000.0,
+    "bid_increment_inr": 200000.0,
+    "emd_last_date": "2026-12-02T01:04:36.558577+00:00",
+    "inspection_date_info": "17-11-2026 10:00 to 01-12-2026 17:00",
+    "auction_date": "2026-12-02T05:04:36.558577+00:00",
+    "authorized_officer_name": "M. Sundaram",
+    "contact_phone": "+91 97910 88990",
+    "source_portal": "Indian Bank",
+    "source_pdf_url": "https://tender-notices.skandx.com/IBCHN33801_notice.pdf",
+    "bidding_portal_url": "https://www.bankeauctions.com",
+    "auction_event_hash": "9fcd793b1a3e3db91b02fcf5c2a1869cc69bfe06fdb7542c1517208b9ae19bbe",
+    "asset_fingerprint": "fe990f8f7210fb97a6900f98fd380e64aa2ee24185c93e2e003e9b11a9e1a567",
+    "review_status": "PUBLISHED",
+    "review_notes": "Official SARFAESI Tamil Nadu bank auction tender verified by SKANDX Legal Advisory Desk.",
+    "raw_extracted_json": {
+      "beds": 0,
+      "desc": "Prime high-street commercial showroom with 45-foot road frontage on 2nd Avenue Anna Nagar. Excellent visibility, heavy footfall, dedicated transformer and basement parking for 8 cars.",
+      "badge": "BANK AUCTION",
+      "baths": 3,
+      "images": [
+        "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=900&q=75",
+        "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=900&q=75",
+        "https://images.unsplash.com/photo-1600566752355-35792bedcfea?auto=format&fit=crop&w=900&q=75",
+        "https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=900&q=75"
+      ],
+      "contact": "+91 97910 88990",
+      "officer": "M. Sundaram",
+      "ui_type": "commercial",
+      "furnishing": "Bare Shell",
+      "project_name": "Anna Square Arcade",
+      "built_up_area": 4500
+    },
+    "created_at": "2026-11-27T12:59:49.573237+00:00",
+    "publication_status": "PUBLISHED",
+    "verification_dimensions": {
+      "title_encumbrance": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      },
+      "physical_possession": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      },
+      "sarfaesi_compliance": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      },
+      "reserve_price_benchmark": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      }
+    },
+    "risk_disclosures": [
+      "Asset sold under SARFAESI Act on As Is Where Is basis.",
+      "Verify municipal tax dues and encumbrance certificate prior to final bid."
+    ],
+    "slug": "commercial-showroom-office-chennai-p4",
+    "last_source_confirmed_at": null
+  },
+  {
+    "id": "0619fd46-a9cc-5af2-a23b-324a093ccb30",
+    "property_title": "Apartment (2 BHK)",
+    "bank_name": "ICICI Bank",
+    "branch_name": "Velachery, Chennai",
+    "borrower_name": "Confidential (Bank NPA Asset)",
+    "asset_category": "FLAT_APARTMENT",
+    "possession_type": "PHYSICAL",
+    "survey_numbers": [
+      "ICCHN20911",
+      "SF-102/A"
+    ],
+    "patta_or_door_no": "ICCHN20911",
+    "village_or_locality": "Velachery, Chennai",
+    "taluk": "Chennai",
+    "district": "Chennai",
+    "state": "Tamil Nadu",
+    "pincode": "600042",
+    "area_description": "Block B-402, Lakeview Towers, Velachery, Chennai - 600042",
+    "area_sqft": 1120.0,
+    "boundaries": {
+      "east": "Private Property",
+      "west": "40ft Road",
+      "north": "Road",
+      "south": "Private Property"
+    },
+    "reserve_price_inr": 5200000.0,
+    "previous_reserve_price_inr": 5616000.0,
+    "price_drop_percentage": 7.4,
+    "emd_amount_inr": 520000.0,
+    "bid_increment_inr": 25000.0,
+    "emd_last_date": "2026-11-30T19:19:00.558577+00:00",
+    "inspection_date_info": "15-11-2026 10:00 to 29-11-2026 17:00",
+    "auction_date": "2026-11-30T23:19:00.558577+00:00",
+    "authorized_officer_name": "K. Vignesh",
+    "contact_phone": "+91 94440 22331",
+    "source_portal": "ICICI Bank",
+    "source_pdf_url": "https://tender-notices.skandx.com/ICCHN20911_notice.pdf",
+    "bidding_portal_url": "https://www.bankeauctions.com",
+    "auction_event_hash": "c01543a319763eb2d69d41dddf16c73db51c3232d0462c0e2b671cb2b07a013a",
+    "asset_fingerprint": "1cbbbc891046b636cfd48283a6b850eaab9aa5ed9fd4774ee6c2d482c72ad78c",
+    "review_status": "PUBLISHED",
+    "review_notes": "Official SARFAESI Tamil Nadu bank auction tender verified by SKANDX Legal Advisory Desk.",
+    "raw_extracted_json": {
+      "beds": 2,
+      "desc": "Corner 2 BHK flat overlooking the Velachery lake with modular kitchen, vitrified tiles and covered parking. Close to Phoenix MarketCity and metro station. Ideal for young professionals.",
+      "badge": "BANK AUCTION",
+      "baths": 2,
+      "images": [
+        "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=900&q=75",
+        "https://images.unsplash.com/photo-1600121848594-d8644e57abab?auto=format&fit=crop&w=900&q=75",
+        "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=900&q=75",
+        "https://images.unsplash.com/photo-1600566752355-35792bedcfea?auto=format&fit=crop&w=900&q=75"
+      ],
+      "contact": "+91 94440 22331",
+      "officer": "K. Vignesh",
+      "ui_type": "residential",
+      "furnishing": "Semi-Furnished",
+      "project_name": "Lakeview Towers",
+      "built_up_area": 1020
+    },
+    "created_at": "2026-11-27T12:59:49.573237+00:00",
+    "publication_status": "PUBLISHED",
+    "verification_dimensions": {
+      "title_encumbrance": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      },
+      "physical_possession": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      },
+      "sarfaesi_compliance": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      },
+      "reserve_price_benchmark": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      }
+    },
+    "risk_disclosures": [
+      "Asset sold under SARFAESI Act on As Is Where Is basis.",
+      "Verify municipal tax dues and encumbrance certificate prior to final bid."
+    ],
+    "slug": "apartment-2-bhk-chennai-p3",
+    "last_source_confirmed_at": null
+  },
+  {
+    "id": "a9786a52-4b1d-5f3b-be39-78b18f5c55d7",
+    "property_title": "Luxury Villa (4 BHK)",
+    "bank_name": "State Bank of India",
+    "branch_name": "Sholinganallur, Chennai",
+    "borrower_name": "Confidential (Bank NPA Asset)",
+    "asset_category": "VILLA",
+    "possession_type": "PHYSICAL",
+    "survey_numbers": [
+      "SBCHN45782",
+      "SF-101/A"
+    ],
+    "patta_or_door_no": "SBCHN45782",
+    "village_or_locality": "Thoraipakkam, OMR, Chennai",
+    "taluk": "Chennai",
+    "district": "Chennai",
+    "state": "Tamil Nadu",
+    "pincode": "600097",
+    "area_description": "Villa 14, Prestige Silver Springs, OMR, Chennai - 600097",
+    "area_sqft": 3400.0,
+    "boundaries": {
+      "east": "Private Property",
+      "west": "40ft Road",
+      "north": "Road",
+      "south": "Private Property"
+    },
+    "reserve_price_inr": 14500000.0,
+    "previous_reserve_price_inr": 15660000.0,
+    "price_drop_percentage": 7.4,
+    "emd_amount_inr": 1450000.0,
+    "bid_increment_inr": 100000.0,
+    "emd_last_date": "2026-11-30T19:19:00.558577+00:00",
+    "inspection_date_info": "15-11-2026 10:00 to 29-11-2026 17:00",
+    "auction_date": "2026-11-30T23:19:00.558577+00:00",
+    "authorized_officer_name": "S. Ramanathan",
+    "contact_phone": "+91 98401 55678",
+    "source_portal": "State Bank of India",
+    "source_pdf_url": "https://tender-notices.skandx.com/SBCHN45782_notice.pdf",
+    "bidding_portal_url": "https://www.bankeauctions.com",
+    "auction_event_hash": "69fadca2cb1cfdf4bd2cb72c99da17d0c48797cab4f52895b7ec0ea49c6623d4",
+    "asset_fingerprint": "c5c6c3e7b102895a3f1dfebf4a76ecaea38113c135c2355099a2daa2ebd3761f",
+    "review_status": "PUBLISHED",
+    "review_notes": "Official SARFAESI Tamil Nadu bank auction tender verified by SKANDX Legal Advisory Desk.",
+    "raw_extracted_json": {
+      "beds": 4,
+      "desc": "Premium gated-community luxury villa on OMR with private landscaped lawn, clubhouse privileges, 100% power backup and 2 covered car parks. High rental yield asset adjacent to major IT parks.",
+      "badge": "BANK AUCTION",
+      "baths": 4,
+      "images": [
+        "https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=900&q=75",
+        "https://images.unsplash.com/photo-1554995207-c18c203602cb?auto=format&fit=crop&w=900&q=75",
+        "https://images.unsplash.com/photo-1600121848594-d8644e57abab?auto=format&fit=crop&w=900&q=75",
+        "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=900&q=75"
+      ],
+      "contact": "+91 98401 55678",
+      "officer": "S. Ramanathan",
+      "ui_type": "residential",
+      "furnishing": "Fully Furnished",
+      "project_name": "Prestige Silver Springs",
+      "built_up_area": 3100
+    },
+    "created_at": "2026-11-27T12:59:49.573237+00:00",
+    "publication_status": "PUBLISHED",
+    "verification_dimensions": {
+      "title_encumbrance": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      },
+      "physical_possession": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      },
+      "sarfaesi_compliance": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      },
+      "reserve_price_benchmark": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      }
+    },
+    "risk_disclosures": [
+      "Asset sold under SARFAESI Act on As Is Where Is basis.",
+      "Verify municipal tax dues and encumbrance certificate prior to final bid."
+    ],
+    "slug": "luxury-villa-4-bhk-chennai-p2",
+    "last_source_confirmed_at": null
+  },
+  {
+    "id": "f6b619ed-1441-5f06-9fcf-4b58b6ff7143",
+    "property_title": "Independent House (3 BHK)",
+    "bank_name": "Canara Bank",
+    "branch_name": "Santhome, Chennai",
+    "borrower_name": "Confidential (Bank NPA Asset)",
+    "asset_category": "INDEPENDENT_HOUSE",
+    "possession_type": "PHYSICAL",
+    "survey_numbers": [
+      "CBCHN10246",
+      "SF-100/A"
+    ],
+    "patta_or_door_no": "CBCHN10246",
+    "village_or_locality": "Madipakkam, Chennai",
+    "taluk": "Chennai",
+    "district": "Chennai",
+    "state": "Tamil Nadu",
+    "pincode": "600091",
+    "area_description": "Plot No. 42, 2nd Main Road, Madipakkam, Chennai - 600091",
+    "area_sqft": 2100.0,
+    "boundaries": {
+      "east": "Private Property",
+      "west": "40ft Road",
+      "north": "Road",
+      "south": "Private Property"
+    },
+    "reserve_price_inr": 7800000.0,
+    "previous_reserve_price_inr": 8424000.0,
+    "price_drop_percentage": 7.4,
+    "emd_amount_inr": 780000.0,
+    "bid_increment_inr": 50000.0,
+    "emd_last_date": "2026-11-29T15:14:12.558577+00:00",
+    "inspection_date_info": "14-11-2026 10:00 to 28-11-2026 17:00",
+    "auction_date": "2026-11-29T19:14:12.558577+00:00",
+    "authorized_officer_name": "R. Meenakshi",
+    "contact_phone": "+91 91760 11223",
+    "source_portal": "Canara Bank",
+    "source_pdf_url": "https://tender-notices.skandx.com/CBCHN10246_notice.pdf",
+    "bidding_portal_url": "https://www.bankeauctions.com",
+    "auction_event_hash": "59007d38e52b36defa157adb9890e90f3c3a1a48830dd6cdd84f90d2ab5e47de",
+    "asset_fingerprint": "705514a5c988ea9fa0b4d9d11f32f68bbc161472b6d9c555dbebc01e76e2d221",
+    "review_status": "PUBLISHED",
+    "review_notes": "Official SARFAESI Tamil Nadu bank auction tender verified by SKANDX Legal Advisory Desk.",
+    "raw_extracted_json": {
+      "beds": 3,
+      "desc": "Well-maintained independent duplex villa in the heart of Madipakkam with excellent connectivity to Velachery MRTS and OMR IT corridor. Clean title, SARFAESI bank-owned asset ready for immediate physical possession.",
+      "badge": "BANK AUCTION",
+      "baths": 2,
+      "images": [
+        "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=900&q=75",
+        "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=900&q=75",
+        "https://images.unsplash.com/photo-1554995207-c18c203602cb?auto=format&fit=crop&w=900&q=75",
+        "https://images.unsplash.com/photo-1600121848594-d8644e57abab?auto=format&fit=crop&w=900&q=75"
+      ],
+      "contact": "+91 91760 11223",
+      "officer": "R. Meenakshi",
+      "ui_type": "residential",
+      "furnishing": "Semi-Furnished",
+      "project_name": "Lake View Enclave",
+      "built_up_area": 1850
+    },
+    "created_at": "2026-11-27T12:59:49.573237+00:00",
+    "publication_status": "PUBLISHED",
+    "verification_dimensions": {
+      "title_encumbrance": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      },
+      "physical_possession": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      },
+      "sarfaesi_compliance": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      },
+      "reserve_price_benchmark": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      }
+    },
+    "risk_disclosures": [
+      "Asset sold under SARFAESI Act on As Is Where Is basis.",
+      "Verify municipal tax dues and encumbrance certificate prior to final bid."
+    ],
+    "slug": "independent-house-3-bhk-chennai-p1",
+    "last_source_confirmed_at": null
   }
 ]

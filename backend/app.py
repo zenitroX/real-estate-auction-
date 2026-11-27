@@ -194,6 +194,15 @@ def serialize_public_auction(row: dict) -> dict:
             for k, v in dims.items()
             if isinstance(v, dict)
         }
+    raw = row.get("raw_extracted_json")
+    if isinstance(raw, dict):
+        safe_keys = ("images", "beds", "baths", "furnishing", "project_name", "built_up_area", "desc", "badge", "ui_type")
+        out["metadata"] = {k: raw[k] for k in safe_keys if k in raw}
+        if "images" in raw and raw["images"]:
+            out["images"] = raw["images"]
+        for k in ("beds", "baths", "furnishing", "project_name", "built_up_area", "desc"):
+            if k in raw:
+                out[k] = raw[k]
     return out
 
 def _is_published_auction(row: dict) -> bool:
