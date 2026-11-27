@@ -132,6 +132,15 @@ ADMIN_EDITABLE_PROPERTY_FIELDS = {
     "verification_dimensions": "verification_dimensions",
     "riskDisclosures": "risk_disclosures",
     "risk_disclosures": "risk_disclosures",
+    "video_url": "video_url",
+    "videoUrl": "video_url",
+    "video": "video_url",
+    "images": "images",
+    "furnishing": "furnishing",
+    "projectName": "project_name",
+    "project_name": "project_name",
+    "builtUpArea": "built_up_area",
+    "built_up_area": "built_up_area",
 }
 
 PUBLIC_VERIFICATION_KEYS = ("status", "reviewed_at", "review_period")
@@ -196,11 +205,13 @@ def serialize_public_auction(row: dict) -> dict:
         }
     raw = row.get("raw_extracted_json")
     if isinstance(raw, dict):
-        safe_keys = ("images", "beds", "baths", "furnishing", "project_name", "built_up_area", "desc", "badge", "ui_type")
+        safe_keys = ("images", "video_url", "video", "beds", "baths", "furnishing", "project_name", "built_up_area", "desc", "badge", "ui_type")
         out["metadata"] = {k: raw[k] for k in safe_keys if k in raw}
         if "images" in raw and raw["images"]:
             out["images"] = raw["images"]
-        for k in ("beds", "baths", "furnishing", "project_name", "built_up_area", "desc"):
+        if "video_url" in raw and raw["video_url"]:
+            out["video_url"] = raw["video_url"]
+        for k in ("beds", "baths", "furnishing", "project_name", "built_up_area", "desc", "video_url", "video"):
             if k in raw:
                 out[k] = raw[k]
     return out
@@ -834,6 +845,14 @@ def persist_property_update(prop_id, new_status, updated_fields=None):
                             targets = field_aliases.get(k, (k,))
                             for t in targets:
                                 item[t] = v
+                        if "images" in updated_fields:
+                            item["images"] = updated_fields["images"]
+                        if "video_url" in updated_fields:
+                            item["video_url"] = updated_fields["video_url"]
+                        elif "videoUrl" in updated_fields:
+                            item["video_url"] = updated_fields["videoUrl"]
+                        elif "video" in updated_fields:
+                            item["video_url"] = updated_fields["video"]
                         matched = True
                         break
                 
@@ -858,12 +877,47 @@ def persist_property_update(prop_id, new_status, updated_fields=None):
                 "Content-Type": "application/json",
                 "Prefer": "return=minimal"
             }
-            body = {"review_status": new_status}
+            body = {"review_status": new_status, "publication_status": new_status}
             for k, v in updated_fields.items():
                 db_col = ADMIN_EDITABLE_PROPERTY_FIELDS.get(k)
-                if db_col and v is not None:
+                if db_col and v is not None and db_col not in ("images", "video_url", "furnishing", "project_name", "built_up_area"):
                     body[db_col] = v
             encoded_id = urllib.parse.quote(str(prop_id), safe="")
+
+            # Merge media and extended specs into raw_extracted_json
+            media_keys = ("images", "video_url", "video", "videoUrl", "furnishing", "project_name", "projectName", "built_up_area", "builtUpArea", "beds", "baths")
+            if any(k in updated_fields for k in media_keys):
+                existing_raw = {}
+                try:
+                    fetch_url = f"{SUPABASE_URL}/rest/v1/auction_properties?id=eq.{encoded_id}&select=raw_extracted_json"
+                    fetch_req = urllib.request.Request(fetch_url, headers=headers)
+                    with urllib.request.urlopen(fetch_req, timeout=4) as f_resp:
+                        raw_data = json.loads(f_resp.read().decode())
+                        if raw_data and isinstance(raw_data, list):
+                            existing_raw = raw_data[0].get("raw_extracted_json") or {}
+                except Exception:
+                    pass
+
+                if "images" in updated_fields and isinstance(updated_fields["images"], list):
+                    existing_raw["images"] = updated_fields["images"]
+                v_url = updated_fields.get("video_url") or updated_fields.get("videoUrl") or updated_fields.get("video")
+                if v_url is not None:
+                    existing_raw["video_url"] = v_url
+                if "furnishing" in updated_fields:
+                    existing_raw["furnishing"] = updated_fields["furnishing"]
+                p_name = updated_fields.get("project_name") or updated_fields.get("projectName")
+                if p_name is not None:
+                    existing_raw["project_name"] = p_name
+                b_area = updated_fields.get("built_up_area") or updated_fields.get("builtUpArea")
+                if b_area is not None:
+                    existing_raw["built_up_area"] = b_area
+                if "beds" in updated_fields:
+                    existing_raw["beds"] = updated_fields["beds"]
+                if "baths" in updated_fields:
+                    existing_raw["baths"] = updated_fields["baths"]
+
+                body["raw_extracted_json"] = existing_raw
+
             url = f"{SUPABASE_URL}/rest/v1/auction_properties?id=eq.{encoded_id}"
             req = urllib.request.Request(url, data=json.dumps(body).encode("utf-8"), headers=headers, method="PATCH")
             with urllib.request.urlopen(req, timeout=5):

@@ -293,20 +293,22 @@ export default function App() {
   };
 
   const handleVerifyProperty = async (id, updatedFields = {}) => {
+    const targetStatus = updatedFields.status || updatedFields.publication_status || 'PUBLISHED';
+    const isVerified = targetStatus === 'PUBLISHED';
     const previousProperties = properties;
     setProperties((prev) =>
       prev.map((p) =>
         p.id === id
-          ? { ...p, ...updatedFields, verified: true, status: 'PUBLISHED', verifiedDate: 'Just now' }
+          ? { ...p, ...updatedFields, verified: isVerified, status: targetStatus, verifiedDate: 'Just now' }
           : p
       )
     );
 
     try {
-      await verifyPropertyApi(id, 'PUBLISHED', updatedFields);
+      await verifyPropertyApi(id, targetStatus, updatedFields);
       addToast(
-        'Listing Verified & Published!',
-        'Asset is now visible to customers on the public marketplace.',
+        isVerified ? 'Listing Verified & Published!' : 'Property Updated Successfully',
+        'Asset details, photos, and video saved to database.',
         'success'
       );
     } catch (err) {

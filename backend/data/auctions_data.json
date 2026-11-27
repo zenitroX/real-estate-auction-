@@ -1266,94 +1266,6 @@
     "last_source_confirmed_at": null
   },
   {
-    "id": "0619fd46-a9cc-5af2-a23b-324a093ccb30",
-    "property_title": "Apartment (2 BHK)",
-    "bank_name": "ICICI Bank",
-    "branch_name": "Velachery, Chennai",
-    "borrower_name": "Confidential (Bank NPA Asset)",
-    "asset_category": "FLAT_APARTMENT",
-    "possession_type": "PHYSICAL",
-    "survey_numbers": [
-      "ICCHN20911",
-      "SF-102/A"
-    ],
-    "patta_or_door_no": "ICCHN20911",
-    "village_or_locality": "Velachery, Chennai",
-    "taluk": "Chennai",
-    "district": "Chennai",
-    "state": "Tamil Nadu",
-    "pincode": "600042",
-    "area_description": "Block B-402, Lakeview Towers, Velachery, Chennai - 600042",
-    "area_sqft": 1120.0,
-    "boundaries": {
-      "east": "Private Property",
-      "west": "40ft Road",
-      "north": "Road",
-      "south": "Private Property"
-    },
-    "reserve_price_inr": 5200000.0,
-    "previous_reserve_price_inr": 5616000.0,
-    "price_drop_percentage": 7.4,
-    "emd_amount_inr": 520000.0,
-    "bid_increment_inr": 25000.0,
-    "emd_last_date": "2026-11-30T19:19:00.558577+00:00",
-    "inspection_date_info": "15-11-2026 10:00 to 29-11-2026 17:00",
-    "auction_date": "2026-11-30T23:19:00.558577+00:00",
-    "authorized_officer_name": "K. Vignesh",
-    "contact_phone": "+91 94440 22331",
-    "source_portal": "ICICI Bank",
-    "source_pdf_url": "https://tender-notices.skandx.com/ICCHN20911_notice.pdf",
-    "bidding_portal_url": "https://www.bankeauctions.com",
-    "auction_event_hash": "c01543a319763eb2d69d41dddf16c73db51c3232d0462c0e2b671cb2b07a013a",
-    "asset_fingerprint": "1cbbbc891046b636cfd48283a6b850eaab9aa5ed9fd4774ee6c2d482c72ad78c",
-    "review_status": "PUBLISHED",
-    "review_notes": "Official SARFAESI Tamil Nadu bank auction tender verified by SKANDX Legal Advisory Desk.",
-    "raw_extracted_json": {
-      "beds": 2,
-      "desc": "Corner 2 BHK flat overlooking the Velachery lake with modular kitchen, vitrified tiles and covered parking. Close to Phoenix MarketCity and metro station. Ideal for young professionals.",
-      "badge": "BANK AUCTION",
-      "baths": 2,
-      "images": [
-        "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=900&q=75",
-        "https://images.unsplash.com/photo-1600121848594-d8644e57abab?auto=format&fit=crop&w=900&q=75",
-        "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=900&q=75",
-        "https://images.unsplash.com/photo-1600566752355-35792bedcfea?auto=format&fit=crop&w=900&q=75"
-      ],
-      "contact": "+91 94440 22331",
-      "officer": "K. Vignesh",
-      "ui_type": "residential",
-      "furnishing": "Semi-Furnished",
-      "project_name": "Lakeview Towers",
-      "built_up_area": 1020
-    },
-    "created_at": "2026-11-27T12:59:49.573237+00:00",
-    "publication_status": "PUBLISHED",
-    "verification_dimensions": {
-      "title_encumbrance": {
-        "status": "PASS",
-        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
-      },
-      "physical_possession": {
-        "status": "PASS",
-        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
-      },
-      "sarfaesi_compliance": {
-        "status": "PASS",
-        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
-      },
-      "reserve_price_benchmark": {
-        "status": "PASS",
-        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
-      }
-    },
-    "risk_disclosures": [
-      "Asset sold under SARFAESI Act on As Is Where Is basis.",
-      "Verify municipal tax dues and encumbrance certificate prior to final bid."
-    ],
-    "slug": "apartment-2-bhk-chennai-p3",
-    "last_source_confirmed_at": null
-  },
-  {
     "id": "a9786a52-4b1d-5f3b-be39-78b18f5c55d7",
     "property_title": "Luxury Villa (4 BHK)",
     "bank_name": "State Bank of India",
@@ -1442,6 +1354,94 @@
     "last_source_confirmed_at": null
   },
   {
+    "id": "0619fd46-a9cc-5af2-a23b-324a093ccb30",
+    "property_title": "Apartment (2 BHK)",
+    "bank_name": "ICICI Bank",
+    "branch_name": "Velachery, Chennai",
+    "borrower_name": "Confidential (Bank NPA Asset)",
+    "asset_category": "FLAT_APARTMENT",
+    "possession_type": "PHYSICAL",
+    "survey_numbers": [
+      "ICCHN20911",
+      "SF-102/A"
+    ],
+    "patta_or_door_no": "ICCHN20911",
+    "village_or_locality": "Velachery, Chennai",
+    "taluk": "Chennai",
+    "district": "Chennai",
+    "state": "Tamil Nadu",
+    "pincode": "600042",
+    "area_description": "Block B-402, Lakeview Towers, Velachery, Chennai - 600042",
+    "area_sqft": 1120.0,
+    "boundaries": {
+      "east": "Private Property",
+      "west": "40ft Road",
+      "north": "Road",
+      "south": "Private Property"
+    },
+    "reserve_price_inr": 5200000.0,
+    "previous_reserve_price_inr": 5616000.0,
+    "price_drop_percentage": 7.4,
+    "emd_amount_inr": 520000.0,
+    "bid_increment_inr": 25000.0,
+    "emd_last_date": "2026-11-30T19:19:00.558577+00:00",
+    "inspection_date_info": "15-11-2026 10:00 to 29-11-2026 17:00",
+    "auction_date": "2026-11-30T23:19:00.558577+00:00",
+    "authorized_officer_name": "K. Vignesh",
+    "contact_phone": "+91 94440 22331",
+    "source_portal": "ICICI Bank",
+    "source_pdf_url": "https://tender-notices.skandx.com/ICCHN20911_notice.pdf",
+    "bidding_portal_url": "https://www.bankeauctions.com",
+    "auction_event_hash": "c01543a319763eb2d69d41dddf16c73db51c3232d0462c0e2b671cb2b07a013a",
+    "asset_fingerprint": "1cbbbc891046b636cfd48283a6b850eaab9aa5ed9fd4774ee6c2d482c72ad78c",
+    "review_status": "PUBLISHED",
+    "review_notes": "Official SARFAESI Tamil Nadu bank auction tender verified by SKANDX Legal Advisory Desk.",
+    "raw_extracted_json": {
+      "beds": 2,
+      "desc": "Corner 2 BHK flat overlooking the Velachery lake with modular kitchen, vitrified tiles and covered parking. Close to Phoenix MarketCity and metro station. Ideal for young professionals.",
+      "badge": "BANK AUCTION",
+      "baths": 2,
+      "images": [
+        "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=900&q=75",
+        "https://images.unsplash.com/photo-1600121848594-d8644e57abab?auto=format&fit=crop&w=900&q=75",
+        "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=900&q=75",
+        "https://images.unsplash.com/photo-1600566752355-35792bedcfea?auto=format&fit=crop&w=900&q=75"
+      ],
+      "contact": "+91 94440 22331",
+      "officer": "K. Vignesh",
+      "ui_type": "residential",
+      "furnishing": "Semi-Furnished",
+      "project_name": "Lakeview Towers",
+      "built_up_area": 1020
+    },
+    "created_at": "2026-11-27T12:59:49.573237+00:00",
+    "publication_status": "PUBLISHED",
+    "verification_dimensions": {
+      "title_encumbrance": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      },
+      "physical_possession": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      },
+      "sarfaesi_compliance": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      },
+      "reserve_price_benchmark": {
+        "status": "PASS",
+        "reviewed_at": "2026-11-27T12:59:48.558577+00:00"
+      }
+    },
+    "risk_disclosures": [
+      "Asset sold under SARFAESI Act on As Is Where Is basis.",
+      "Verify municipal tax dues and encumbrance certificate prior to final bid."
+    ],
+    "slug": "apartment-2-bhk-chennai-p3",
+    "last_source_confirmed_at": null
+  },
+  {
     "id": "f6b619ed-1441-5f06-9fcf-4b58b6ff7143",
     "property_title": "Independent House (3 BHK)",
     "bank_name": "Canara Bank",
@@ -1491,15 +1491,14 @@
       "baths": 2,
       "images": [
         "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=900&q=75",
-        "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=900&q=75",
-        "https://images.unsplash.com/photo-1554995207-c18c203602cb?auto=format&fit=crop&w=900&q=75",
-        "https://images.unsplash.com/photo-1600121848594-d8644e57abab?auto=format&fit=crop&w=900&q=75"
+        "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=900&q=75"
       ],
       "contact": "+91 91760 11223",
       "officer": "R. Meenakshi",
       "ui_type": "residential",
-      "furnishing": "Semi-Furnished",
-      "project_name": "Lake View Enclave",
+      "video_url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+      "furnishing": "Fully Furnished Luxury",
+      "project_name": "Lake View Elite Duplex",
       "built_up_area": 1850
     },
     "created_at": "2026-11-27T12:59:49.573237+00:00",

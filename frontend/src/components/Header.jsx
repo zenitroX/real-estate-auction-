@@ -38,23 +38,9 @@ export default function Header({
 }) {
   const [showNotifs, setShowNotifs] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
   const notifRef = useRef(null);
 
   const unreadCount = notifications ? notifications.filter((n) => n.unread).length : 0;
-
-  useEffect(() => {
-    function handleScroll() {
-      if (window.scrollY > 40) {
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
-    }
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -82,7 +68,7 @@ export default function Header({
   ];
 
   return (
-    <header className={`site-header ${isScrolled ? 'scrolled-island' : ''}`}>
+    <header className="site-header">
       <div className="header-inner">
         {/* Brand */}
         <button
@@ -257,25 +243,37 @@ export default function Header({
                 </div>
               )}
 
-              {/* Customer User Person Icon Only (No name text) */}
-              <button
-                className="header-user-btn"
-                onClick={() => {
-                  if (user && user.isLoggedIn) {
+              {/* Login / Register / Account */}
+              {user && user.isLoggedIn ? (
+                <button
+                  className="nav-link"
+                  onClick={() => {
                     onSetViewMode('customer');
                     setActivePage('dashboard');
                     window.scrollTo({ top: 0, behavior: 'smooth' });
-                  } else {
-                    onOpenAuth('login');
-                  }
-                }}
-                title={user && user.isLoggedIn ? `Account (${user.name}) - Bidder Dashboard` : 'Sign In to Account'}
-                aria-label="User Account"
-              >
-                <div className="header-user-avatar">
-                  <User size={18} />
-                </div>
-              </button>
+                  }}
+                  title={`Account (${user.name})`}
+                  style={{ display: 'flex', alignItems: 'center', gap: 6 }}
+                >
+                  <User size={16} /> Account
+                </button>
+              ) : (
+                <>
+                  <button
+                    className="nav-link"
+                    onClick={() => onOpenAuth('login')}
+                  >
+                    Login
+                  </button>
+                  <button
+                    className="btn btn-gold btn-sm"
+                    onClick={() => onOpenAuth('register')}
+                    style={{ fontWeight: 600 }}
+                  >
+                    Register
+                  </button>
+                </>
+              )}
 
               {/* Mobile hamburger */}
               <button

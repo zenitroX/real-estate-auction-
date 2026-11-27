@@ -47,6 +47,7 @@ function mapAuctionItem(item, index) {
   const builtUpArea = item.built_up_area || meta.built_up_area || null;
   const beds = item.beds != null ? Number(item.beds) : (meta.beds != null ? Number(meta.beds) : null);
   const baths = item.baths != null ? Number(item.baths) : (meta.baths != null ? Number(meta.baths) : null);
+  const videoUrl = item.video_url || item.videoUrl || meta.video_url || meta.videoUrl || null;
 
   return {
     id: String(item.id || `auction-${index}`),
@@ -80,6 +81,7 @@ function mapAuctionItem(item, index) {
     projectName,
     beds,
     baths,
+    videoUrl,
     areaDescription: item.area_description || null,
     surveyNumbers: Array.isArray(item.survey_numbers) ? item.survey_numbers : [],
     boundaries: item.boundaries || null,

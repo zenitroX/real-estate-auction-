@@ -19,6 +19,7 @@ import {
   ShieldCheck,
   Headset,
   Info,
+  Video,
 } from 'lucide-react';
 import PropertyCard from '../components/PropertyCard';
 import {
@@ -30,6 +31,15 @@ import {
   timeRemaining,
   pad2,
 } from '../data/propertiesData';
+
+function getYoutubeEmbedUrl(url) {
+  if (!url || typeof url !== 'string') return null;
+  const ytMatch = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
+  if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}`;
+  const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
+  if (vimeoMatch) return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+  return null;
+}
 
 export default function PropertyDetailsView({
   property,
@@ -348,6 +358,47 @@ export default function PropertyDetailsView({
             </div>
           </div>
         </div>
+
+        {/* Property Video Walkthrough (if uploaded or linked by Admin) */}
+        {property.videoUrl && (
+          <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E2E8F0', padding: 24, marginTop: 28, boxShadow: '0 2px 8px rgba(0,0,0,0.03)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, flexWrap: 'wrap', gap: 10 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <span className="brand-mark" style={{ background: '#FEF3C7', color: '#D97706', width: 36, height: 36, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Video size={18} />
+                </span>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '1.25rem', color: '#071D35' }}>Official Property Video Walkthrough</h3>
+                  <small style={{ color: '#64748B' }}>Verified site inspection recording and property tour</small>
+                </div>
+              </div>
+              <span className="badge badge-gold" style={{ fontSize: '0.75rem' }}>
+                Verified Video Tour
+              </span>
+            </div>
+
+            <div style={{ borderRadius: 12, overflow: 'hidden', background: '#071D35', width: '100%', aspectRatio: '16/9', maxHeight: 520, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              {getYoutubeEmbedUrl(property.videoUrl) ? (
+                <iframe
+                  src={getYoutubeEmbedUrl(property.videoUrl)}
+                  title="Property Video Walkthrough"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  style={{ width: '100%', height: '100%', border: 'none' }}
+                />
+              ) : (
+                <video
+                  src={property.videoUrl}
+                  controls
+                  playsInline
+                  style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                >
+                  Your browser does not support the video tag.
+                </video>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Highlights & Bank Details Grid */}
         <div className="detail-below">

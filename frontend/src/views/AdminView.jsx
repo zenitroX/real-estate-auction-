@@ -21,6 +21,11 @@ import {
   BadgeCheck,
   LogOut,
   Columns,
+  Video,
+  Trash2,
+  Plus,
+  Upload,
+  Image,
 } from 'lucide-react';
 import { formatPrice, formatRupees, formatPriceShort, typeLabel } from '../data/propertiesData';
 import { API_BASE, getAdminAuthHeader } from '../data/api';
@@ -57,6 +62,7 @@ export default function AdminView({
   const setActiveTab = controlledSetTab || setInternalTab;
 
   const [editingProperty, setEditingProperty] = useState(null);
+  const [newImageUrl, setNewImageUrl] = useState('');
   const [showSplitPdf, setShowSplitPdf] = useState(false);
   const [pdfModalData, setPdfModalData] = useState(null);
   const [rejectConfirmTarget, setRejectConfirmTarget] = useState(null);
@@ -389,11 +395,11 @@ export default function AdminView({
                       <button
                         className="btn btn-outline btn-block btn-sm"
                         onClick={() => {
-                          setEditingProperty({ ...p });
+                          setEditingProperty({ ...p, images: [...(p.images || [])], videoUrl: p.videoUrl || '' });
                           setShowSplitPdf(false);
                         }}
                       >
-                        <Edit3 size={14} /> Edit Extracted Details
+                        <Edit3 size={14} /> Edit Details & Media
                       </button>
 
                       <button
@@ -485,12 +491,27 @@ export default function AdminView({
                         </span>
                       </td>
                       <td>
-                        <button
-                          className="btn btn-outline btn-sm"
-                          onClick={() => onViewProperty(p.id)}
-                        >
-                          <ExternalLink size={13} /> Customer View
-                        </button>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                          <button
+                            className="btn btn-gold btn-sm"
+                            style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '5px 10px', fontSize: '0.78rem' }}
+                            onClick={() => {
+                              setEditingProperty({ ...p, images: [...(p.images || [])], videoUrl: p.videoUrl || '' });
+                              setShowSplitPdf(false);
+                            }}
+                            title="Edit details, photos, or video tour"
+                          >
+                            <Edit3 size={13} /> Edit & Media
+                          </button>
+                          <button
+                            className="btn btn-outline btn-sm"
+                            style={{ padding: '5px 10px', fontSize: '0.78rem' }}
+                            onClick={() => onViewProperty(p.id)}
+                            title="View as customer"
+                          >
+                            <ExternalLink size={13} /> View
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -645,41 +666,54 @@ export default function AdminView({
           </div>
         )}
 
-        {/* Edit Extracted Details Modal */}
+        {/* Edit Extracted Details & Media Modal */}
         {editingProperty && (
-          <div className="modal-overlay" onClick={() => { setEditingProperty(null); setShowSplitPdf(false); }} role="dialog" aria-modal="true">
+          <div className="modal-overlay" onClick={() => { setEditingProperty(null); setShowSplitPdf(false); setNewImageUrl(''); }} role="dialog" aria-modal="true">
             <div
               className="modal"
               style={{
-                width: showSplitPdf ? 'min(1240px, 98vw)' : 'min(620px, 100%)',
+                width: showSplitPdf ? 'min(1360px, 98vw)' : 'min(820px, 96vw)',
                 maxHeight: '94vh',
                 overflowY: 'auto',
                 transition: 'width 0.2s ease-in-out',
+                padding: '24px',
               }}
               onClick={(e) => e.stopPropagation()}
             >
-              <button className="modal-close" onClick={() => { setEditingProperty(null); setShowSplitPdf(false); }}><XCircle size={20} /></button>
-              <div className="modal-head">
-                <span className="brand-mark"><Edit3 size={20} /></span>
-                <h3>Verify & Edit Extracted Fields</h3>
-                <p>Adjust OCR fields, auction dates, and possession details before publishing.</p>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '1.35rem', color: '#071D35', display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <Edit3 size={20} color="#D9A62E" /> Edit Listing & Media Gallery
+                  </h3>
+                  <p style={{ margin: '4px 0 0', color: '#64748B', fontSize: '0.82rem' }}>
+                    Property ID: <code style={{ color: '#071D35', fontWeight: 700 }}>{editingProperty.assetCode || editingProperty.id}</code> &middot; Changes save directly to Supabase
+                  </p>
+                </div>
+                <button
+                  className="modal-close"
+                  onClick={() => { setEditingProperty(null); setShowSplitPdf(false); setNewImageUrl(''); }}
+                  aria-label="Close modal"
+                >
+                  <XCircle size={22} />
+                </button>
               </div>
 
+              {/* PDF Split-Pane toggle bar */}
               <div
                 style={{
                   display: 'flex',
-                  justifyContent: 'space-between',
                   alignItems: 'center',
-                  marginBottom: 16,
+                  justifyContent: 'space-between',
                   background: '#F8FAFC',
-                  padding: '10px 14px',
-                  borderRadius: 10,
                   border: '1px solid #E2E8F0',
+                  padding: '8px 12px',
+                  borderRadius: 8,
+                  marginBottom: 16,
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <FileText size={18} color="#D9A62E" />
-                  <span style={{ fontSize: '0.86rem', fontWeight: 600, color: '#071D35' }}>Original Bank Tender Notice</span>
+                  <FileText size={16} color="#D9A62E" />
+                  <span style={{ fontSize: '0.84rem', fontWeight: 600, color: '#071D35' }}>Original Bank Tender Notice</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <button
@@ -688,7 +722,7 @@ export default function AdminView({
                     onClick={() => setShowSplitPdf(!showSplitPdf)}
                     style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.78rem' }}
                   >
-                    <Columns size={14} /> {showSplitPdf ? 'Hide Split-Pane' : 'View Original Notice PDF (Split-Pane)'}
+                    <Columns size={14} /> {showSplitPdf ? 'Hide Split-Pane' : 'View Notice PDF (Split-Pane)'}
                   </button>
                   <a
                     href={`${API_BASE}/api/admin/pdf-proxy?url=${encodeURIComponent(getPropertyPdfUrl(editingProperty))}`}
@@ -704,7 +738,7 @@ export default function AdminView({
 
               <div style={{ display: 'grid', gridTemplateColumns: showSplitPdf ? '1.1fr 1fr' : '1fr', gap: 20, alignItems: 'start' }}>
                 {showSplitPdf && (
-                  <div style={{ border: '1px solid #CBD5E1', borderRadius: 10, overflow: 'hidden', height: 600, display: 'flex', flexDirection: 'column', background: '#0F172A' }}>
+                  <div style={{ border: '1px solid #CBD5E1', borderRadius: 10, overflow: 'hidden', height: 650, display: 'flex', flexDirection: 'column', background: '#0F172A' }}>
                     <div style={{ background: '#071D35', color: '#CBD5E1', padding: '8px 12px', fontSize: '0.78rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <span>Notice PDF Stream: <code style={{ color: '#E8B849' }}>/api/admin/pdf-proxy</code></span>
                       <span className="badge badge-green" style={{ fontSize: '0.65rem' }}>Authenticated</span>
@@ -717,7 +751,191 @@ export default function AdminView({
                   </div>
                 )}
 
-                <form onSubmit={handleSaveEdit} className="modal-form">
+                <form onSubmit={handleSaveEdit} className="modal-form" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                  {/* Status & Verification Box */}
+                  <div style={{ background: '#FEF3C7', border: '1px solid #FDE68A', padding: '12px 14px', borderRadius: 10 }}>
+                    <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, color: '#92400E', marginBottom: 6 }}>
+                      Verification & Publication Status
+                    </label>
+                    <select
+                      value={editingProperty.status || (editingProperty.verified ? 'PUBLISHED' : 'PENDING_REVIEW')}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setEditingProperty({
+                          ...editingProperty,
+                          status: val,
+                          publication_status: val,
+                          verified: val === 'PUBLISHED',
+                        });
+                      }}
+                      style={{ background: '#fff', fontWeight: 600, width: '100%' }}
+                    >
+                      <option value="PUBLISHED">Verified & Published Live (Visible to Public)</option>
+                      <option value="PENDING_REVIEW">Pending Review (Back-Office Queue)</option>
+                      <option value="REJECTED">Rejected / Hidden from Marketplace</option>
+                    </select>
+                  </div>
+
+                  {/* MEDIA SECTION: Real Pictures & Video */}
+                  <div style={{ border: '1px solid #E2E8F0', borderRadius: 12, padding: 16, background: '#F8FAFC' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                      <strong style={{ fontSize: '0.92rem', color: '#071D35', display: 'flex', alignItems: 'center', gap: 6 }}>
+                        <Image size={17} color="#D9A62E" /> Real Property Photos ({editingProperty.images?.length || 0})
+                      </strong>
+                      <label
+                        htmlFor="admin-photo-upload"
+                        className="btn btn-outline btn-sm"
+                        style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', background: '#fff', fontSize: '0.78rem' }}
+                      >
+                        <Upload size={13} /> Upload Real Photos from PC
+                        <input
+                          id="admin-photo-upload"
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          style={{ display: 'none' }}
+                          onChange={(e) => {
+                            const files = Array.from(e.target.files || []);
+                            files.forEach((file) => {
+                              const reader = new FileReader();
+                              reader.onload = (ev) => {
+                                if (ev.target?.result) {
+                                  setEditingProperty((prev) => ({
+                                    ...prev,
+                                    images: [...(prev.images || []), ev.target.result],
+                                  }));
+                                }
+                              };
+                              reader.readAsDataURL(file);
+                            });
+                          }}
+                        />
+                      </label>
+                    </div>
+
+                    {/* Current Photos Thumbnails Grid */}
+                    {editingProperty.images && editingProperty.images.length > 0 ? (
+                      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 12 }}>
+                        {editingProperty.images.map((imgUrl, imgIdx) => (
+                          <div
+                            key={imgIdx}
+                            style={{
+                              position: 'relative',
+                              width: 80,
+                              height: 60,
+                              borderRadius: 8,
+                              overflow: 'hidden',
+                              border: '2px solid #E2E8F0',
+                              background: '#071D35',
+                            }}
+                          >
+                            <img
+                              src={imgUrl}
+                              alt=""
+                              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                              onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = './placeholder.svg'; }}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setEditingProperty((prev) => ({
+                                  ...prev,
+                                  images: prev.images.filter((_, idx) => idx !== imgIdx),
+                                }));
+                              }}
+                              style={{
+                                position: 'absolute',
+                                top: 2,
+                                right: 2,
+                                background: 'rgba(220, 38, 38, 0.88)',
+                                border: 'none',
+                                borderRadius: '50%',
+                                width: 20,
+                                height: 20,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: '#fff',
+                                cursor: 'pointer',
+                              }}
+                              title="Delete photo"
+                            >
+                              <Trash2 size={11} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p style={{ fontSize: '0.82rem', color: '#94A3B8', margin: '4px 0 10px' }}>
+                        No property photos added yet. Upload real pictures or paste an image URL below.
+                      </p>
+                    )}
+
+                    {/* Add Image URL bar */}
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <input
+                        type="url"
+                        placeholder="Or paste property image URL (https://...)"
+                        value={newImageUrl}
+                        onChange={(e) => setNewImageUrl(e.target.value)}
+                        style={{ flex: 1, fontSize: '0.82rem' }}
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-outline btn-sm"
+                        style={{ background: '#fff' }}
+                        onClick={() => {
+                          if (newImageUrl.trim()) {
+                            setEditingProperty((prev) => ({
+                              ...prev,
+                              images: [...(prev.images || []), newImageUrl.trim()],
+                            }));
+                            setNewImageUrl('');
+                          }
+                        }}
+                      >
+                        <Plus size={14} /> Add Image URL
+                      </button>
+                    </div>
+
+                    {/* Video Tour Section */}
+                    <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px dashed #CBD5E1' }}>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.86rem', fontWeight: 600, color: '#071D35', marginBottom: 6 }}>
+                        <Video size={16} color="#D9A62E" /> Property Video Tour URL (YouTube, Vimeo, or MP4)
+                      </label>
+                      <input
+                        type="url"
+                        placeholder="e.g. https://www.youtube.com/watch?v=... or https://mysite.com/walkthrough.mp4"
+                        value={editingProperty.videoUrl || ''}
+                        onChange={(e) => setEditingProperty({ ...editingProperty, videoUrl: e.target.value })}
+                        style={{ fontSize: '0.84rem' }}
+                      />
+
+                      {/* Video Preview if URL provided */}
+                      {editingProperty.videoUrl && (
+                        <div style={{ marginTop: 10, background: '#0F172A', borderRadius: 8, padding: 8, textAlign: 'center' }}>
+                          <small style={{ color: '#E8B849', display: 'block', marginBottom: 6, fontSize: '0.74rem' }}>
+                            ✓ Live Video Tour Attached
+                          </small>
+                          <div style={{ width: '100%', maxHeight: 180, overflow: 'hidden', borderRadius: 6 }}>
+                            {editingProperty.videoUrl.includes('youtube.com') || editingProperty.videoUrl.includes('youtu.be') ? (
+                              <p style={{ color: '#fff', fontSize: '0.82rem', margin: '8px 0' }}>
+                                Embedded YouTube Walkthrough: <code>{editingProperty.videoUrl}</code>
+                              </p>
+                            ) : (
+                              <video
+                                src={editingProperty.videoUrl}
+                                controls
+                                style={{ width: '100%', maxHeight: 160, objectFit: 'contain' }}
+                              />
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* General Details */}
                   <div className="form-field">
                     <label>Property Title</label>
                     <input
@@ -739,6 +957,17 @@ export default function AdminView({
                       />
                     </div>
                     <div className="form-field">
+                      <label>Branch Name</label>
+                      <input
+                        type="text"
+                        value={editingProperty.branch || ''}
+                        onChange={(e) => setEditingProperty({ ...editingProperty, branch: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                    <div className="form-field">
                       <label>Reserve Price (INR)</label>
                       <input
                         type="number"
@@ -751,6 +980,16 @@ export default function AdminView({
                             emd: editingProperty.emd || Math.round(newReserve * 0.1),
                           });
                         }}
+                        required
+                      />
+                    </div>
+                    <div className="form-field">
+                      <label>EMD Amount (INR)</label>
+                      <input
+                        type="number"
+                        placeholder="Statutory 10% EMD"
+                        value={editingProperty.emd !== undefined && editingProperty.emd !== null ? editingProperty.emd : Math.round((editingProperty.reserve || 0) * 0.1)}
+                        onChange={(e) => setEditingProperty({ ...editingProperty, emd: Number(e.target.value) })}
                         required
                       />
                     </div>
@@ -770,20 +1009,22 @@ export default function AdminView({
                       />
                     </div>
                     <div className="form-field">
-                      <label>EMD Amount (INR)</label>
-                      <input
-                        type="number"
-                        placeholder="Statutory 10% EMD"
-                        value={editingProperty.emd !== undefined && editingProperty.emd !== null ? editingProperty.emd : Math.round((editingProperty.reserve || 0) * 0.1)}
-                        onChange={(e) => setEditingProperty({ ...editingProperty, emd: Number(e.target.value) })}
-                        required
-                      />
+                      <label>Asset Category</label>
+                      <select
+                        value={editingProperty.type || 'residential'}
+                        onChange={(e) => setEditingProperty({ ...editingProperty, type: e.target.value })}
+                      >
+                        <option value="residential">Residential House / Flat</option>
+                        <option value="commercial">Commercial Building / Office</option>
+                        <option value="land">Land / Open Plot</option>
+                        <option value="industrial">Industrial Shed / Factory</option>
+                      </select>
                     </div>
                   </div>
 
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                     <div className="form-field">
-                      <label>Built-up Area (sq.ft)</label>
+                      <label>Carpet / Built-up Area (sq.ft)</label>
                       <input
                         type="number"
                         placeholder="e.g. 2100"
@@ -792,25 +1033,38 @@ export default function AdminView({
                       />
                     </div>
                     <div className="form-field">
-                      <label>Land Area (sq.ft)</label>
+                      <label>Project / Building Name</label>
                       <input
-                        type="number"
-                        placeholder="e.g. 1800"
-                        value={editingProperty.landArea || ''}
-                        onChange={(e) => setEditingProperty({ ...editingProperty, landArea: Number(e.target.value) })}
+                        type="text"
+                        placeholder="e.g. Prestige Silver Springs"
+                        value={editingProperty.projectName || ''}
+                        onChange={(e) => setEditingProperty({ ...editingProperty, projectName: e.target.value })}
                       />
                     </div>
                   </div>
 
-                  <div className="form-field">
-                    <label>Possession Type</label>
-                    <select
-                      value={editingProperty.possessionType || 'Physical Vacant'}
-                      onChange={(e) => setEditingProperty({ ...editingProperty, possessionType: e.target.value })}
-                    >
-                      <option value="Physical Vacant">Physical Vacant Possession</option>
-                      <option value="Symbolic / Constructive">Symbolic / Constructive Possession</option>
-                    </select>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                    <div className="form-field">
+                      <label>Furnished Status</label>
+                      <select
+                        value={editingProperty.furnishing || 'Unfurnished'}
+                        onChange={(e) => setEditingProperty({ ...editingProperty, furnishing: e.target.value })}
+                      >
+                        <option value="Unfurnished">Unfurnished</option>
+                        <option value="Semi-Furnished">Semi-Furnished</option>
+                        <option value="Fully Furnished">Fully Furnished</option>
+                      </select>
+                    </div>
+                    <div className="form-field">
+                      <label>Possession Type</label>
+                      <select
+                        value={editingProperty.possessionType || 'Physical'}
+                        onChange={(e) => setEditingProperty({ ...editingProperty, possessionType: e.target.value })}
+                      >
+                        <option value="Physical">Physical Vacant Possession</option>
+                        <option value="Symbolic">Symbolic / Constructive Possession</option>
+                      </select>
+                    </div>
                   </div>
 
                   <div className="form-field">
@@ -823,9 +1077,18 @@ export default function AdminView({
                     />
                   </div>
 
-                  <button className="btn btn-gold btn-block btn-lg" type="submit">
-                    <BadgeCheck size={18} /> Save & Approve Listing
-                  </button>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 8 }}>
+                    <button
+                      type="button"
+                      className="btn btn-outline btn-lg"
+                      onClick={() => { setEditingProperty(null); setShowSplitPdf(false); setNewImageUrl(''); }}
+                    >
+                      Cancel
+                    </button>
+                    <button className="btn btn-gold btn-lg" type="submit">
+                      <BadgeCheck size={18} /> Save & Apply to Supabase
+                    </button>
+                  </div>
                 </form>
               </div>
             </div>

@@ -72,6 +72,11 @@ export default function PropertyCard({ property, onView, onContact, isWishlisted
             <span className="bnc-ribbon-tail"></span>
             {badgeLabel}
           </span>
+          {property.videoUrl && (
+            <span style={{ position: 'absolute', bottom: 8, left: 8, background: 'rgba(7, 29, 53, 0.88)', color: '#E8B849', fontSize: '0.68rem', fontWeight: 700, padding: '3px 8px', borderRadius: 6, display: 'flex', alignItems: 'center', gap: 4, backdropFilter: 'blur(4px)', zIndex: 2 }}>
+              ▶ Video Tour
+            </span>
+          )}
         </div>
 
         {/* Info grid */}
