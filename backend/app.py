@@ -1052,12 +1052,14 @@ class ApiRequestHandler(http.server.BaseHTTPRequestHandler):
                 self.send_header("Vary", "Origin")
             elif not origin and allowed_origins:
                 self.send_header("Access-Control-Allow-Origin", allowed_origins[0])
-            else:
-                self.send_header("Access-Control-Allow-Origin", origin if origin else "*")
         else:
             if origin:
-                self.send_header("Access-Control-Allow-Origin", origin)
-                self.send_header("Vary", "Origin")
+                parsed_origin = urllib.parse.urlparse(origin)
+                if parsed_origin.hostname in ("localhost", "127.0.0.1", "0.0.0.0"):
+                    self.send_header("Access-Control-Allow-Origin", origin)
+                    self.send_header("Vary", "Origin")
+                else:
+                    self.send_header("Access-Control-Allow-Origin", "*")
             else:
                 self.send_header("Access-Control-Allow-Origin", "*")
 
